@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <link rel="icon" href="/icons/favicon.ico">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Согласие на обработку персональных данных — Мои AI Новости</title>
+    <style>
+        /* ===== ШРИФТ ROBOTO ===== */
+
+        * { margin:0; padding:0; box-sizing:border-box; }
+        :root {
+            --bg-color: #010715;
+            --footer-bg: #111c40;
+            --text: #fff;
+            --text-secondary: #8a9bb5;
+            --accent: #6c5ce7;
+            --accent2: #3088ff;
+            --card-bg: rgba(255,255,255,0.04);
+            --border: rgba(255,255,255,0.06);
+            --radius: 20px;
+            --shadow: 0 12px 48px rgba(0,0,0,0.6);
+        }
+        html { scroll-behavior: smooth; }
+        html, body {
+            overflow-x: hidden;
+            max-width: 100%;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "Fira Sans", "Droid Sans", "Helvetica Neue", Arial, sans-serif;
+            background: var(--footer-bg) linear-gradient(180deg, #020e33 0%, var(--bg-color) 25%, var(--bg-color) 84%, var(--footer-bg) 100%);
+            color: var(--text);
+            line-height: 1.6;
+            padding: 0;
+            min-height: 100vh;
+            -webkit-font-smoothing: antialiased;
+            font-variant-ligatures: none;
+            display: flex;
+            flex-direction: column;
+        }
+        .page-wrap {
+            padding: 0 20px;
+            flex: 1 0 auto;
+            display: flex;
+            flex-direction: column;
+            width: 100%;
+        }
+        .container {
+            max-width: 1100px;
+            margin: 0 auto;
+            flex: 1 0 auto;
+            display: flex;
+            flex-direction: column;
+            width: 100%;
+        }
+
+        /* Header */
+        header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 20px 0 10px;
+            border-bottom: 1px solid var(--border);
+            flex-wrap: wrap;
+            flex-shrink: 0;
+        }
+        .logo {
+            font-size: 28px;
+            font-weight: 700;
+            background: linear-gradient(290deg, #d235ff 0%, #a062ff 30%, #3088ff 66%, #61d8ff 100%);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            letter-spacing: -0.5px;
+        }
+        .logo span { font-weight: 300; color: var(--text-secondary); background: none; -webkit-background-clip: unset; background-clip: unset; }
+        .nav { display: flex; gap: 24px; font-size: 15px; flex-wrap: wrap; }
+        .nav a { color: var(--text-secondary); text-decoration: none; transition: color 0.2s; }
+        .nav a:hover { color: var(--text); }
+
+        /* Main content */
+        .content-wrapper {
+            background: var(--card-bg);
+            border-radius: var(--radius);
+            padding: 40px 36px;
+            border: 1px solid var(--border);
+            backdrop-filter: blur(4px);
+            margin: 40px 0;
+            width: 100%;
+        }
+        @media (max-width: 640px) {
+            .content-wrapper { padding: 24px 18px; }
+        }
+
+        .content-wrapper h1 {
+            font-size: 32px;
+            font-weight: 700;
+            margin-bottom: 8px;
+            display: inline-block;
+            background: linear-gradient(290deg, #d235ff 0%, #a062ff 30%, #3088ff 66%, #61d8ff 100%);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            text-align: center;
+            width: 100%;
+        }
+        .meta {
+            text-align: center;
+            color: var(--text-secondary);
+            font-size: 14px;
+            margin-bottom: 28px;
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 16px;
+        }
+        .meta span {
+            display: inline-block;
+            margin: 0 10px;
+        }
+        .section {
+            margin-bottom: 24px;
+        }
+        .section h2 {
+            font-size: 20px;
+            font-weight: 600;
+            color: var(--accent2);
+            margin-bottom: 10px;
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 6px;
+        }
+        .section h3 {
+            font-size: 17px;
+            font-weight: 500;
+            margin: 14px 0 6px 0;
+            color: #d4d4f7;
+        }
+        .section p, .section li {
+            color: var(--text-secondary);
+            line-height: 1.7;
+            font-size: 15px;
+            margin-bottom: 6px;
+        }
+        .section ul {
+            padding-left: 24px;
+            margin: 6px 0 12px 0;
+        }
+        .section ul li {
+            margin-bottom: 4px;
+        }
+        .contact-block {
+            background: rgba(255,255,255,0.04);
+            border-radius: 12px;
+            padding: 16px 20px;
+            margin-top: 6px;
+            border-left: 3px solid var(--accent2);
+        }
+        .contact-block a {
+            color: var(--accent2);
+            text-decoration: none;
+        }
+        .contact-block a:hover {
+            text-decoration: underline;
+        }
+
+        /* ===== ПОДВАЛ ===== */
+        .footer-wrapper {
+            width: 100%;
+            background: var(--footer-bg);
+            border-top: 1px solid var(--border);
+            padding: 12px 0;
+            margin-top: auto;
+            flex-shrink: 0;
+        }
+        .footer-inner {
+            max-width: 1100px;
+            margin: 0 auto;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            align-items: center;
+            gap: 6px 16px;
+            font-size: 13px;
+            color: var(--text-secondary);
+            padding: 0 20px;
+        }
+        @media (min-width: 768px) {
+            .footer-inner {
+                flex-wrap: nowrap;
+                gap: 8px 20px;
+            }
+        }
+        .footer-inner a {
+            color: var(--text-secondary);
+            text-decoration: none;
+            transition: 0.2s;
+        }
+        .footer-inner a:hover { color: var(--text); }
+        .footer-inner .docs a {
+            color: var(--accent2);
+            font-weight: 500;
+        }
+        .footer-inner .docs a:hover { text-decoration: underline; }
+        .footer-inner .studio-link {
+            color: #3088ff !important;
+            font-weight: 500;
+        }
+        .footer-inner .studio-link:hover { text-decoration: underline; }
+        .footer-inner .sep {
+            color: var(--text-secondary);
+            opacity: 0.3;
+        }
+
+        @media (max-width: 640px) {
+            header { flex-direction: column; align-items: stretch; gap: 10px; }
+            .nav { justify-content: center; gap: 14px; }
+            .footer-inner {
+                flex-wrap: wrap;
+                gap: 4px 8px;
+                font-size: 12px;
+                padding: 0 16px;
+            }
+            .content-wrapper { margin: 20px 0; }
+            .content-wrapper h1 { font-size: 24px; }
+            .meta span { display: block; margin: 4px 0; }
+        }
+@media (max-width: 640px) { .logo { text-align: center; } }
+    </style>
+</head>
+<body>
+    <div class="page-wrap">
+        <div class="container">
+
+            <!-- HEADER -->
+            <header>
+                <a href="/landing" class="logo" style="text-decoration: none;">Мои <span>AI Новости</span></a>
+                <nav class="nav">
+                    <a href="/landing#about">О проекте</a>
+                    <a href="/landing#features">Возможности</a>
+                    <a href="/landing#health">Здоровье</a>
+                    <a href="/landing#tech">Технологии</a>
+                    <a href="/landing#pricing">Тарифы</a>
+                    <a href="/landing#faq">FAQ</a>
+                    <a href="/landing#start">Начать</a>
+                    <a href="/support">Справка</a>
+                </nav>
+            </header>
+
+            <!-- КОНТЕНТ -->
+            <div class="content-wrapper">
+                <h1>Согласие на обработку персональных данных</h1>
+                <div class="meta">
+                    <span>Оператор: ИП Ерыков Артём Андреевич (ИНН 772609477460, ОГРНИП 323774600128170)</span>
+                </div>
+
+                <div class="section">
+                    <p>Я, как субъект персональных данных, свободно, своей волей и в своём интересе даю согласие Оператору – <strong>ИП Ерыкову Артёму Андреевичу</strong> (ИНН 772609477460, ОГРНИП 323774600128170) на обработку моих персональных данных на следующих условиях в соответствии с <a href="/privacy" style="color:var(--accent2);">Политикой обработки персональных данных</a>, размещённой на Сайте:</p>
+
+                    <!-- ===== ДОБАВЛЕННЫЙ БЛОК (как в privacy.html) ===== -->
+                    <p><strong>Оператор/автор:</strong> ИП Ерыков Артём Андреевич (ИНН 772609477460)<br>
+                    <strong>Название приложения/сервиса:</strong> «Мои AI Новости — полноценный агрегатор»</p>
+                    <!-- ===== КОНЕЦ ДОБАВЛЕННОГО БЛОКА ===== -->
+
+                    <h2>1. Перечень персональных данных, на обработку которых даётся согласие</h2>
+                    <ul>
+                        <li>Идентификаторы в мессенджерах: <code>telegram_id</code> (при использовании Telegram-бота), <code>max_user_id</code>, <code>max_chat_id</code> (при использовании MAX-бота). Авторизация через VK не предусмотрена, поэтому идентификаторы VK не обрабатываются.</li>
+                        <li>IP-адрес, дата и время запроса, User-Agent, код ответа сервера.</li>
+                        <li>Адрес электронной почты (при добровольном указании).</li>
+                    </ul>
+                    <p><strong>Оператор не использует мои персональные данные для обучения моделей искусственного интеллекта</strong> без моего отдельного явного согласия. Обработка контента с помощью ИИ осуществляется автоматически и не предполагает доступа к моим персональным данным.</p>
+
+                    <h2>2. Цели обработки</h2>
+                    <ul>
+                        <li>Предоставление персонализированных дайджестов новостей из выбранных пользователем источников.</li>
+                        <li>Управление подписками.</li>
+                        <li>Обработка платёжных транзакций через стороннего агрегатора.</li>
+                        <li>Техническая поддержка пользователей.</li>
+                        <li>Обеспечение безопасности и стабильной работы Сервиса.</li>
+                        <li>Исполнение требований налогового законодательства.</li>
+                        <li><strong>Автоматическая обработка контента с использованием искусственного интеллекта</strong> (перевод, суммаризация, фильтрация, ранжирование) исключительно для целей предоставления Сервиса.</li>
+                    </ul>
+                    <p>Я подтверждаю, что ознакомлен(а) с особенностями работы ИИ, описанными в разделе 7 настоящего Согласия, и принимаю их.</p>
+
+                    <h2>3. Способы и сроки обработки</h2>
+                    <ul>
+                        <li>Обработка осуществляется с использованием средств автоматизации и без их использования.</li>
+                        <li>Персональные данные хранятся не более 3 (трёх) лет с момента последней активности пользователя, если иное не требуется для исполнения налоговых обязательств.</li>
+                        <li>По истечении срока хранения или при отзыве согласия персональные данные уничтожаются, если иное не предусмотрено законом.</li>
+                    </ul>
+
+                    <h2>4. Передача третьим лицам</h2>
+                    <ul>
+                        <li>Персональные данные не передаются третьим лицам, за исключением платёжного агрегатора (для проведения транзакций), хостинг-провайдера (на условиях конфиденциальности) и уполномоченных государственных органов в случаях, предусмотренных законом.</li>
+                        <li>Оператор не передаёт мои персональные данные владельцам источников новостей, выбранных мной, и не использует их для рекламы или продвижения таких источников.</li>
+                    </ul>
+
+                    <h2>5. Отзыв согласия</h2>
+                    <p>Согласие может быть отозвано в любое время путём направления письменного уведомления на электронную почту <strong>news@proid.studio</strong> (для всех вопросов, включая отзыв согласия и жалобы) или через интерфейс Сервиса. В этом случае Оператор обязан прекратить обработку персональных данных в течение 10 рабочих дней с момента получения уведомления и уничтожить их, если иное не предусмотрено законом.</p>
+
+                    <h2>6. Срок действия согласия</h2>
+                    <p>Настоящее согласие действует с момента его подтверждения (проставления галочки) и до момента отзыва или достижения целей обработки, но не более 3 лет с момента последней активности пользователя.</p>
+
+                    <h2>7. Особенности использования искусственного интеллекта (ИИ)</h2>
+                    <p>7.1. Я осознаю, что в рамках Сервиса Оператор может применять технологии искусственного интеллекта для автоматической обработки текстов, включая, но не ограничиваясь: перевод на русский язык, суммаризацию (краткое изложение), фильтрацию рекламы и нежелательного контента, ранжирование и дедупликацию новостей.</p>
+                    <p>7.2. Я понимаю, что работа ИИ основана на алгоритмах машинного обучения, которые имеют вероятностную природу. Результаты обработки текстов могут быть:</p>
+                    <ul>
+                        <li>неполными или неточными;</li>
+                        <li>изменяющими смысл исходного текста;</li>
+                        <li>непредсказуемыми и недетерминированными (один и тот же текст при повторной обработке может дать разные результаты);</li>
+                        <li>содержать ошибки, логические неточности или искажения.</li>
+                    </ul>
+                    <p>7.3. Я соглашаюсь, что Оператор <strong>не гарантирует</strong> достоверность, точность, полноту, релевантность или соответствие моим ожиданиям результатов, полученных с помощью ИИ. Я принимаю на себя все риски, связанные с использованием таких результатов, и <strong>не вправе предъявлять претензии</strong> к Оператору в связи с качеством, содержанием или последствиями использования контента, обработанного ИИ.</p>
+                    <p>7.4. Я подтверждаю, что ознакомлен(а) с особенностями работы ИИ и согласен(на) с тем, что Сервис предоставляет обработанный контент «как есть» (as is) без каких-либо гарантий со стороны Оператора.</p>
+                    <p>7.5. Мои персональные данные <strong>не используются для обучения моделей ИИ</strong> без моего отдельного явного согласия. ИИ обрабатывает только контент из открытых источников, выбранных мной, и не имеет доступа к моим персональным данным.</p>
+                    <p>7.6. Сервис не хранит полные тексты новостных материалов на своих серверах. При обработке новостей сервис формирует краткое резюме и направляет его пользователю через выбранный канал доставки. После отправки полный текст исходного материала не сохраняется в базе данных сервиса. История сообщений хранится в аккаунте пользователя и инфраструктуре соответствующего мессенджера в соответствии с правилами такого сервиса.</p>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- ФУТЕР -->
+    <div class="footer-wrapper" id="docs">
+        <div class="footer-inner">
+            <span>© 2026 Мои AI Новости</span>
+            <span class="docs">
+                <a href="/privacy" target="_blank">Политика</a>
+                <a href="/offer" target="_blank">Оферта</a>
+                <a href="/consent" target="_blank">Согласие</a>
+            </span>
+            <span class="sep">|</span>
+            <span>Проект <a href="https://proid.studio" target="_blank" class="studio-link">proid.studio</a></span>
+            <span class="sep">|</span>
+            <span>ИП Ерыков А.А. (ИНН 772609477460)</span>
+            <a href="mailto:news@proid.studio" style="color: var(--accent2);">news@proid.studio</a>
+        </div>
+    </div>
+
+</body>
+</html>

@@ -1,0 +1,879 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <link rel="icon" href="/icons/favicon.ico">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Мои AI Новости</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <style>
+        *{margin:0;padding:0;box-sizing:border-box;}
+        :root{--bg-color:#010715;--footer-bg:#111c40;--text:#fff;--text-secondary:#8a9bb5;--accent:#6c5ce7;--accent2:#3088ff;--card-bg:rgba(255,255,255,0.04);--border:rgba(255,255,255,0.06);--radius:20px;--shadow:0 12px 48px rgba(0,0,0,0.6);}
+        html{scroll-behavior:smooth;}
+        body{font-family:-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "Fira Sans", "Droid Sans", "Helvetica Neue", Arial, sans-serif;background:var(--footer-bg) linear-gradient(180deg,#020e33 0%,var(--bg-color) 25%,var(--bg-color) 84%,var(--footer-bg) 100%);color:var(--text);line-height:1.6;padding:0;min-height:100vh;-webkit-font-smoothing:antialiased;font-variant-ligatures:none;display:flex;flex-direction:column;}
+        .page-wrap{padding:0 20px;flex:1 0 auto;display:flex;flex-direction:column;width:100%;}
+        .container{max-width:600px;margin:0 auto;flex:1 0 auto;display:flex;flex-direction:column;width:100%;padding:0 0 20px;}
+        .header{display:flex;align-items:center;justify-content:center;padding:100px 0 10px;border-bottom:1px solid var(--border);flex-shrink:0;}
+        .header h1{font-size:28px;font-weight:700;background:linear-gradient(290deg,#d235ff 0%,#a062ff 30%,#3088ff 66%,#61d8ff 100%);-webkit-background-clip:text;background-clip:text;color:transparent;letter-spacing:-0.5px;}
+        .section-header{text-align:center;font-size:18px;font-weight:600;color:var(--text);margin:20px 0 12px 0;}
+        .quick-buttons{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:4px;}
+        .quick-buttons button{flex:1 0 calc(33.33% - 6px);padding:10px 8px;border:1px solid var(--border);border-radius:var(--radius);background:var(--card-bg);color:var(--text);font-size:14px;font-weight:500;cursor:pointer;transition:all .2s;text-align:center;backdrop-filter:blur(4px);}
+        .quick-buttons button:hover,.quick-buttons button:focus,.quick-buttons button:focus-visible{background:linear-gradient(180deg,rgba(159,103,255,.22),rgba(197,66,255,.35)) padding-box,linear-gradient(var(--bg-color),var(--bg-color)) padding-box,linear-gradient(180deg,rgba(171,78,252,.82) 0%,rgba(108,31,198,.24) 53%,#7C45C2 100%) border-box,linear-gradient(180deg,rgba(159,103,255,.22),rgba(197,66,255,.35)) border-box;border:1px solid transparent;color:#fff;}
+        .quick-buttons button:active{background:linear-gradient(180deg,rgba(159,103,255,.22),rgba(197,66,255,.35)) padding-box,linear-gradient(var(--bg-color),var(--bg-color)) padding-box,linear-gradient(180deg,rgba(171,78,252,.82) 0%,rgba(108,31,198,.24) 53%,#7C45C2 100%) border-box,linear-gradient(180deg,rgba(159,103,255,.22),rgba(197,66,255,.35)) border-box;border:1px solid transparent;color:#fff;transform:scale(.97);}
+        .suggest-btn{width:100%;padding:10px 8px;border:1px solid var(--border);border-radius:var(--radius);background:var(--card-bg);color:var(--text-secondary);font-size:14px;font-weight:500;cursor:pointer;transition:all .2s;text-align:center;backdrop-filter:blur(4px);margin-top:4px;}
+        .suggest-btn:hover,.suggest-btn:focus,.suggest-btn:focus-visible{background:linear-gradient(180deg,rgba(159,103,255,.22),rgba(197,66,255,.35)) padding-box,linear-gradient(var(--bg-color),var(--bg-color)) padding-box,linear-gradient(180deg,rgba(171,78,252,.82) 0%,rgba(108,31,198,.24) 53%,#7C45C2 100%) border-box,linear-gradient(180deg,rgba(159,103,255,.22),rgba(197,66,255,.35)) border-box;border:1px solid transparent;color:#fff;}
+        .suggest-btn:active{background:linear-gradient(180deg,rgba(159,103,255,.22),rgba(197,66,255,.35)) padding-box,linear-gradient(var(--bg-color),var(--bg-color)) padding-box,linear-gradient(180deg,rgba(171,78,252,.82) 0%,rgba(108,31,198,.24) 53%,#7C45C2 100%) border-box,linear-gradient(180deg,rgba(159,103,255,.22),rgba(197,66,255,.35)) border-box;border:1px solid transparent;color:#fff;transform:scale(.97);}
+        .add-form,.category-form{background:var(--card-bg);padding:16px;border-radius:var(--radius);border:1px solid var(--border);margin-top:4px;margin-bottom:4px;display:none;backdrop-filter:blur(4px);}
+        .add-form input{width:100%;padding:12px;margin-bottom:10px;background:rgba(0,0,0,0.3);color:var(--text);border:1px solid var(--border);border-radius:12px;font-size:15px;outline:none;}
+        .add-form input:focus{border-color:var(--accent2);}
+        .add-form button,.category-form button{width:100%;padding:12px;border:none;border-radius:12px;font-size:16px;font-weight:600;cursor:pointer;transition:all .2s;}
+        .btn-primary{background:linear-gradient(290deg,#d235ff 0%,#a062ff 30%,#3088ff 66%,#61d8ff 100%);color:#fff;margin-bottom:8px;}
+        .btn-primary:hover{opacity:.9;transform:scale(1.01);}
+        .btn-primary:active{opacity:.8;transform:scale(.98);}
+        .btn-secondary{background:transparent;color:var(--text-secondary);border:1px solid var(--border);}
+        .btn-secondary:hover{background:rgba(255,255,255,0.05);}
+        .btn-secondary:active{background:rgba(255,255,255,0.1);}
+        .github-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin:8px 0;}
+        .github-grid button{padding:8px 0;background:var(--card-bg);border:1px solid var(--border);border-radius:12px;color:var(--text);font-size:14px;font-weight:500;cursor:pointer;transition:all .2s;text-align:center;}
+        .github-grid button:hover:not(:disabled){background:linear-gradient(180deg,rgba(159,103,255,.22),rgba(197,66,255,.35)) padding-box,linear-gradient(var(--bg-color),var(--bg-color)) padding-box,linear-gradient(180deg,rgba(171,78,252,.82) 0%,rgba(108,31,198,.24) 53%,#7C45C2 100%) border-box,linear-gradient(180deg,rgba(159,103,255,.22),rgba(197,66,255,.35)) border-box;border:1px solid transparent;color:#fff;}
+        .github-grid button:active:not(:disabled){transform:scale(.95);}
+        .github-grid button:disabled{opacity:.4;cursor:not-allowed;pointer-events:none;}
+        .category-grid{display:flex;flex-wrap:wrap;gap:6px;margin:0px 0;}
+        .category-grid button{flex:1 0 calc(50% - 6px);padding:8px 10px;background:var(--card-bg);border:1px solid var(--border);border-radius:12px;color:var(--text);font-size:13px;cursor:pointer;transition:all .2s;text-align:left;backdrop-filter:blur(4px);}
+        .category-grid button:hover{background:linear-gradient(180deg,rgba(159,103,255,.22),rgba(197,66,255,.35)) padding-box,linear-gradient(var(--bg-color),var(--bg-color)) padding-box,linear-gradient(180deg,rgba(171,78,252,.82) 0%,rgba(108,31,198,.24) 53%,#7C45C2 100%) border-box,linear-gradient(180deg,rgba(159,103,255,.22),rgba(197,66,255,.35)) border-box;border:1px solid transparent;color:#fff;}
+        .category-grid button:active{background:linear-gradient(180deg,rgba(159,103,255,.22),rgba(197,66,255,.35)) padding-box,linear-gradient(var(--bg-color),var(--bg-color)) padding-box,linear-gradient(180deg,rgba(171,78,252,.82) 0%,rgba(108,31,198,.24) 53%,#7C45C2 100%) border-box,linear-gradient(180deg,rgba(159,103,255,.22),rgba(197,66,255,.35)) border-box;border:1px solid transparent;color:#fff;transform:scale(.97);}
+        .group-title{font-size:16px;font-weight:600;margin:16px 0 8px 0;color:var(--text-secondary);letter-spacing:.5px;text-transform:uppercase;border-bottom:1px solid var(--border);padding-bottom:4px;text-align:center;}
+        .source-list{display:flex;flex-direction:column;gap:8px;margin-top:4px;}
+        .source-item{background:var(--card-bg);border-radius:var(--radius);padding:12px 16px;display:flex;align-items:center;justify-content:space-between;border:1px solid var(--border);box-shadow:var(--shadow);cursor:pointer;transition:background .15s;backdrop-filter:blur(4px);}
+        .source-item:hover{background:rgba(255,255,255,0.08);}
+        .source-info{display:flex;align-items:center;gap:10px;flex:1;min-width:0;}
+        .source-icon{width:32px;height:32px;border-radius:8px;flex-shrink:0;}
+        .source-value{font-size:15px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:var(--text);}
+        .delete-btn{background:none;border:none;color:var(--text-secondary);font-size:18px;cursor:pointer;padding:4px 8px;border-radius:6px;transition:all .2s;opacity:.6;flex-shrink:0;z-index:2;}
+        .delete-btn:hover{background:rgba(255,70,70,0.15);color:#ff6b6b;opacity:1;}
+        .empty-state{text-align:center;padding:30px 20px;color:var(--text-secondary);background:var(--card-bg);border-radius:var(--radius);border:1px dashed var(--border);backdrop-filter:blur(4px);}
+        .empty-icon{font-size:40px;margin-bottom:12px;opacity:.6;}
+        .footer-wrapper{width:100%;background:var(--footer-bg);border-top:1px solid var(--border);padding:12px 0;margin-top:auto;flex-shrink:0;}
+        .footer-inner{margin:0 auto;display:flex;flex-wrap:wrap;justify-content:center;align-items:center;gap:6px 16px;font-size:13px;color:var(--text-secondary);padding:0 20px;}
+        @media(min-width:600px){.footer-inner{flex-wrap:nowrap;gap:8px 20px;}}
+        .footer-inner a{color:var(--text-secondary);text-decoration:none;transition:.2s;}
+        .footer-inner a:hover{color:var(--text);}
+        .footer-inner .docs a{color:var(--accent2);font-weight:500;}
+        .footer-inner .docs a:hover{text-decoration:underline;}
+        .footer-inner .studio-link{color:#3088ff !important;font-weight:500;}
+        .footer-inner .studio-link:hover{text-decoration:underline;}
+        .footer-inner .sep{color:var(--text-secondary);opacity:.3;}
+        .footer-inner .landing-link{color:var(--accent2);font-weight:500;}
+        .footer-inner .landing-link:hover{text-decoration:underline;}
+        .disabled-overlay{pointer-events:none;opacity:.6;}
+        @media(max-width:480px){.quick-buttons button{flex:1 0 calc(33.33% - 6px);}
+        .github-grid{grid-template-columns:repeat(2,1fr);}
+        .footer-inner{flex-wrap:wrap;gap:4px 8px;font-size:12px;padding:0 16px;}}
+        .payment-toggle-btn{width:100%;padding:14px;font-size:18px;font-weight:700;border-radius:var(--radius);background:linear-gradient(290deg,#d235ff 0%,#a062ff 30%,#3088ff 66%,#61d8ff 100%);color:#fff;border:none;cursor:pointer;transition:all .2s;margin:4px 0 8px;margin-top:50px;}
+        .payment-toggle-btn:hover{opacity:.9;transform:scale(1.01);}
+        .payment-toggle-btn:active{transform:scale(.98);}
+        .tariff-block{display:none;margin-top:10px;animation:fadeIn .3s ease;}
+        .tariff-block.visible{display:block;}
+        @keyframes fadeIn{from{opacity:0;transform:translateY(-10px);}to{opacity:1;transform:translateY(0);}}
+        .tariff-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin:12px 0 8px;}
+        .tariff-card{background:var(--card-bg);border-radius:var(--radius);padding:16px 12px;border:1px solid var(--border);text-align:center;backdrop-filter:blur(4px);transition:.2s;}
+        .tariff-card:hover{border-color:var(--accent2);transform:translateY(-2px);}
+        .tariff-card .title{font-size:20px;font-weight:700;background:linear-gradient(290deg,#d235ff 0%,#a062ff 30%,#3088ff 66%,#61d8ff 100%);-webkit-background-clip:text;background-clip:text;color:transparent;margin-bottom:8px;}
+        .tariff-card .price-btn{display:block;width:100%;padding:10px 0;margin:6px 0;border:1px solid var(--border);border-radius:12px;background:var(--card-bg);color:var(--text);font-size:15px;font-weight:600;cursor:pointer;transition:all .2s;text-align:center;}
+        .tariff-card .price-btn:hover{background:linear-gradient(180deg,rgba(159,103,255,.22),rgba(197,66,255,.35)) padding-box,linear-gradient(var(--bg-color),var(--bg-color)) padding-box,linear-gradient(180deg,rgba(171,78,252,.82) 0%,rgba(108,31,198,.24) 53%,#7C45C2 100%) border-box,linear-gradient(180deg,rgba(159,103,255,.22),rgba(197,66,255,.35)) border-box;border:1px solid transparent;color:#fff;}
+        .tariff-card .price-btn:active{transform:scale(.97);}
+        .tariff-card .price-btn .label{font-size:12px;font-weight:400;color:var(--text-secondary);}
+        .tariff-link{text-align:center;margin-top:4px;}
+        .tariff-link a{color:var(--accent2);text-decoration:none;font-size:14px;font-weight:500;}
+        .tariff-link a:hover{text-decoration:underline;}
+        .status-block{background:var(--card-bg);border-radius:var(--radius);padding:16px 18px;margin-top:16px;border:1px solid var(--border);backdrop-filter:blur(4px);}
+        .status-title{font-size:16px;font-weight:600;color:var(--text-secondary);margin-bottom:10px;text-align:center;letter-spacing:.5px;}
+        .status-row{display:flex;justify-content:space-between;padding:4px 0;font-size:14px;color:var(--text-secondary);border-bottom:1px solid var(--border);}
+        .status-row:last-child{border-bottom:none;}
+        .status-row span:first-child{color:var(--text-secondary);}
+        .status-row span:last-child{color:var(--text);font-weight:500;}
+        .time-picker-grid{display:grid;grid-template-columns:repeat(6,1fr);gap:6px;margin-top:10px;}
+        .time-picker-grid button{padding:8px 0;background:var(--card-bg);border:1px solid var(--border);border-radius:12px;color:var(--text);font-size:14px;font-weight:500;cursor:pointer;transition:all .2s;text-align:center;}
+        .time-picker-grid button:hover{background:linear-gradient(180deg,rgba(159,103,255,.22),rgba(197,66,255,.35)) padding-box,linear-gradient(var(--bg-color),var(--bg-color)) padding-box,linear-gradient(180deg,rgba(171,78,252,.82) 0%,rgba(108,31,198,.24) 53%,#7C45C2 100%) border-box,linear-gradient(180deg,rgba(159,103,255,.22),rgba(197,66,255,.35)) border-box;border:1px solid transparent;color:#fff;}
+        .time-picker-grid button:active{transform:scale(.95);}
+        .time-picker-grid button.selected{border-color:var(--accent2);background:rgba(48,136,255,0.15);}
+        .change-time-btn{background:transparent;border:1px solid var(--border);color:var(--text-secondary);padding:4px 12px;border-radius:12px;font-size:13px;cursor:pointer;transition:.2s;}
+        .change-time-btn:hover{background:rgba(255,255,255,0.05);color:var(--text);}
+        .change-time-btn:disabled{opacity:.4;cursor:not-allowed;}
+        .close-picker-btn{width:100%;padding:8px;background:transparent;border:1px solid var(--border);border-radius:12px;color:var(--text-secondary);font-size:14px;cursor:pointer;margin-top:8px;transition:.2s;}
+        .close-picker-btn:hover{background:rgba(255,255,255,0.05);}
+        .upgrade-hint{font-size:12px;color:var(--text-secondary);margin-left:8px;}
+        .upgrade-hint a{color:var(--accent2);text-decoration:none;}
+        .upgrade-hint a:hover{text-decoration:underline;}
+    </style>
+</head>
+<body>
+    <div class="page-wrap">
+        <div class="container">
+            <div class="header"><h1>Мои AI Новости</h1></div>
+
+            <div class="section-header">Добавить</div>
+            <div class="quick-buttons" id="quickButtons">
+                <button onclick="toggleCategoryForm('dzen')">Дзен</button>
+                <button onclick="toggleCategoryForm('rb')">RB.ru</button>
+                <button onclick="toggleCategoryForm('habr')">Хабр</button>
+                <button onclick="toggleCategoryForm('lifehacker')">Лайфхакер</button>
+                <button onclick="addForbesTelegram()">Forbes</button>
+                <button onclick="toggleCategoryForm('vc')">VC.ru</button>
+                <button onclick="openAddForm('rss')">RSS/HTML</button>
+                <button onclick="openAddForm('telegram')">Telegram</button>
+                <button onclick="openAddForm('vk')">VK</button>
+                <button onclick="openGitHubForm()">GitHub</button>
+                <button onclick="openYouTubeForm()">YouTube</button>
+                <button onclick="openRedditForm()">Reddit</button>
+                <button onclick="toggleCategoryForm('bbc')">BBC</button>
+                <button onclick="openGoogleNewsForm()">Google News</button>
+                <button onclick="toggleCategoryForm('cnn')">CNN</button>
+            </div>
+
+            <div class="add-form" id="addForm">
+                <div style="font-weight:600;margin-bottom:6px;" id="addFormTitle">Добавить RSS/HTML</div>
+                <input id="sourceValue" type="text" placeholder="Введите URL...">
+                <button class="btn-primary" onclick="addSourceSubmit()">Добавить</button>
+                <button class="btn-secondary" onclick="closeAddForm()">Отмена</button>
+            </div>
+
+            <div class="add-form" id="githubForm">
+                <div style="font-weight:600;margin-bottom:6px;">GitHub — генератор RSS</div>
+                <input id="githubInput" type="text" placeholder="owner/repo или username">
+                <div class="github-grid" id="githubGrid">
+                    <button data-type="releases" onclick="generateGitHubRSS('releases')">releases</button>
+                    <button data-type="tags" onclick="generateGitHubRSS('tags')">tags</button>
+                    <button data-type="commits" onclick="generateGitHubRSS('commits')">commits</button>
+                    <button data-type="main" onclick="generateGitHubRSS('main')">main</button>
+                    <button data-type="master" onclick="generateGitHubRSS('master')">master</button>
+                    <button data-type="username" onclick="generateGitHubRSS('username')">username</button>
+                </div>
+                <button class="btn-secondary" onclick="closeGitHubForm()">Отмена</button>
+            </div>
+
+            <div class="add-form" id="youtubeForm">
+                <div style="font-weight:600;margin-bottom:6px;">YouTube — генератор RSS</div>
+                <input id="youtubeInput" type="text" placeholder="логин канала или channelId">
+                <button class="btn-primary" onclick="generateYouTubeRSS()">Сгенерировать</button>
+                <button class="btn-secondary" onclick="closeYouTubeForm()">Отмена</button>
+            </div>
+
+            <div class="add-form" id="redditForm">
+                <div style="font-weight:600;margin-bottom:6px;">Reddit — генератор RSS</div>
+                <input id="redditInput" type="text" placeholder="название сабреддита">
+                <button class="btn-primary" onclick="generateRedditRSS()">Сгенерировать</button>
+                <button class="btn-secondary" onclick="closeRedditForm()">Отмена</button>
+            </div>
+
+            <div class="add-form" id="googleNewsForm">
+                <div style="font-weight:600;margin-bottom:6px;">Google News — генератор RSS</div>
+                <input id="googleNewsInput" type="text" placeholder="ключевое слово или фраза">
+                <div style="margin:8px 0 10px;font-size:13px;color:var(--text-secondary);">
+                    <div style="display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid var(--border);font-weight:600;color:var(--text);"><span>пример</span><span>значение</span></div>
+                    <div style="display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid var(--border);"><span style="color:var(--text-secondary);">Forbes технологии</span><span style="color:var(--text-secondary);">поиск нескольких слов</span></div>
+                    <div style="display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid var(--border);"><span style="color:var(--text-secondary);">"точная фраза"</span><span style="color:var(--text-secondary);">точное совпадение</span></div>
+                    <div style="display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid var(--border);"><span style="color:var(--text-secondary);">технологии OR роботы</span><span style="color:var(--text-secondary);">одно из слов</span></div>
+                    <div style="display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid var(--border);"><span style="color:var(--text-secondary);">intitle:слово</span><span style="color:var(--text-secondary);">поиск в заголовке</span></div>
+                    <div style="display:flex;justify-content:space-between;padding:4px 0;"><span style="color:var(--text-secondary);">allintext:текст</span><span style="color:var(--text-secondary);">поиск в тексте</span></div>
+                </div>
+                <button class="btn-primary" onclick="generateGoogleNewsRSS()">Сгенерировать</button>
+                <button class="btn-secondary" onclick="closeGoogleNewsForm()">Отмена</button>
+            </div>
+
+            <div class="category-form" id="bbcForm"><div style="font-weight:600;margin-bottom:8px;">BBC — выберите категорию</div><div class="category-grid" id="bbcGrid"></div></div>
+            <div class="category-form" id="cnnForm"><div style="font-weight:600;margin-bottom:8px;">CNN — выберите категорию</div><div class="category-grid" id="cnnGrid"></div></div>
+            <div class="category-form" id="dzenForm"><div style="font-weight:600;margin-bottom:8px;">Дзен — выберите категорию</div><div class="category-grid" id="dzenGrid"></div></div>
+            <div class="category-form" id="rbForm"><div style="font-weight:600;margin-bottom:8px;">Russian Business — выберите категорию</div><div class="category-grid" id="rbGrid"></div></div>
+            <div class="category-form" id="habrForm"><div style="font-weight:600;margin-bottom:8px;">Хабр — выберите хаб</div><div class="category-grid" id="habrGrid"></div></div>
+            <div class="category-form" id="lifehackerForm"><div style="font-weight:600;margin-bottom:8px;">Лайфхакер — выберите категорию</div><div class="category-grid" id="lifehackerGrid"></div></div>
+            <div class="category-form" id="vcForm"><div style="font-weight:600;margin-bottom:8px;">VC.ru — выберите категорию</div><div class="category-grid" id="vcGrid"></div></div>
+
+            <div style="display:flex;gap:8px;margin-bottom:4px;margin-top:0px;">
+                <button class="suggest-btn" style="flex:1;color:var(--text);" onclick="toggleCategoryBrowser()">Категории</button>
+                <button class="suggest-btn" style="flex:1;color:var(--text-secondary);" onclick="suggestSource()">Предложить своё</button>
+            </div>
+
+            <div class="category-form" id="categoryBrowser" style="display:none;">
+                <div class="category-form-header" style="font-weight:600;margin-bottom:8px;color:var(--text-secondary);text-align:center;" id="categoryBrowserHeader">Выберите категорию</div>
+                <div class="category-grid" id="categoryGrid"></div>
+                <button class="btn-secondary" id="categoryBackBtn" style="display:none;margin-top:8px;width:100%;" onclick="goBackLevel()">← Назад</button>
+            </div>
+
+            <div class="section-header">Мои источники (<span id="counter">0</span>)</div>
+            <div id="sourceListContainer"></div>
+
+            <button class="payment-toggle-btn" id="paymentToggleBtn" onclick="toggleTariffs()">💰 Оплатить тариф</button>
+
+            <div class="tariff-block" id="tariffBlock">
+                <div class="tariff-grid">
+                    <div class="tariff-card"><div class="title">Базовый</div><button class="price-btn" onclick="handlePayment('basic_month')">190 ₽ <span class="label">/ мес</span></button><button class="price-btn" onclick="handlePayment('basic_year')">1 900 ₽ <span class="label">/ год</span></button></div>
+                    <div class="tariff-card"><div class="title">Расширенный</div><button class="price-btn" onclick="handlePayment('premium_month')">490 ₽ <span class="label">/ мес</span></button><button class="price-btn" onclick="handlePayment('premium_year')">4 900 ₽ <span class="label">/ год</span></button></div>
+                </div>
+                <div class="tariff-link"><a href="https://news.proid.studio/#pricing" target="_blank">Описание тарифов</a></div>
+            </div>
+
+            <div class="status-block" id="userStatus">
+                <div class="status-title">Текущий статус</div>
+                <div class="status-row"><span>Тариф:</span> <span id="statusTariff">—</span></div>
+                <div class="status-row"><span>Мои источники:</span> <span id="statusSources">0</span></div>
+                <div class="status-row"><span>Лимит источников:</span> <span id="statusLimit">5</span></div>
+                <div class="status-row"><span>Автополучение:</span> <span id="statusAutoSend">✅</span></div>
+                <div class="status-row"><span>Получили:</span> <span id="statusLastSent">—</span></div>
+                <div class="status-row"><span>Оплачено до:</span> <span id="statusExpires">—</span></div>
+            </div>
+
+            <div class="status-block" id="timeBlock">
+                <div class="status-title">Время получения</div>
+                <div class="status-row" style="border-bottom:none;padding-bottom:0;">
+                    <span>Текущее время:</span>
+                    <span id="currentTimeDisplay">—</span>
+                    <button class="change-time-btn" id="changeTimeBtn" onclick="toggleTimePicker()">Изменить</button>
+                    <span class="upgrade-hint" id="upgradeHint" style="display:none;">🔒 <a href="#" onclick="toggleTariffs(); return false;">Доступно в Расширенном тарифе</a></span>
+                </div>
+                <div id="timePicker" style="display:none;margin-top:10px;">
+                    <div class="time-picker-grid" id="timePickerGrid"></div>
+                    <button class="close-picker-btn" onclick="closeTimePicker()">Закрыть</button>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <div class="footer-wrapper">
+        <div class="footer-inner">
+            <span>© 2026 Мои AI Новости</span>
+            <span class="docs"><a href="/privacy" target="_blank">Политика</a> <a href="/offer" target="_blank">Оферта</a> <a href="/consent" target="_blank">Согласие</a></span>
+            <span class="sep">|</span>
+            <span>Проект <a href="https://proid.studio" target="_blank" class="studio-link">proid.studio</a></span>
+            <span class="sep">|</span>
+            <a href="/landing" class="landing-link">О сервисе</a>
+            <span class="sep">|</span>
+            <span>ИП Ерыков А.А. (ИНН 772609477460)</span>
+            <a href="mailto:news@proid.studio" style="color:var(--accent2);">news@proid.studio</a>
+        </div>
+    </div>
+
+    <script src="/webapp/categories.js?v=50"></script>
+    <script>
+        window.BBC_RSS_CATEGORIES = {
+            "Австралия":"http://feeds.bbci.co.uk/news/world/australia/rss.xml",
+            "Азия":"http://feeds.bbci.co.uk/news/world/asia/rss.xml",
+            "Англия":"http://feeds.bbci.co.uk/news/england/rss.xml",
+            "Африка":"http://feeds.bbci.co.uk/news/world/africa/rss.xml",
+            "Бизнес":"http://feeds.bbci.co.uk/news/business/rss.xml",
+            "Ближний Восток":"http://feeds.bbci.co.uk/news/world/middle_east/rss.xml",
+            "Великобритания":"http://feeds.bbci.co.uk/news/uk/rss.xml",
+            "Главные новости":"http://feeds.bbci.co.uk/news/rss.xml",
+            "Европа":"http://feeds.bbci.co.uk/news/world/europe/rss.xml",
+            "Здоровье":"http://feeds.bbci.co.uk/news/health/rss.xml",
+            "Искусство и развлечения":"http://feeds.bbci.co.uk/news/entertainment_and_arts/rss.xml",
+            "Латинская Америка":"http://feeds.bbci.co.uk/news/world/latin_america/rss.xml",
+            "Мир":"http://feeds.bbci.co.uk/news/world/rss.xml",
+            "Наука и экология":"http://feeds.bbci.co.uk/news/science_and_environment/rss.xml",
+            "Образование":"http://feeds.bbci.co.uk/news/education/rss.xml",
+            "Политика":"http://feeds.bbci.co.uk/news/politics/rss.xml",
+            "Северная Ирландия":"http://feeds.bbci.co.uk/news/northern_ireland/rss.xml",
+            "США и Канада":"http://feeds.bbci.co.uk/news/world/us_and_canada/rss.xml",
+            "Технологии":"http://feeds.bbci.co.uk/news/technology/rss.xml",
+            "Уэльс":"http://feeds.bbci.co.uk/news/wales/rss.xml",
+            "Шотландия":"http://feeds.bbci.co.uk/news/scotland/rss.xml"
+        };
+        window.CNN_RSS_CATEGORIES = {
+            "Азия":"http://rss.cnn.com/rss/edition_asia.rss",
+            "Америка":"http://rss.cnn.com/rss/edition_americas.rss",
+            "Африка":"http://rss.cnn.com/rss/edition_africa.rss",
+            "Бизнес":"http://rss.cnn.com/rss/edition_business.rss",
+            "Ближний Восток":"http://rss.cnn.com/rss/edition_meast.rss",
+            "Главные новости":"http://rss.cnn.com/rss/edition.rss",
+            "Европа":"http://rss.cnn.com/rss/edition_europe.rss",
+            "Мир":"http://rss.cnn.com/rss/edition_world.rss",
+            "Путешествия":"http://rss.cnn.com/rss/edition_travel.rss",
+            "Спорт":"http://rss.cnn.com/rss/edition_sport.rss",
+            "США":"http://rss.cnn.com/rss/edition_us.rss",
+            "Технологии":"http://rss.cnn.com/rss/edition_technology.rss"
+        };
+
+        let currentSources=[],currentLimit=5,currentAddType='rss',currentSendTime=null,isPremium=false,timePickerVisible=false;
+        const tg=window.Telegram&&window.Telegram.WebApp?window.Telegram.WebApp:null;
+        if(!tg){
+            document.getElementById('sourceListContainer').innerHTML='<div class="empty-state"><div class="empty-icon">⚠️</div><h3>Telegram WebApp не доступен</h3><p>Откройте страницу из Telegram Mini App</p></div>';
+            document.querySelector('.container').classList.add('disabled-overlay');
+        }else{try{tg.ready();}catch(e){}}
+        const initData=tg?tg.initData:null;
+        if(!initData){
+            document.getElementById('sourceListContainer').innerHTML='<div class="empty-state"><div class="empty-icon">🔒</div><h3>Не удалось получить данные авторизации</h3><p>Попробуйте перезагрузить страницу или откройте через кнопку в боте</p></div>';
+            document.querySelector('.container').classList.add('disabled-overlay');
+            document.getElementById('quickButtons').style.display='none';
+            document.getElementById('paymentToggleBtn').style.display='none';
+        }else loadSources();
+
+        function apiRequest(url,options={}){
+            return fetch(url,options).then(resp=>{
+                if(resp.status===503){
+                    alert('⚠️ Сервер временно недоступен. Пожалуйста, обновите страницу через несколько секунд.');
+                    return null;
+                }
+                return resp;
+            });
+        }
+
+        function hapticFeedback(){
+            if(navigator.vibrate)navigator.vibrate(10);
+            if(tg&&tg.HapticFeedback)tg.HapticFeedback.impactOccurred('light');
+        }
+
+        function getIconGradient(type){
+            switch(type){
+                case'telegram':return'linear-gradient(290deg,#d235ff 0%,#a062ff 30%,#3088ff 66%,#61d8ff 100%)';
+                case'vk':return'linear-gradient(290deg,#0d47a1 0%,#1565c0 30%,#1e88e5 66%,#64b5f6 100%)';
+                case'rss':return'linear-gradient(290deg,#d84315 0%,#f57c00 30%,#f9a825 66%,#ffee58 100%)';
+                default:return'linear-gradient(290deg,#d235ff 0%,#a062ff 30%,#3088ff 66%,#61d8ff 100%)';
+            }
+        }
+
+        function getTypeLabel(t){const m={'rss':'RSS/HTML','telegram':'Telegram','vk':'VK','max':'MAX'};return m[t]||t;}
+        function truncate(s,l){l=l||40;return s.length>l?s.slice(0,l)+'…':s;}
+        function safeDecodeUrl(u){try{return decodeURIComponent(u);}catch(e){return u;}}
+        function formatSourceValue(s){let v=s.value;if(s.type==='telegram'||s.type==='vk'){if(!v.startsWith('http')&&!v.startsWith('@'))v='@'+v;}if(s.type==='rss'){v=safeDecodeUrl(v).replace(/^https?:\/\//,'').replace(/^www\./,'');}return v;}
+        function getSourceUrl(s){let u=s.value;if(s.type==='telegram')u='https://t.me/'+u.replace(/^@/,'');else if(s.type==='vk')u='https://vk.com/'+u.replace(/^@/,'');return u;}
+
+        function askOpenLink(u){
+            hapticFeedback();
+            if(!tg){alert('Откройте страницу из Telegram Mini App');return;}
+            if(tg.showPopup){
+                tg.showPopup({
+                    title:'Открыть ссылку?',
+                    message:u,
+                    buttons:[{id:'cancel',type:'cancel',text:'Отмена'},{id:'open',type:'default',text:'Открыть'}]
+                },function(b){if(b==='open')tg.openLink(u);});
+            }else{if(confirm('Открыть ссылку?\n\n'+u))tg.openLink(u);}
+        }
+
+        function updateStatus(d){
+            document.getElementById('statusTariff').textContent=d.tariff_name||'—';
+            document.getElementById('statusSources').textContent=d.used||0;
+            document.getElementById('statusLimit').textContent=d.limit||5;
+            document.getElementById('statusAutoSend').textContent='✅';
+            document.getElementById('statusLastSent').textContent=d.last_sent||'—';
+            document.getElementById('statusExpires').textContent=d.expires_at||'—';
+            isPremium=d.is_premium||false;
+            const defHour=d.default_send_hour||18,st=d.send_time||null;
+            currentSendTime=st;
+            const display=st?st:(defHour.toString().padStart(2,'0')+':00');
+            document.getElementById('currentTimeDisplay').textContent=display+' MSK';
+            const btn=document.getElementById('changeTimeBtn'),hint=document.getElementById('upgradeHint');
+            if(isPremium){btn.style.display='inline-block';btn.disabled=false;hint.style.display='none';}
+            else{btn.style.display='none';hint.style.display='inline-block';if(document.getElementById('timePicker').style.display!=='none')closeTimePicker();}
+        }
+
+        function toggleTimePicker(){
+            hapticFeedback();
+            if(!isPremium){
+                if(tg&&tg.showPopup){
+                    tg.showPopup({
+                        title:'Доступно только в Расширенном тарифе',
+                        message:'Управление временем получения доступно только для Расширенного тарифа. Оформите подписку, чтобы пользоваться этой функцией.',
+                        buttons:[{id:'upgrade',type:'default',text:'Перейти к тарифам'},{id:'cancel',type:'cancel',text:'Закрыть'}]
+                    },function(b){if(b==='upgrade')toggleTariffs();});
+                }else alert('Доступно только для Расширенного тарифа. Оформите подписку.');
+                return;
+            }
+            const p=document.getElementById('timePicker');
+            if(p.style.display==='none')openTimePicker();else closeTimePicker();
+        }
+        function openTimePicker(){if(!isPremium)return;document.getElementById('timePicker').style.display='block';renderTimePicker();timePickerVisible=true;}
+        function closeTimePicker(){document.getElementById('timePicker').style.display='none';timePickerVisible=false;}
+        function renderTimePicker(){
+            const grid=document.getElementById('timePickerGrid'),cur=currentSendTime?parseInt(currentSendTime.split(':')[0]):-1;
+            grid.innerHTML='';
+            for(let h=0;h<24;h++){
+                const btn=document.createElement('button');
+                btn.textContent=h.toString().padStart(2,'0')+':00';
+                if(h===cur)btn.classList.add('selected');
+                btn.onclick=function(){setTime(h);};
+                grid.appendChild(btn);
+            }
+        }
+        async function setTime(hour){
+            hapticFeedback();
+            if(!initData){alert('Нет авторизации');return;}
+            try{
+                const resp=await apiRequest('/api/webapp/set_time',{
+                    method:'POST',
+                    headers:{'Content-Type':'application/json','X-Telegram-Init-Data':initData},
+                    body:JSON.stringify({hour:hour})
+                });
+                if(!resp)return;
+                if(!resp.ok){const e=await resp.json();throw new Error(e.detail||'Ошибка установки времени');}
+                const d=await resp.json();
+                currentSendTime=d.send_time;
+                document.getElementById('currentTimeDisplay').textContent=currentSendTime+' MSK';
+                document.querySelectorAll('#timePickerGrid button').forEach((btn,idx)=>{btn.classList.toggle('selected',idx===hour);});
+                if(tg&&tg.showPopup)tg.showPopup({title:'Успешно',message:'Время получения установлено на '+currentSendTime+' MSK',buttons:[{type:'ok'}]});
+                else alert('Время установлено');
+                closeTimePicker();
+                loadSources();
+            }catch(e){if(tg&&tg.showPopup)tg.showPopup({title:'Ошибка',message:e.message,buttons:[{type:'ok'}]});else alert('Ошибка: '+e.message);}
+        }
+
+        async function loadSources(){
+            if(!initData)return;
+            try{
+                const resp=await apiRequest('/api/webapp/sources',{headers:{'X-Telegram-Init-Data':initData}});
+                if(!resp)return;
+                if(!resp.ok){
+                    if(resp.status===403){
+                        const e=await resp.json();
+                        document.getElementById('sourceListContainer').innerHTML='<div class="empty-state"><div class="empty-icon">🔒</div><h3>Требуется согласие</h3><p>'+(e.detail||'Для использования приложения необходимо принять Согласие на обработку персональных данных. Откройте бота и нажмите /start.')+'</p></div>';
+                        document.querySelector('.container').classList.add('disabled-overlay');
+                        document.getElementById('quickButtons').style.display='none';
+                        document.getElementById('paymentToggleBtn').style.display='none';
+                        return;
+                    }
+                    const e=await resp.json();
+                    throw new Error(e.detail||'Ошибка загрузки');
+                }
+                const d=await resp.json();
+                currentSources=d.sources||[];
+                currentLimit=d.limit||5;
+                renderGroupedSources(currentSources);
+                document.getElementById('counter').textContent=currentSources.length;
+                updateStatus(d);
+                document.querySelector('.container').classList.remove('disabled-overlay');
+                document.getElementById('quickButtons').style.display='flex';
+                document.getElementById('paymentToggleBtn').style.display='block';
+            }catch(e){if(tg&&tg.showPopup)tg.showPopup({title:'Ошибка',message:e.message,buttons:[{type:'ok'}]});else alert('Ошибка загрузки: '+e.message);
+                document.getElementById('sourceListContainer').innerHTML='<div class="empty-state"><div class="empty-icon">⚠️</div><h3>Ошибка загрузки</h3><p>'+e.message+'</p></div>';}
+        }
+
+        function renderGroupedSources(sources){
+            const container=document.getElementById('sourceListContainer');
+            if(!container)return;
+            if(!sources||sources.length===0){container.innerHTML='<div class="empty-state"><div class="empty-icon">📭</div><h3>Нет источников</h3><p>Добавьте свой первый источник</p></div>';return;}
+            const sorted=[...sources].sort((a,b)=>a.value.toLowerCase().localeCompare(b.value.toLowerCase()));
+            const groups={'rss':[],'telegram':[],'vk':[],'max':[]};
+            sorted.forEach(s=>{if(groups[s.type])groups[s.type].push(s);else groups[s.type]=[s];});
+            let html='';
+            const order=['telegram','vk','max','rss'];
+            for(const t of order){
+                const items=groups[t];
+                if(items&&items.length>0){
+                    html+='<div class="group-title">'+getTypeLabel(t)+'</div>';
+                    html+='<div class="source-list">';
+                    items.forEach(s=>{
+                        const f=formatSourceValue(s),v=truncate(f,50),u=getSourceUrl(s),g=getIconGradient(s.type);
+                        html+='<div class="source-item" onclick="askOpenLink(\''+u+'\')"><div class="source-info"><div class="source-icon" style="background:'+g+';"></div><span class="source-value" title="'+f+'">'+v+'</span></div><button class="delete-btn" onclick="event.stopPropagation(); confirmDelete('+s.id+')">✕</button></div>';
+                    });
+                    html+='</div>';
+                }
+            }
+            container.innerHTML=html;
+            container.querySelectorAll('.delete-btn').forEach(b=>{b.addEventListener('click',function(e){e.stopPropagation();hapticFeedback();});});
+        }
+
+        function confirmDelete(id){
+            hapticFeedback();
+            const s=currentSources.find(s=>s.id===id);
+            if(!s){if(tg&&tg.showPopup)tg.showPopup({title:'Ошибка',message:'Источник не найден',buttons:[{type:'ok'}]});else alert('Источник не найден');return;}
+            const f=formatSourceValue(s),msg='Удалить источник?\n\n'+f+'\n\nЭто действие нельзя отменить.';
+            if(tg&&tg.showPopup){
+                tg.showPopup({
+                    title:'Подтверждение',
+                    message:msg,
+                    buttons:[{id:'delete',type:'destructive',text:'Удалить'},{id:'cancel',type:'cancel',text:'Отмена'}]
+                },function(b){if(b==='delete')deleteSource(id);});
+            }else{if(confirm(msg))deleteSource(id);}
+        }
+        async function deleteSource(id){
+            if(!initData){alert('Нет авторизации');return;}
+            try{
+                const resp=await apiRequest('/api/webapp/delete',{
+                    method:'POST',
+                    headers:{'Content-Type':'application/json','X-Telegram-Init-Data':initData},
+                    body:JSON.stringify({source_id:id})
+                });
+                if(!resp)return;
+                if(!resp.ok){const e=await resp.json();throw new Error(e.detail||'Ошибка удаления');}
+                hapticFeedback();
+                await loadSources();
+                alert('✅ Источник удалён');
+            }catch(e){if(tg&&tg.showPopup)tg.showPopup({title:'Ошибка',message:e.message,buttons:[{type:'ok'}]});else alert('Ошибка: '+e.message);}
+        }
+
+        function openAddForm(t){
+            hapticFeedback();
+            currentAddType=t;
+            const form=document.getElementById('addForm'),title=document.getElementById('addFormTitle');
+            const labels={'rss':'RSS/HTML','telegram':'Telegram','vk':'VK'};
+            title.textContent='Добавить '+labels[t];
+            const input=document.getElementById('sourceValue');
+            input.placeholder=t==='rss'?'Введите URL...':(t==='telegram'?'Введите username (без @)...':'Введите username (без @)...');
+            input.value='';
+            document.querySelectorAll('.category-form,.add-form').forEach(el=>el.style.display='none');
+            form.style.display='block';
+        }
+        function closeAddForm(){document.getElementById('addForm').style.display='none';}
+
+        function toggleCategoryForm(type){
+            hapticFeedback();
+            const map={'bbc':'bbcForm','cnn':'cnnForm','dzen':'dzenForm','rb':'rbForm','habr':'habrForm','lifehacker':'lifehackerForm','vc':'vcForm'};
+            const id=map[type],form=document.getElementById(id);
+            if(!form)return;
+            const hidden=window.getComputedStyle(form).display==='none';
+            document.querySelectorAll('.category-form,.add-form').forEach(el=>el.style.display='none');
+            if(hidden){
+                const grid=document.getElementById(id.replace('Form','Grid'));
+                if(grid&&grid.children.length===0){
+                    let cats;
+                    if(type==='bbc')cats=window.BBC_RSS_CATEGORIES;
+                    else if(type==='cnn')cats=window.CNN_RSS_CATEGORIES;
+                    else if(type==='dzen')cats=window.DZEN_CATEGORIES;
+                    else if(type==='rb')cats=window.RB_CATEGORIES;
+                    else if(type==='habr')cats=window.HABR_CATEGORIES;
+                    else if(type==='lifehacker')cats=window.LIFEHACKER_CATEGORIES;
+                    else if(type==='vc')cats=window.VC_CATEGORIES;
+                    if(cats){
+                        Object.entries(cats).sort((a,b)=>a[0].localeCompare(b[0],'ru')).forEach(([name,url])=>{
+                            const btn=document.createElement('button');
+                            btn.textContent=name;
+                            btn.onclick=()=>addCategorySource('rss',url,name);
+                            grid.appendChild(btn);
+                        });
+                    }
+                }
+                form.style.display='block';
+            }
+        }
+
+        function suggestSource(){
+            hapticFeedback();
+            const url='https://t.me/professional_interior_design',text='Добрый день. Хочу предложить источник:';
+            const full=url+'?text='+encodeURIComponent(text);
+            if(tg&&tg.openLink)tg.openLink(full);else window.open(full,'_blank');
+        }
+
+        async function addCategorySource(type,url,name){
+            hapticFeedback();
+            if(!initData){alert('Нет авторизации');return;}
+            let st=type,sv=url;
+            if(url.startsWith('https://t.me/')){st='telegram';sv=url.replace(/^https:\/\/t\.me\//,'').split('/')[0];if(sv.startsWith('@'))sv=sv.slice(1);}
+            else if(url.startsWith('https://vk.com/')||url.startsWith('https://vk.ru/')){st='vk';sv=url.replace(/^https:\/\/(vk\.com|vk\.ru)\//,'').split('/')[0];if(sv.startsWith('@'))sv=sv.slice(1);}
+            if(tg&&tg.showPopup){
+                tg.showPopup({
+                    title:'Подтверждение',
+                    message:'Добавить источник?\n\n'+name,
+                    buttons:[{id:'add',type:'default',text:'Добавить'},{id:'cancel',type:'cancel',text:'Отмена'}]
+                },async function(b){if(b==='add')await doAddCategorySource(st,sv,name);});
+            }else{if(confirm('Добавить источник?\n\n'+name))await doAddCategorySource(st,sv,name);}
+        }
+        async function doAddCategorySource(type,url,name){
+            try{
+                const resp=await apiRequest('/api/webapp/add',{
+                    method:'POST',
+                    headers:{'Content-Type':'application/json','X-Telegram-Init-Data':initData},
+                    body:JSON.stringify({source_type:type,source_value:url})
+                });
+                if(!resp)return;
+                if(!resp.ok){const e=await resp.json();throw new Error(e.detail||'Ошибка');}
+                await loadSources();
+                if(tg&&tg.showPopup)tg.showPopup({title:'Успешно',message:'Добавлено: '+name,buttons:[{type:'ok'}]});
+                else alert('Добавлено: '+name);
+                document.querySelectorAll('.category-form').forEach(el=>el.style.display='none');
+            }catch(e){if(tg&&tg.showPopup)tg.showPopup({title:'Ошибка',message:e.message,buttons:[{type:'ok'}]});else alert('Ошибка: '+e.message);}
+        }
+        function addForbesTelegram(){hapticFeedback();addCategorySource('telegram','forbesrussia','Forbes (Telegram)');}
+
+        async function addSourceSubmit(){
+            hapticFeedback();
+            if(!initData){alert('Нет авторизации');return;}
+            const v=document.getElementById('sourceValue').value.trim();
+            if(!v){if(tg&&tg.showPopup)tg.showPopup({title:'Ошибка',message:'Введите значение',buttons:[{type:'ok'}]});else alert('Введите значение');return;}
+            if(!window.confirm('Добавить источник?\n\n'+v))return;
+            try{
+                const resp=await apiRequest('/api/webapp/add',{
+                    method:'POST',
+                    headers:{'Content-Type':'application/json','X-Telegram-Init-Data':initData},
+                    body:JSON.stringify({source_type:currentAddType,source_value:v})
+                });
+                if(!resp)return;
+                if(!resp.ok){const e=await resp.json();throw new Error(e.detail||'Ошибка');}
+                await loadSources();
+                if(tg&&tg.showPopup)tg.showPopup({title:'Успешно',message:'Источник добавлен',buttons:[{type:'ok'}]});else alert('Источник добавлен');
+                document.getElementById('addForm').style.display='none';
+                document.getElementById('sourceValue').value='';
+            }catch(e){if(tg&&tg.showPopup)tg.showPopup({title:'Ошибка',message:e.message,buttons:[{type:'ok'}]});else alert('Ошибка: '+e.message);}
+        }
+
+        function addRSSSource(url,name){
+            hapticFeedback();
+            if(!initData){alert('Нет авторизации');return;}
+            if(!url||!url.trim()){alert('URL не может быть пустым.');return;}
+            let final=url.trim();
+            if(!final.startsWith('http://')&&!final.startsWith('https://'))final='https://'+final;
+            apiRequest('/api/webapp/add',{
+                method:'POST',
+                headers:{'Content-Type':'application/json','X-Telegram-Init-Data':initData},
+                body:JSON.stringify({source_type:'rss',source_value:final})
+            })
+            .then(async resp=>{
+                if(!resp)return;
+                const text=await resp.text();
+                if(!resp.ok){
+                    try{const e=JSON.parse(text);throw new Error(e.detail||'Ошибка добавления');}catch(e){throw new Error('Ошибка сервера: '+text.substring(0,300));}
+                }
+                return JSON.parse(text);
+            })
+            .then(()=>{
+                loadSources();
+                if(tg&&tg.showPopup)tg.showPopup({title:'Успешно',message:'Источник добавлен: '+name,buttons:[{type:'ok'}]});else alert('Источник добавлен: '+name);
+                document.querySelectorAll('.category-form,.add-form').forEach(f=>f.style.display='none');
+            })
+            .catch(e=>{if(tg&&tg.showPopup)tg.showPopup({title:'Ошибка',message:e.message,buttons:[{type:'ok'}]});else alert('Ошибка добавления: '+e.message);});
+        }
+
+        function openGitHubForm() {
+    hapticFeedback();
+    document.querySelectorAll('.category-form, .add-form').forEach(f => f.style.display = 'none');
+    document.getElementById('githubForm').style.display = 'block';
+    updateGitHubButtons('');
+    // === ДОБАВЛЕНО: обработчик ввода ===
+    const input = document.getElementById('githubInput');
+    input.removeEventListener('input', window._githubInputHandler);
+    window._githubInputHandler = function() {
+        updateGitHubButtons(this.value);
+    };
+    input.addEventListener('input', window._githubInputHandler);
+}
+        function closeGitHubForm(){document.getElementById('githubForm').style.display='none';}
+        function updateGitHubButtons(v){const grid=document.getElementById('githubGrid'),btns=grid.querySelectorAll('button'),hasSlash=v&&v.includes('/');btns.forEach(btn=>{const type=btn.dataset.type;if(type==='username')btn.disabled=!v||!v.trim();else btn.disabled=!(hasSlash&&v.trim());});}
+        function generateGitHubRSS(type){
+            hapticFeedback();
+            const input=document.getElementById('githubInput'),raw0=input.value.trim();
+            if(!raw0){alert('Введите owner/repo или username.');return;}
+            let raw=raw0.replace(/^https?:\/\/github\.com\//,'').replace(/\/+$/,''),url='',display='GitHub';
+            if(type==='username'){
+                const parts=raw.split('/'),username=parts[0];
+                if(!username){alert('Некорректный username.');return;}
+                url='https://github.com/'+username+'.atom';
+                display='GitHub ('+username+')';
+            }else{
+                if(!raw.includes('/')){alert('Для этого типа нужен owner/repo.');return;}
+                const parts=raw.split('/'),owner=parts[0],repo=parts.slice(1).join('/');
+                if(!owner||!repo){alert('Некорректный owner/repo.');return;}
+                let path='';
+                switch(type){
+                    case'releases':path='releases.atom';break;
+                    case'tags':path='tags.atom';break;
+                    case'commits':path='commits.atom';break;
+                    case'main':path='commits/main.atom';break;
+                    case'master':path='commits/master.atom';break;
+                    default:path='releases.atom';
+                }
+                url='https://github.com/'+owner+'/'+repo+'/'+path;
+                display='GitHub ('+owner+'/'+repo+')';
+            }
+            if(!window.confirm('Добавить источник?\n'+display+'\n'+url))return;
+            addRSSSource(url,display);
+        }
+
+        function openYouTubeForm(){hapticFeedback();document.querySelectorAll('.category-form,.add-form').forEach(f=>f.style.display='none');document.getElementById('youtubeForm').style.display='block';}
+        function closeYouTubeForm(){document.getElementById('youtubeForm').style.display='none';}
+        async function generateYouTubeRSS(){
+            hapticFeedback();
+            const input=document.getElementById('youtubeInput'),v=input.value.trim();
+            if(!v){alert('Введите имя канала или channelId.');return;}
+            try{
+                const resp=await apiRequest('/api/youtube/resolve',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({input:v})});
+                if(!resp)return;
+                if(!resp.ok){const e=await resp.json();alert('Ошибка: '+(e.detail||e.message||'Канал не найден'));return;}
+                const d=await resp.json(),id=d.channelId;
+                if(!id){alert('Канал не найден. Проверьте имя.');return;}
+                const url='https://www.youtube.com/feeds/videos.xml?channel_id='+encodeURIComponent(id),name=d.title||'YouTube канал';
+                if(tg&&tg.showPopup){
+                    tg.showPopup({
+                        title:'Подтверждение',
+                        message:'Добавить источник?\n\n'+name,
+                        buttons:[{id:'add',type:'default',text:'Добавить'},{id:'cancel',type:'cancel',text:'Отмена'}]
+                    },function(b){if(b==='add'){addRSSSource(url,name);document.getElementById('youtubeForm').style.display='none';document.getElementById('youtubeInput').value='';alert('✅ Добавлено: '+name);}});
+                }else{if(window.confirm('Добавить источник?\n'+name)){addRSSSource(url,name);document.getElementById('youtubeForm').style.display='none';document.getElementById('youtubeInput').value='';alert('✅ Добавлено: '+name);}}
+            }catch(e){alert('Ошибка: '+e.message);}
+        }
+
+        function openRedditForm(){hapticFeedback();document.querySelectorAll('.category-form,.add-form').forEach(f=>f.style.display='none');document.getElementById('redditForm').style.display='block';}
+        function closeRedditForm(){document.getElementById('redditForm').style.display='none';}
+        function generateRedditRSS(){
+            hapticFeedback();
+            const input=document.getElementById('redditInput'),v=input.value.trim();
+            if(!v){alert('Введите название сабреддита.');return;}
+            let sub=v.replace(/^https?:\/\/(?:www\.)?reddit\.com\/r\//,'').split('/')[0];
+            sub=sub.replace(/[^a-zA-Z0-9_]/g,'');
+            if(!sub){alert('Некорректное название сабреддита.');return;}
+            const url='https://www.reddit.com/r/'+sub+'/.rss';
+            if(!window.confirm('Добавить источник?\nReddit (r/'+sub+')\n'+url))return;
+            addRSSSource(url,'Reddit (r/'+sub+')');
+        }
+
+        function openGoogleNewsForm(){hapticFeedback();document.querySelectorAll('.category-form,.add-form').forEach(f=>f.style.display='none');document.getElementById('googleNewsForm').style.display='block';}
+        function closeGoogleNewsForm(){document.getElementById('googleNewsForm').style.display='none';}
+        function generateGoogleNewsRSS(){
+            hapticFeedback();
+            const input=document.getElementById('googleNewsInput'),q=input.value.trim();
+            if(!q){alert('Введите ключевое слово или фразу для поиска.');return;}
+            const enc=q.replace(/\s+/g,' ').trim().replace(/ /g,'+');
+            const url='https://news.google.com/rss/search?q='+enc+'&hl=ru&gl=RU&ceid=RU:ru';
+            if(!window.confirm('Добавить источник?\nGoogle News: '+q+'\n'+url))return;
+            addRSSSource(url,'Google News: '+q);
+        }
+
+        function toggleTariffs(){hapticFeedback();document.getElementById('tariffBlock').classList.toggle('visible');}
+        async function handlePayment(tariffKey){
+            hapticFeedback();
+            if(!initData){alert('Нет авторизации');return;}
+            try{
+                const resp=await apiRequest('/api/payment/create-invoice',{
+                    method:'POST',
+                    headers:{'Content-Type':'application/json','X-Telegram-Init-Data':initData},
+                    body:JSON.stringify({tariff:tariffKey})
+                });
+                if(!resp)return;
+                if(!resp.ok){const e=await resp.json();throw new Error(e.detail||'Ошибка создания платежа');}
+                const d=await resp.json();
+                if(d.payment_url){if(tg&&tg.openLink)tg.openLink(d.payment_url);else window.location.href=d.payment_url;}
+                else alert('Не удалось получить ссылку на оплату');
+            }catch(e){alert('Ошибка: '+e.message);}
+        }
+
+        let categoryHistory=[];
+        const CATEGORY_CACHE_TTL=3600000;
+        async function loadCategoryLevel(parentId=null){
+            const key=parentId===null?'categories_root':'categories_'+parentId;
+            const cached=localStorage.getItem(key);
+            if(cached){try{const p=JSON.parse(cached);if(Date.now()-p.timestamp<CATEGORY_CACHE_TTL)return p.data;}catch(e){}}
+            const url=parentId===null?'/api/categories':'/api/categories?parent_id='+parentId;
+            const resp=await apiRequest(url);
+            if(!resp)return[];
+            if(!resp.ok)throw new Error('Ошибка загрузки');
+            const data=await resp.json();
+            localStorage.setItem(key,JSON.stringify({timestamp:Date.now(),data}));
+            return data;
+        }
+
+        function shortenCategoryName(n){
+            const map={
+                'DevOps и инфраструктура':'DevOps','IT и разработка':'IT','Информационная безопасность':'Инфобез',
+                'Искусственный интеллект':'AI','Машинное обучение':'ML','Глубокое обучение':'Deep Learning',
+                'Компьютерное зрение':'CV','Обработка естественного языка':'NLP','Кибербезопасность':'Кибербез',
+                'Разработка ПО':'Разработка','Архитектура ПО':'Архитектура ПО','Базы данных':'БД',
+                'Облачные технологии':'Облака','Веб-разработка':'Веб','Мобильная разработка':'Мобильная',
+                'Научные исследования':'Наука','Новости и общество':'Новости','Финансы и инвестиции':'Финансы',
+                'Экономика':'Экономика','Политика':'Политика','Медицина':'Медицина','Образование':'Образование',
+                'Экология':'Экология','Архитектура':'Архитектура','Дизайн':'Дизайн','Фотография':'Фото',
+                'Видеопроизводство':'Видео','Искусство':'Искусство','Музыка':'Музыка','Кино и ТВ':'Кино',
+                'Спорт':'Спорт','Путешествия':'Путешествия','Еда':'Еда','Дом':'Дом','Сад':'Сад',
+                'Семья':'Семья','Саморазвитие':'Саморазвитие','История':'История','Книги':'Книги',
+                'Хобби':'Хобби','Религия и философия':'Религия','HR':'HR','Отраслевые технологии':'Отраслевые',
+                'Маркетинг':'Маркетинг','Медиа':'Медиа','Мода':'Мода','Красота':'Красота','Игры':'Игры',
+                'Киберспорт':'Киберспорт','Автомобили':'Автотехника','Авиация':'Авиация','Морская отрасль':'Морская',
+                'Логистика':'Логистика','Сельское хозяйство':'Сельхоз','Энергетика':'Энергетика',
+                'Промышленность':'Промышленность','Инженерия':'Инженерия','Строительство':'Строительство',
+                'Недвижимость':'Недвижимость','Юриспруденция':'Юриспруденция','Законодательство':'Законодательство',
+                'Госуправление':'Госуправление','Международные отношения':'Международные','Геополитика':'Геополитика',
+                'Общество':'Общество','Региональные':'Региональные','Национальные':'Национальные','Мировые':'Мировые',
+                'Градостроительство':'Градостр.'
+            };
+            return map[n]||n;
+        }
+
+        function sortItems(items){
+            const late=['IT и разработка','DevOps и инфраструктура'];
+            const normal=items.filter(i=>!late.includes(i.name)),lateItems=items.filter(i=>late.includes(i.name));
+            const rus=normal.filter(i=>/[а-яё]/i.test(i.name)),eng=normal.filter(i=>!/[а-яё]/i.test(i.name));
+            rus.sort((a,b)=>a.name.localeCompare(b.name,'ru'));
+            eng.sort((a,b)=>a.name.localeCompare(b.name,'en'));
+            lateItems.sort((a,b)=>a.name.localeCompare(b.name,'ru'));
+            return[...rus,...eng,...lateItems];
+        }
+
+        function toggleCategoryBrowser(){
+            hapticFeedback();
+            const b=document.getElementById('categoryBrowser');
+            if(b.style.display==='block'){b.style.display='none';return;}
+            document.querySelectorAll('.add-form,.category-form').forEach(f=>f.style.display='none');
+            b.style.display='block';
+            categoryHistory=[];
+            showLevel(null);
+        }
+
+        function showLevel(parentId){
+            const header=document.getElementById('categoryBrowserHeader'),grid=document.getElementById('categoryGrid'),back=document.getElementById('categoryBackBtn');
+            grid.innerHTML='<div style="text-align:center;padding:10px;color:var(--text-secondary);">Загрузка...</div>';
+            loadCategoryLevel(parentId).then(items=>{
+                if(!items||items.length===0){grid.innerHTML='<div style="text-align:center;padding:10px;color:var(--text-secondary);">Нет элементов</div>';return;}
+                const sorted=sortItems(items),hasSources=sorted.some(i=>i.url&&i.url.trim()!=='');
+                let hText=parentId===null?'Выберите категорию':(categoryHistory[categoryHistory.length-1]?.name||'Категория')+(hasSources?' — выберите источник':' — выберите подкатегорию');
+                header.textContent=hText;
+                let html='';
+                sorted.forEach(i=>{
+                    const name=shortenCategoryName(i.name).replace(/"/g,'&quot;');
+                    if(i.url){html+='<button onclick="addSourceByType(\''+(i.source_type||'rss')+'\',\''+i.url+'\',\''+name+'\')">'+name+'</button>';}
+                    else{html+='<button onclick="openLevel('+i.id+',\''+name+'\')">'+name+'</button>';}
+                });
+                grid.innerHTML=html;
+                back.style.display=categoryHistory.length>0?'block':'none';
+            }).catch(err=>{grid.innerHTML='<div style="text-align:center;padding:10px;color:red;">Ошибка: '+err.message+'</div>';});
+        }
+        function openLevel(id,name){hapticFeedback();categoryHistory.push({id:id,name:name});showLevel(id);}
+        function goBackLevel(){
+            hapticFeedback();
+            if(categoryHistory.length===0){document.getElementById('categoryBrowser').style.display='none';return;}
+            categoryHistory.pop();
+            if(categoryHistory.length===0)showLevel(null);else showLevel(categoryHistory[categoryHistory.length-1].id);
+        }
+        function addSourceByType(type,url,name){
+            hapticFeedback();
+            let st=type;
+            if(!['rss','telegram','vk','max'].includes(st))st='rss';
+            addRSSSource(url,name);
+        }
+
+        window.toggleTariffs=toggleTariffs;
+        window.handlePayment=handlePayment;
+        window.startPayment=handlePayment;
+        window.toggleCategoryForm=toggleCategoryForm;
+        window.openAddForm=openAddForm;
+        window.addSourceSubmit=addSourceSubmit;
+        window.addCategorySource=addCategorySource;
+        window.addForbesTelegram=addForbesTelegram;
+        window.closeAddForm=closeAddForm;
+        window.confirmDelete=confirmDelete;
+        window.askOpenLink=askOpenLink;
+        window.updateStatus=updateStatus;
+        window.toggleTimePicker=toggleTimePicker;
+        window.closeTimePicker=closeTimePicker;
+        window.setTime=setTime;
+        window.suggestSource=suggestSource;
+        window.openGitHubForm=openGitHubForm;
+        window.closeGitHubForm=closeGitHubForm;
+        window.generateGitHubRSS=generateGitHubRSS;
+        window.openYouTubeForm=openYouTubeForm;
+        window.closeYouTubeForm=closeYouTubeForm;
+        window.generateYouTubeRSS=generateYouTubeRSS;
+        window.openRedditForm=openRedditForm;
+        window.closeRedditForm=closeRedditForm;
+        window.generateRedditRSS=generateRedditRSS;
+        window.addRSSSource=addRSSSource;
+        window.openGoogleNewsForm=openGoogleNewsForm;
+        window.closeGoogleNewsForm=closeGoogleNewsForm;
+        window.generateGoogleNewsRSS=generateGoogleNewsRSS;
+        window.toggleCategoryBrowser=toggleCategoryBrowser;
+        window.goBackLevel=goBackLevel;
+        window.openLevel=openLevel;
+        window.showLevel=showLevel;
+        window.addSourceByType=addSourceByType;
+        window.loadCategoryLevel=loadCategoryLevel;
+        window.shortenCategoryName=shortenCategoryName;
+        window.sortItems=sortItems;
+    </script>
+</body>
+</html>

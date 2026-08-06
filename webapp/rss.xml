@@ -1,0 +1,36 @@
+<?xml version="1.0" ?>
+<rss xmlns:ns0="http://www.w3.org/2005/Atom" version="2.0">
+  
+  
+  <channel>
+    
+    
+    <title>Мои AI Новости — О сервисе</title>
+    
+    
+    <link>https://news.proid.studio/</link>
+    
+    
+    <description>RSS-лента новостей проекта Мои AI Новости</description>
+    
+    
+    <language>ru</language>
+    
+    
+    <lastBuildDate>Sat, 18 Jul 2026 20:45:36 +0300</lastBuildDate>
+    
+    
+    <ns0:link href="https://news.proid.studio/rss" rel="self" type="application/rss+xml"/>
+    
+  
+    <item>
+      <title>Запуск Сервиса</title>
+      <link>https://news.proid.studio/</link>
+      <description>Подробнее по ссылке</description>
+      <pubDate>Sat, 18 Jul 2026 20:45:36 +0300</pubDate>
+      <guid>17843967369397</guid>
+    </item>
+  </channel>
+  
+
+</rss>

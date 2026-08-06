@@ -1,0 +1,67 @@
+{
+  "name": "Мои AI Новости",
+  "short_name": "AI News",
+  "description": "Ежедневные персонализированные дайджесты новостей с искусственным интеллектом. Собирайте новости из Telegram, VK, RSS, MAX, YouTube, GitHub, Reddit и других источников. Без рекламы и шума — только то, что вы выбрали.",
+  "start_url": "/pwa",
+  "display": "standalone",
+  "background_color": "#010715",
+  "theme_color": "#010715",
+  "icons": [
+    {
+      "src": "/icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ],
+  "lang": "ru",
+  "scope": "/",
+  "id": "/",
+  "orientation": "portrait",
+  "dir": "ltr",
+  "categories": [
+    "news",
+    "personalization",
+    "productivity",
+    "utilities"
+  ],
+  "share_target": {
+    "method": "GET"
+  },
+  "screenshots": [
+    {
+      "src": "/picture/1.png",
+      "sizes": "853x1844",
+      "type": "image/png",
+      "form_factor": "narrow"
+    },
+    {
+      "src": "/picture/02.jpg",
+      "sizes": "1080x2342",
+      "type": "image/jpeg",
+      "form_factor": "narrow"
+    },
+    {
+      "src": "/picture/03.jpg",
+      "sizes": "1080x2342",
+      "type": "image/jpeg",
+      "form_factor": "narrow"
+    },
+    {
+      "src": "/picture/04.jpg",
+      "sizes": "1080x2342",
+      "type": "image/jpeg",
+      "form_factor": "narrow"
+    },
+    {
+      "src": "/picture/05.jpg",
+      "sizes": "1080x2342",
+      "type": "image/jpeg",
+      "form_factor": "narrow"
+    }
+  ]
+}

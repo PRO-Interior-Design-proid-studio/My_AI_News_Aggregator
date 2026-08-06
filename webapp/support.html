@@ -1,0 +1,879 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Справка — Мои AI Новости. Как пользоваться, тарифы, настройка</title>
+    <meta name="description" content="Полная инструкция по использованию Мои AI Новости: как добавить источники, настроить время, выбрать тариф, оплатить подписку. Поддержка пользователей.">
+    <link rel="canonical" href="https://news.proid.studio/support">
+
+    <!-- Open Graph -->
+    <meta property="og:title" content="Справка — Мои AI Новости">
+    <meta property="og:description" content="Инструкция и часто задаваемые вопросы по сервису Мои AI Новости.">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://news.proid.studio/support">
+    <meta property="og:image" content="https://news.proid.studio/picture/LOGO.jpg">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
+    <meta property="og:locale" content="ru_RU">
+    <meta property="og:site_name" content="Мои AI Новости">
+
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Справка — Мои AI Новости">
+    <meta name="twitter:description" content="Полная инструкция по использованию сервиса Мои AI Новости.">
+    <meta name="twitter:image" content="https://news.proid.studio/picture/LOGO.jpg">
+
+    <!-- JSON‑LD Structured Data (FAQPage) -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "FAQPage",
+      "mainEntity": [
+        {"@type":"Question","name":"Зачем нужен агрегатор, если у меня уже есть подписки?","acceptedAnswer":{"@type":"Answer","text":"Вы не отвлекаетесь днём на уведомления. Вместо того чтобы вылавливать новости между рекламой, вы получаете готовую ленту раз в день — и читаете всё, что важно, без лишнего шума. Это экономит время и нервы."}},
+        {"@type":"Question","name":"Нужно ли отписываться от каналов после настройки?","acceptedAnswer":{"@type":"Answer","text":"Да, после настройки можно отписаться от каналов в соцсетях, чтобы они не отвлекали. Но если вам нужно оперативно следить за каким-то источником (например, для работы), оставьте подписку — дайджест будет дублировать информацию, но вы не пропустите срочное."}},
+        {"@type":"Question","name":"Какие источники нельзя добавить?","acceptedAnswer":{"@type":"Answer","text":"Приватные Telegram-каналы и группы (без username), закрытые VK-сообщества, MAX-каналы (запрещено платформой), а также сайты без RSS."}},
+        {"@type":"Question","name":"Как часто обновляются источники?","acceptedAnswer":{"@type":"Answer","text":"Дайджест собирается один раз в сутки (в выбранное вами время). Это сделано специально, чтобы вы не отвлекались в течение дня. Если вам нужна более свежая информация, можно воспользоваться ручным запуском (на Расширенном тарифе)."}},
+        {"@type":"Question","name":"Безопасно ли мои данные?","acceptedAnswer":{"@type":"Answer","text":"Да. Мы обрабатываем только ваш идентификатор в Telegram/MAX, IP-адрес и технические данные для работы сервиса. Мы не передаём данные третьим лицам, не используем их для рекламы и не продаём."}}
+      ]
+    }
+    </script>
+
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebPage",
+      "name": "Справка — Мои AI Новости",
+      "description": "Полная инструкция по использованию персонализированного новостного агрегатора с искусственным интеллектом.",
+      "url": "https://news.proid.studio/support",
+      "inLanguage": "ru-RU",
+      "about": {
+        "@type": "Thing",
+        "name": "новостной агрегатор, искусственный интеллект, дайджест новостей"
+      }
+    }
+    </script>
+
+    <link rel="icon" href="/icons/favicon.ico">
+    <link rel="manifest" href="/manifest.json">
+
+    <style>
+
+        * { margin:0; padding:0; box-sizing:border-box; }
+        :root {
+            --bg-color: #010715;
+            --footer-bg: #111c40;
+            --text: #fff;
+            --text-secondary: #8a9bb5;
+            --accent: #6c5ce7;
+            --accent2: #3088ff;
+            --card-bg: rgba(255,255,255,0.04);
+            --border: rgba(255,255,255,0.06);
+            --radius: 20px;
+            --shadow: 0 12px 48px rgba(0,0,0,0.6);
+        }
+        html { scroll-behavior: smooth; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "Fira Sans", "Droid Sans", "Helvetica Neue", Arial, sans-serif;
+            background: var(--footer-bg) linear-gradient(180deg, #020e33 0%, var(--bg-color) 25%, var(--bg-color) 84%, var(--footer-bg) 100%);
+            color: var(--text);
+            line-height: 1.6;
+            padding: 0;
+            min-height: 100vh;
+            -webkit-font-smoothing: antialiased;
+            font-variant-ligatures: none;
+            display: flex;
+            flex-direction: column;
+        }
+        .page-wrap {
+            padding: 0 20px;
+            flex: 1 0 auto;
+            display: flex;
+            flex-direction: column;
+            width: 100%;
+        }
+        .container {
+            max-width: 1100px;
+            margin: 0 auto;
+            flex: 1 0 auto;
+            display: flex;
+            flex-direction: column;
+            width: 100%;
+        }
+
+        /* ===== ШАПКА (как в лендинге) ===== */
+        header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 20px 0 10px;
+            border-bottom: 1px solid var(--border);
+            flex-wrap: wrap;
+            flex-shrink: 0;
+        }
+        .logo {
+            font-size: 28px;
+            font-weight: 700;
+            background: linear-gradient(290deg, #d235ff 0%, #a062ff 30%, #3088ff 66%, #61d8ff 100%);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            letter-spacing: -0.5px;
+        }
+        .logo span { font-weight: 300; color: var(--text-secondary); background: none; -webkit-background-clip: unset; background-clip: unset; }
+        .nav { display: flex; gap: 24px; font-size: 15px; flex-wrap: wrap; }
+        .nav a { color: var(--text-secondary); text-decoration: none; transition: color 0.2s; }
+        .nav a:hover { color: var(--text); }
+
+        /* ===== СЕКЦИИ (как в лендинге) ===== */
+        section {
+            padding: 50px 0;
+            border-bottom: 1px solid var(--border);
+            flex-shrink: 0;
+        }
+        section:last-of-type {
+            border-bottom: none;
+        }
+        .section-label {
+            font-size: 13px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            color: var(--accent2);
+            margin-bottom: 6px;
+            font-weight: 600;
+            text-align: left;
+        }
+        .section-title {
+            font-size: clamp(1.8rem, 3.5vw, 2.6rem);
+            font-weight: 700;
+            margin-bottom: 10px;
+            display: inline-block;
+            background: linear-gradient(290deg, #d235ff 0%, #a062ff 30%, #3088ff 66%, #61d8ff 100%);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            text-align: center;
+            width: 100%;
+        }
+        .section-desc {
+            color: var(--text-secondary);
+            max-width: 600px;
+            font-size: 1.05rem;
+            text-align: center;
+            margin-left: auto;
+            margin-right: auto;
+            margin-bottom: 30px;
+        }
+
+        .toc {
+            background: var(--card-bg);
+            border-radius: 12px;
+            padding: 20px 24px;
+            border: 1px solid var(--border);
+            margin-bottom: 30px;
+            max-width: 100%;
+            overflow: hidden;
+        }
+        .toc h2 {
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--text);
+            margin-bottom: 12px;
+        }
+        .toc ul {
+            list-style: none;
+            padding: 0;
+            columns: 2 200px;
+            column-gap: 24px;
+        }
+        .toc ul li {
+            margin-bottom: 6px;
+            break-inside: avoid;
+        }
+        .toc ul li a {
+            color: var(--accent2);
+            text-decoration: none;
+            font-size: 15px;
+            word-break: break-word;
+        }
+        .toc ul li a:hover { text-decoration: underline; }
+
+        .section-inner {
+            margin-top: 10px;
+            max-width: 100%;
+        }
+        .section-inner h2 {
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--accent2);
+            margin-bottom: 12px;
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 6px;
+        }
+        .section-inner h3 {
+            font-size: 18px;
+            font-weight: 600;
+            margin: 18px 0 8px 0;
+            color: #d4d4f7;
+        }
+        .section-inner h4 {
+            font-size: 16px;
+            font-weight: 500;
+            margin: 14px 0 6px 0;
+            color: #b0c4de;
+        }
+        .section-inner p, .section-inner li {
+            color: var(--text-secondary);
+            line-height: 1.7;
+            font-size: 15px;
+            margin-bottom: 6px;
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+        }
+        .section-inner ul, .section-inner ol {
+            padding-left: 24px;
+            margin: 6px 0 12px 0;
+        }
+        .section-inner ul li { margin-bottom: 4px; }
+
+        .table-responsive {
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            margin: 12px 0;
+            max-width: 100%;
+        }
+        .section-inner table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 480px;
+            max-width: 100%;
+        }
+        @media (max-width: 640px) {
+            .section-inner table {
+                min-width: 400px;
+                font-size: 13px;
+            }
+            .section-inner th, .section-inner td {
+                padding: 6px 8px;
+                word-wrap: break-word;
+                /* word-break: break-word; — убрано для нормального переноса по словам */
+            }
+        }
+        .section-inner th, .section-inner td {
+            border: 1px solid var(--border);
+            padding: 8px 12px;
+            text-align: left;
+            color: var(--text-secondary);
+        }
+        .section-inner th {
+            background: rgba(255,255,255,0.06);
+            color: var(--text);
+            font-weight: 600;
+        }
+        .highlight {
+            background: rgba(48,136,255,0.12);
+            border-left: 3px solid var(--accent2);
+            padding: 12px 16px;
+            border-radius: 6px;
+            margin: 8px 0;
+            overflow-wrap: break-word;
+            word-wrap: break-word;
+        }
+        .highlight strong { color: var(--text); }
+
+        .contact-block {
+            background: rgba(255,255,255,0.04);
+            border-radius: 12px;
+            padding: 16px 20px;
+            margin-top: 6px;
+            border-left: 3px solid var(--accent2);
+            max-width: 100%;
+            overflow-wrap: break-word;
+        }
+        .contact-block a {
+            color: var(--accent2);
+            text-decoration: none;
+            word-break: break-all;
+        }
+        .contact-block a:hover { text-decoration: underline; }
+
+        /* ===== ФУТЕР (как в лендинге) ===== */
+        .footer-wrapper {
+            width: 100%;
+            background: var(--footer-bg);
+            border-top: 1px solid var(--border);
+            padding: 12px 0;
+            margin-top: auto;
+            flex-shrink: 0;
+        }
+        .footer-inner {
+            max-width: 1100px;
+            margin: 0 auto;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            align-items: center;
+            gap: 6px 16px;
+            font-size: 13px;
+            color: var(--text-secondary);
+            padding: 0 20px;
+        }
+        @media (min-width: 768px) {
+            .footer-inner { flex-wrap: nowrap; gap: 8px 20px; }
+        }
+        .footer-inner a {
+            color: var(--text-secondary);
+            text-decoration: none;
+            transition: 0.2s;
+        }
+        .footer-inner a:hover { color: var(--text); }
+        .footer-inner .docs a {
+            color: var(--accent2);
+            font-weight: 500;
+        }
+        .footer-inner .docs a:hover { text-decoration: underline; }
+        .footer-inner .studio-link {
+            color: #3088ff !important;
+            font-weight: 500;
+        }
+        .footer-inner .studio-link:hover { text-decoration: underline; }
+        .footer-inner .sep { opacity: 0.3; }
+
+        @media (max-width: 640px) {
+            header { flex-direction: column; align-items: stretch; gap: 10px; }
+            .logo { text-align: center; }
+            .nav { justify-content: center; gap: 14px; flex-wrap: wrap; }
+            section { padding: 30px 0; }
+            .footer-inner { flex-wrap: wrap; gap: 4px 8px; font-size: 12px; padding: 0 16px; }
+            .toc ul { columns: 1; }
+            .section-inner table { font-size: 13px; min-width: 100%; }
+            .table-responsive { overflow-x: auto; }
+            .section-inner h2 { font-size: 20px; }
+            .section-inner h3 { font-size: 16px; }
+            .section-inner p, .section-inner li { font-size: 14px; }
+        }
+    </style>
+</head>
+<body>
+<div class="page-wrap">
+    <div class="container">
+
+        <!-- ===== ШАПКА ===== -->
+        <header>
+            <a href="/landing" class="logo" style="text-decoration: none;">Мои <span>AI Новости</span></a>
+            <nav class="nav">
+                <a href="/landing#about">О проекте</a>
+                <a href="/landing#features">Возможности</a>
+                <a href="/landing#health">Здоровье</a>
+                <a href="/landing#tech">Технологии</a>
+                <a href="/landing#pricing">Тарифы</a>
+                <a href="/landing#faq">FAQ</a>
+                <a href="/landing#start">Начать</a>
+                <a href="/support">Справка</a>
+            </nav>
+        </header>
+
+        <!-- ===== СЕКЦИЯ 1: ЗАГОЛОВОК ===== -->
+        <section>
+            <h1 class="section-title">📖 Руководство пользователя</h1>
+            <p style="text-align:center; color:var(--text-secondary); font-size:14px; margin-top:-10px; margin-bottom:20px;">
+                Версия: 1.4 &bull; 5 августа 2026 &bull; <a href="https://news.proid.studio" style="color:var(--accent2);">news.proid.studio</a>
+            </p>
+        </section>
+
+        <!-- ===== СЕКЦИЯ 2: ОГЛАВЛЕНИЕ ===== -->
+        <section style="padding-top:0;">
+            <div class="toc">
+                <h2>Содержание</h2>
+                <ul>
+                    <li><a href="#section1">1. Что такое «Мои AI Новости»?</a></li>
+                    <li><a href="#section2">2. Как начать пользоваться</a>
+                        <ul style="columns:1; padding-left:16px; list-style:none;">
+                            <li><a href="#section2-1">2.1. Шаг 1. Откройте бота</a></li>
+                            <li><a href="#section2-2">2.2. Шаг 2. Примите условия использования</a></li>
+                            <li><a href="#section2-3">2.3. Шаг 3. Настройте источники</a></li>
+                            <li><a href="#section2-4">2.4. Авторизация в PWA (браузерной версии)</a></li>
+                        </ul>
+                    </li>
+                    <li><a href="#section3">3. Добавление источников</a>
+                        <ul style="columns:1; padding-left:16px; list-style:none;">
+                            <li><a href="#section3-1">3.1. Через веб-приложение</a></li>
+                            <li><a href="#section3-2">3.2. Через команды в боте</a></li>
+                            <li><a href="#section3-3">3.3. Через MAX-бота</a></li>
+                            <li><a href="#section3-4">3.4. Ограничения</a></li>
+                            <li><a href="#section3-5">3.5. GitHub генератор</a></li>
+                            <li><a href="#section3-6">3.6. Google News генератор</a></li>
+                            <li><a href="#section3-7">3.7. Каталог готовых источников</a></li>
+                        </ul>
+                    </li>
+                    <li><a href="#section4">4. Управление источниками</a></li>
+                    <li><a href="#section5">5. Как формируется дайджест</a>
+                        <ul style="columns:1; padding-left:16px; list-style:none;">
+                            <li><a href="#section5-1">5.1. Фильтрация контента</a></li>
+                            <li><a href="#section5-2">5.2. Доступ к источникам без VPN</a></li>
+                        </ul>
+                    </li>
+                    <li><a href="#section6">6. Время получения дайджеста</a></li>
+                    <li><a href="#section7">7. Тарифы и оплата</a></li>
+                    <li><a href="#section8">8. Работа в MAX</a></li>
+                    <li><a href="#section9">9. Часто задаваемые вопросы (FAQ)</a></li>
+                    <li><a href="#section10">10. Поддержка и контакты</a></li>
+                    <li><a href="#section11">11. Заключение и планы развития</a></li>
+                </ul>
+            </div>
+        </section>
+
+        <!-- ===== СЕКЦИИ С КОНТЕНТОМ ===== -->
+        <section id="section1">
+            <div class="section-inner">
+                <h2>1. Что такое «Мои AI Новости»?</h2>
+                <p><strong>«Мои AI Новости»</strong> — это умный агрегатор новостей, который собирает информацию из выбранных вами источников (Telegram-каналы, группы, VK-сообщества, RSS-ленты, YouTube и другие) и один раз в день присылает вам готовый дайджест — краткую подборку самого важного и интересного за последние сутки.</p>
+                <p><strong>Зачем это нужно?</strong></p>
+                <ul>
+                    <li>Вы больше не отвлекаетесь на уведомления в течение дня.</li>
+                    <li>Вы тратите на чтение новостей 5–10 минут вместо часов.</li>
+                    <li>Вы читаете только то, что выбрали сами — без рекламы, спама и мусора.</li>
+                    <li>Все новости обрабатываются искусственным интеллектом: дубли удаляются, иностранные источники переводятся на русский, реклама и мат отсеиваются.</li>
+                    <li>Дайджест приходит в удобное для вас время — вы всегда в курсе, но не перегружены.</li>
+                </ul>
+                <p>Сервис работает в двух местах:</p>
+                <ul>
+                    <li>В <strong>Telegram</strong> (бот @My_AI_News_Aggregator_bot).</li>
+                    <li>В <strong>MAX</strong> (бот id772609477460_bot).</li>
+                </ul>
+                <div class="highlight">
+                    <strong>Важно:</strong> аккаунты в Telegram и MAX <strong>не связаны</strong> — это два независимых кабинета. Если вы хотите получать дайджест и там, и там, нужно авторизоваться отдельно в каждом из них.
+                </div>
+                <p>Вы также можете пользоваться <strong>браузерной версией</strong> (PWA) по адресу <a href="https://news.proid.studio/pwa" style="color:var(--accent2);">news.proid.studio/pwa</a> — она работает как полноценное приложение на телефоне и компьютере.</p>
+            </div>
+        </section>
+
+        <section id="section2">
+            <div class="section-inner">
+                <h2>2. Как начать пользоваться</h2>
+                <h3 id="section2-1">2.1. Шаг 1. Откройте бота</h3>
+                <p>Найдите в Telegram бота <strong>@My_AI_News_Aggregator_bot</strong> и нажмите «Запустить» (или отправьте команду <strong>/start</strong> — все команды бота пишутся латиницей, на английском языке). Если вы в MAX — найдите бота <strong>id772609477460_bot</strong> и тоже нажмите «Запустить» (или введите <strong>/start</strong>).</p>
+
+                <h3 id="section2-2">2.2. Шаг 2. Примите условия использования</h3>
+                <p>Бот попросит вас дать согласие на обработку персональных данных. Это необходимо для того, чтобы мы могли отправлять вам персональные дайджесты и управлять вашими подписками. Ваши данные <strong>никогда не передаются третьим лицам</strong> и не используются для рекламы. Подробнее — читайте Политику конфиденциальности на сайте.</p>
+                <p>Выберите «Согласен» — после этого вы попадёте в главное меню.</p>
+
+                <h3 id="section2-3">2.3. Шаг 3. Настройте источники</h3>
+                <p>Теперь вам нужно добавить те каналы, группы или сайты, новости из которых вы хотите получать. Как это сделать — читайте в разделе 3.</p>
+
+                <h3 id="section2-4">2.4. Авторизация в PWA (браузерной версии)</h3>
+                <p>Если вы открываете <a href="https://news.proid.studio/pwa" style="color:var(--accent2);">PWA-версию</a> в браузере, вам нужно авторизоваться. Это можно сделать двумя способами:</p>
+
+                <h4>Через Telegram</h4>
+                <ol>
+                    <li>На странице входа нажмите кнопку <strong>«Войти через Telegram»</strong>.</li>
+                    <li>Сервер генерирует <strong>одноразовый токен</strong> (действует 5 минут) и открывает ссылку на бота <code>https://t.me/My_AI_News_Aggregator_bot?start=токен</code>.</li>
+                    <li>Вы переходите в бота, нажимаете «Запустить» (или бот автоматически обрабатывает команду).</li>
+                    <li>Бот отправляет ваш <code>telegram_id</code> и токен на сервер через защищённый эндпоинт <code>/api/auth/bot-bind</code>.</li>
+                    <li>Сервер связывает токен с вашим Telegram ID, создаёт или обновляет пользователя в базе данных и генерирует <strong>сессионный токен</strong>.</li>
+                    <li>PWA периодически опрашивает статус (<code>/api/auth/bot-status?token=...</code>). Когда статус становится <code>success</code>, PWA получает сессионный токен и сохраняет его в <code>localStorage</code>.</li>
+                    <li>После этого вы автоматически попадаете в интерфейс приложения — все последующие запросы будут использовать этот токен в заголовке <code>X-Auth-Token</code>.</li>
+                </ol>
+                <p><strong>Важно:</strong> если вы закрыли страницу до завершения авторизации, просто откройте её заново и повторите процесс. Токен одноразовый, поэтому при повторной попытке будет сгенерирован новый.</p>
+
+                <h4>Через MAX</h4>
+                <ol>
+                    <li>На странице входа нажмите кнопку <strong>«Войти через MAX»</strong>.</li>
+                    <li>Сервер генерирует одноразовый токен и открывает ссылку на MAX-бота: <code>https://max.ru/id772609477460_bot?start=токен</code>.</li>
+                    <li>В MAX-боте нажмите кнопку <strong>«Открыть Приложение в MAX»</strong> (или просто перейдите по ссылке).</li>
+                    <li>MAX-бот отправляет на сервер ваш <code>max_user_id</code> и <code>max_chat_id</code> вместе с токеном через эндпоинт <code>/api/auth/max-bind</code>.</li>
+                    <li>Сервер создаёт/обновляет пользователя, генерирует сессионный токен и сохраняет его в таблице <code>max_auth_sessions</code>.</li>
+                    <li>PWA опрашивает <code>/api/auth/max-status/{token}</code>. Как только токен становится <code>ready</code>, PWA получает сессионный токен и автоматически перенаправляется на страницу приложения (с добавлением <code>?auth_token=...</code> в URL, чтобы сразу войти).</li>
+                </ol>
+                <p><strong>Примечание:</strong> после успешного входа через MAX сессионный токен сохраняется в <code>localStorage</code>, и при следующем открытии PWA вы будете автоматически авторизованы.</p>
+
+                <div class="highlight">
+                    <strong>Совет:</strong> если вы используете PWA на мобильном устройстве, вы можете <strong>установить его на экран «Домой»</strong> (для Android — через браузер, для iOS — через меню «Поделиться» → «На экран «Домой»»). Тогда приложение будет работать как нативное.
+                </div>
+            </div>
+        </section>
+
+        <!-- ===== СЕКЦИЯ 3: ДОБАВЛЕНИЕ ИСТОЧНИКОВ ===== -->
+        <section id="section3">
+            <div class="section-inner">
+                <h2>3. Добавление источников</h2>
+                <p>Вы можете добавлять источники разными способами. Все они одинаково работают и в Telegram, и в MAX, и в браузере.</p>
+
+                <h3 id="section3-1">3.1. Через веб-приложение (самый удобный)</h3>
+                <p>Нажмите кнопку <strong>«Открыть Приложение»</strong> в боте. Откроется интерфейс, похожий на сайт. Там вы увидите кнопки:</p>
+                <ul>
+                    <li><strong>Дзен</strong> — добавить категорию новостей с Дзена.</li>
+                    <li><strong>RB.ru</strong> — добавить бизнес-новости.</li>
+                    <li><strong>Хабр</strong> — добавить хаб (тематический раздел) с Habr.</li>
+                    <li><strong>Лайфхакер</strong> — добавить полезные статьи.</li>
+                    <li><strong>VC.ru</strong> — добавить новости стартапов и технологий.</li>
+                    <li><strong>RSS/HTML</strong> — добавить любую RSS-ленту или сайт (введите URL).</li>
+                    <li><strong>Telegram</strong> — добавьте канал или группу по её username (например, <code>durov</code> без @).</li>
+                    <li><strong>VK</strong> — добавьте сообщество VK по его короткому адресу (например, <code>club123456</code>).</li>
+                    <li><strong>GitHub</strong> — (подробно в разделе 3.5) генератор RSS для репозиториев и пользователей.</li>
+                    <li><strong>YouTube</strong> — добавьте YouTube-канал по его имени или ID (бот сам найдёт канал и подставит RSS).</li>
+                    <li><strong>Reddit</strong> — добавьте сабреддит по названию.</li>
+                    <li><strong>BBC</strong> — выберите категорию новостей BBC.</li>
+                    <li><strong>CNN</strong> — выберите категорию новостей CNN.</li>
+                    <li><strong>Google News</strong> — (подробно в разделе 3.6) генератор RSS по поисковому запросу.</li>
+                </ul>
+                <p>Также есть кнопка <strong>«Категории»</strong> — она открывает структурированный каталог уже проверенных источников, сгруппированных по темам (IT, экономика, спорт, дизайн, наука и т.д.). Каталог постоянно пополняется, вы можете выбрать источник из списка и добавить его одним кликом (подробнее в разделе 3.7).</p>
+
+                <h3 id="section3-2">3.2. Через команды в боте (Telegram)</h3>
+                <p>В Telegram-боте вы можете использовать команды (все команды пишутся латиницей):</p>
+                <ul>
+                    <li><code>/add_rss</code> — бот попросит ввести URL RSS-ленты.</li>
+                    <li><code>/add_tg</code> — бот попросит ввести username канала (без @).</li>
+                    <li><code>/add_vk</code> — бот попросит ввести короткое имя сообщества VK.</li>
+                </ul>
+                <p>Бот также поддерживает добавление источников <strong>через пересылку сообщений</strong>:</p>
+                <ul>
+                    <li>Перешлите любое сообщение из <strong>публичного канала или группы</strong> (у которого есть username) в бота — бот автоматически добавит этот канал/группу в ваш список.</li>
+                    <li>Перешлите сообщение от <strong>публичного бота</strong> (у которого есть username) — бот добавит этого бота как источник.</li>
+                    <li>Если у канала/группы/бота нет username, добавить не получится — бот сообщит об этом.</li>
+                </ul>
+
+                <h3 id="section3-3">3.3. Через MAX-бота</h3>
+                <p>В MAX-боте доступно аналогичное меню с кнопками, которые открывают веб-приложение внутри MAX. Вы можете добавлять те же типы источников, но обратите внимание, что <strong>MAX-каналы добавить нельзя</strong> — это ограничение платформы MAX, мы не можем его обойти.</p>
+
+                <h3 id="section3-4">3.4. Ограничения</h3>
+                <ul>
+                    <li><strong>Бесплатный тариф</strong> — до 5 источников.</li>
+                    <li><strong>Базовый тариф</strong> — до 30 источников.</li>
+                    <li><strong>Расширенный тариф</strong> — до 100 источников.</li>
+                </ul>
+                <p>Если вы пытаетесь добавить источник, но лимит исчерпан, бот сообщит об этом и предложит перейти на более высокий тариф.</p>
+
+                <h3 id="section3-5">3.5. GitHub генератор</h3>
+                <p>GitHub генератор позволяет легко добавить RSS-ленту для отслеживания активности в репозиториях или пользователях GitHub. Он находится в веб-приложении (кнопка «GitHub»).</p>
+                <p><strong>Как работает:</strong> вы вводите <code>owner/repo</code> (например, <code>torvalds/linux</code>) или просто имя пользователя (например, <code>torvalds</code>), затем выбираете один из доступных типов RSS. Сервер генерирует правильный URL и добавляет его как RSS-источник.</p>
+
+                <h4>Доступные типы RSS для репозитория (owner/repo):</h4>
+                <ul>
+                    <li><strong>releases</strong> — RSS-лента релизов (новых версий) репозитория. URL: <code>https://github.com/owner/repo/releases.atom</code></li>
+                    <li><strong>tags</strong> — RSS-лента тегов (тэгов) репозитория. URL: <code>https://github.com/owner/repo/tags.atom</code></li>
+                    <li><strong>commits</strong> — RSS-лента всех коммитов в репозиторий (любая ветка). URL: <code>https://github.com/owner/repo/commits.atom</code></li>
+                    <li><strong>main</strong> — RSS-лента коммитов только в ветку <code>main</code>. URL: <code>https://github.com/owner/repo/commits/main.atom</code></li>
+                    <li><strong>master</strong> — RSS-лента коммитов только в ветку <code>master</code>. URL: <code>https://github.com/owner/repo/commits/master.atom</code></li>
+                </ul>
+                <p><strong>Для пользователя (username):</strong> выберите тип <strong>username</strong> — тогда будет сгенерирована RSS-лента публичной активности пользователя (например, создание репозиториев, звёзды, комментарии). URL: <code>https://github.com/username.atom</code></p>
+
+                <h4>Примеры использования:</h4>
+                <ul>
+                    <li>Чтобы отслеживать новые релизы <code>nodejs/node</code>, введите <code>nodejs/node</code> и нажмите «releases».</li>
+                    <li>Чтобы следить за коммитами в <code>main</code> ветку <code>microsoft/TypeScript</code>, введите <code>microsoft/TypeScript</code> и нажмите «main».</li>
+                    <li>Чтобы получать обновления от пользователя <code>torvalds</code>, введите <code>torvalds</code> и нажмите «username».</li>
+                </ul>
+                <p>После выбора типа откроется диалог подтверждения с сгенерированным URL — вы можете сразу добавить его в свои источники.</p>
+
+
+                <h3 id="section3-6">3.6. Google News генератор</h3>
+                <p>Google News генератор позволяет создать RSS-ленту по любому поисковому запросу в Google Новостях. Это полезно, если вы хотите следить за определённой темой, компанией или событием, которых нет в готовых категориях.</p>
+                <p><strong>Как работает:</strong> вы вводите ключевые слова, и сервер формирует URL для RSS-ленты Google Новостей с этими параметрами. Затем вы добавляете этот URL как обычный RSS-источник.</p>
+
+                <h4>Синтаксис запроса (поддерживаемые операторы):</h4>
+                <ul>
+                    <li><strong>Обычный поиск нескольких слов</strong> — например, <code>Forbes технологии</code> найдёт новости, содержащие оба слова.</li>
+                    <li><strong>Точная фраза в кавычках</strong> — например, <code>"искусственный интеллект"</code> найдёт новости с этой точной фразой.</li>
+                    <li><strong>Логическое ИЛИ</strong> — используйте <code>OR</code> (заглавными) для поиска одного из вариантов. Например, <code>технологии OR роботы</code>.</li>
+                    <li><strong>Поиск в заголовке</strong> — <code>intitle:слово</code> найдёт новости, где слово встречается в заголовке.</li>
+                    <li><strong>Поиск в тексте</strong> — <code>allintext:текст</code> найдёт новости, где текст встречается в любом месте статьи.</li>
+                </ul>
+
+                <h4>Примеры запросов:</h4>
+                <ul>
+                    <li><code>"криптовалюта биткоин"</code> — новости о биткоине с точной фразой.</li>
+                    <li><code>Apple OR Samsung</code> — новости об Apple или Samsung.</li>
+                    <li><code>intitle:выборы allintext:президент</code> — новости с «выборы» в заголовке и «президент» в тексте.</li>
+                    <li><code>"климатический кризис" OR "глобальное потепление"</code> — новости по теме климата.</li>
+                </ul>
+                <p>После ввода запроса нажмите «Сгенерировать» — вам будет предложено добавить сформированный RSS-источник в вашу ленту.</p>
+                <div class="highlight">
+                    <strong>Важно:</strong> Google Новости могут устанавливать ограничения по количеству запросов, которые не зависят от нас. Результаты будут на русском языке (регион RU).
+                </div>
+
+                <h3 id="section3-7">3.7. Каталог готовых источников</h3>
+                <p>Кнопка <strong>«Категории»</strong> в веб-приложении открывает доступ к структурированному каталогу уже проверенных источников, сгруппированных по тематикам. Это удобно, если вы не хотите вводить URL вручную.</p>
+                <ul>
+                    <li>Каталог содержит сотни источников, разделённых на такие темы, как IT, экономика, спорт, дизайн, наука, политика, медицина, образование и многие другие.</li>
+                    <li>Вы можете перемещаться по дереву категорий: сначала выбираете общую тему, затем подкатегорию, а затем конкретный источник.</li>
+                    <li>Источники в каталоге уже проверены на работоспособность и соответствие тематике.</li>
+                    <li>Каталог постоянно пополняется — если вы не нашли нужный источник, вы всегда можете добавить его вручную через RSS/HTML или предложить нам через поддержку.</li>
+                </ul>
+                <p>Использование каталога экономит время и гарантирует, что вы добавите именно тот источник, который вам нужен.</p>
+            </div>
+        </section>
+
+        <!-- ===== СЕКЦИЯ 4: УПРАВЛЕНИЕ ИСТОЧНИКАМИ ===== -->
+        <section id="section4">
+            <div class="section-inner">
+                <h2>4. Управление источниками</h2>
+                <h3>4.1. Просмотр списка</h3>
+                <ul>
+                    <li>В Telegram-боте: команда <code>/list</code> или кнопка <strong>«Мои источники»</strong>.</li>
+                    <li>В веб-приложении: раздел <strong>«Мои источники»</strong>.</li>
+                    <li>В MAX-боте: кнопка <strong>«📋 Мои источники»</strong>.</li>
+                </ul>
+                <p>Все источники сгруппированы по типам (Telegram, VK, RSS) и отсортированы по алфавиту внутри каждой группы — так их легче найти.</p>
+
+                <h3>4.2. Удаление источника</h3>
+                <ul>
+                    <li>В веб-приложении: нажмите на крестик (✕) рядом с нужным источником.</li>
+                    <li>В Telegram-боте: в списке источников нажмите на название источника, затем подтвердите удаление.</li>
+                    <li>В MAX-боте: аналогично.</li>
+                </ul>
+                <p>Вы также можете удалить все источники одного типа сразу (например, все Telegram-каналы) — для этого есть кнопка «Удалить все» рядом с группой.</p>
+
+                <h3>4.3. Сортировка</h3>
+                <p>Источники всегда отсортированы по алфавиту внутри каждого типа, чтобы вы быстро находили нужный.</p>
+            </div>
+        </section>
+
+        <!-- ===== СЕКЦИЯ 5: КАК ФОРМИРУЕТСЯ ДАЙДЖЕСТ ===== -->
+        <section id="section5">
+            <div class="section-inner">
+                <h2>5. Как формируется дайджест</h2>
+                <p>Каждый день в выбранное вами время система запускает сбор новостей:</p>
+                <ol>
+                    <li><strong>Сбор</strong> — бот скачивает свежие записи из всех ваших источников.</li>
+                    <li><strong>Очистка</strong> — удаляются рекламные посты, мат, донаты, номера карт, лишние хештеги и эмодзи (подробнее в разделе 5.1).</li>
+                    <li><strong>Перевод</strong> — иностранные новости (на английском, испанском и т.д.) автоматически переводятся на русский с помощью искусственного интеллекта.</li>
+                    <li><strong>Дедупликация</strong> — если одна и та же новость попала из нескольких источников, в дайджесте она останется только один раз.</li>
+                    <li><strong>Ранжирование</strong> — самые важные и свежие новости попадают в начало.</li>
+                    <li><strong>Формирование</strong> — из обработанных материалов собирается компактный дайджест с заголовками, краткими описаниями и ссылками на источники.</li>
+                    <li><strong>Отправка</strong> — дайджест отправляется вам в Telegram и/или MAX (в зависимости от того, где вы авторизованы).</li>
+                </ol>
+                <p>Весь процесс занимает несколько минут. В дайджесте вы увидите:</p>
+                <ul>
+                    <li>Каждый пункт начинается с заголовка новости.</li>
+                    <li>Под заголовком — краткое содержание (если оно есть).</li>
+                    <li>В конце — ссылка «читать на ...» с указанием источника (tg:имя, vk:имя, url:домен).</li>
+                </ul>
+                <p>Если новость была объединена из нескольких источников, рядом с названием источника будет звёздочка (<code>*</code>).</p>
+                <p><strong>Краткие тексты без картинок</strong> — мы сознательно убираем изображения, чтобы дайджест был лёгким для чтения и экономил трафик. Вы получаете только суть, как в профессиональной газете. При необходимости вы всегда можете перейти по ссылке на полную статью.</p>
+
+                <h3 id="section5-1">5.1. Фильтрация контента</h3>
+                <p>Чтобы ваш дайджест был чистым и безопасным, мы применяем многоуровневую фильтрацию:</p>
+                <ul>
+                    <li><strong>Удаление рекламы</strong> — посты, содержащие явные рекламные маркеры (промокоды, скидки, призывы купить/заказать), автоматически исключаются.</li>
+                    <li><strong>Блокировка мата и нецензурной лексики</strong> — с помощью морфологического анализатора pymorphy2 мы находим и удаляем нежелательные слова.</li>
+                    <li><strong>Удаление донатов и банковских карт</strong> — любые упоминания номеров карт, фраз «спасибо за донат» и т.п. удаляются, чтобы защитить вас от мошенничества.</li>
+                    <li><strong>Очистка от смайлов и хештегов</strong> — эмодзи и хештеги удаляются, чтобы текст был максимально читаемым.</li>
+                    <li><strong>Цензура запрещённых слов</strong> — в соответствии с законодательством РФ и других стран мы заменяем определённые слова на <code>*****</code> (список обновляется автоматически).</li>
+                </ul>
+                <p>Все эти фильтры работают автоматически и не требуют вашего участия. Благодаря этому вы получаете только информативный, безопасный и приятный для чтения контент.</p>
+
+                <h3 id="section5-2">5.2. Доступ к источникам без VPN</h3>
+                <p>Сервис использует собственную инфраструктуру маршрутизации и прокси-серверы для доступа к открытым интернет-ресурсам, что позволяет не требовать от пользователя установки дополнительного программного обеспечения (например, VPN).</p>
+                <ul>
+                    <li>Мы используем технические средства для подключения к глобальным источникам новостей (Telegram, YouTube, Google, GitHub, Reddit и др.) в соответствии с законодательством стран, где работает сервис.</li>
+                    <li>Вся маршрутизация настроена таким образом, чтобы пользователь мог получать новости из любых публичных источников без необходимости самостоятельно настраивать прокси или VPN.</li>
+                    <li>Если какой-то источник временно недоступен из вашего региона, система автоматически переключает канал доступа через запасные маршруты, обеспечивая непрерывность получения новостей.</li>
+                </ul>
+                <p>Таким образом, вам не нужно заботиться о технических деталях — просто добавьте источники и получайте дайджест.</p>
+            </div>
+        </section>
+
+        <!-- ===== СЕКЦИЯ 6: ВРЕМЯ ПОЛУЧЕНИЯ ===== -->
+        <section id="section6">
+            <div class="section-inner">
+                <h2>6. Время получения дайджеста</h2>
+                <p>По умолчанию дайджест приходит в <strong>18:00</strong> по московскому времени. Но вы можете изменить это время:</p>
+                <ul>
+                    <li>В <strong>Расширенном тарифе</strong> вы можете выбрать любой час от 0 до 23.</li>
+                    <li>В веб-приложении найдите раздел <strong>«Время получения»</strong> и нажмите «Изменить».</li>
+                    <li>В Telegram-боте используйте команду <code>/time 18</code> (где 18 — нужный час).</li>
+                </ul>
+                <div class="highlight">
+                    <strong>Важно:</strong> время можно менять только на Расширенном тарифе. На Бесплатном и Базовом тарифах дайджест всегда приходит в 18:00.
+                </div>
+
+                <h3>Ручной запуск</h3>
+                <p>Если вы хотите получить дайджест вне расписания (например, днём), используйте:</p>
+                <ul>
+                    <li>В Telegram-боте: команда <code>/my_run</code> (доступна на Расширенном тарифе, не более 3 ручных запусков в день).</li>
+                    <li>В веб-приложении: кнопка <strong>«Запустить сбор»</strong> (тоже для Расширенного тарифа).</li>
+                    <li>В MAX-боте: команда <code>/my_run</code>.</li>
+                </ul>
+                <p>После запуска система соберёт все новости за последние сутки и отправит вам свежий дайджест. Во время сбора вы будете видеть прогресс в виде сообщения, которое обновляется.</p>
+            </div>
+        </section>
+
+        <!-- ===== СЕКЦИЯ 7: ТАРИФЫ ===== -->
+        <section id="section7">
+            <div class="section-inner">
+                <h2>7. Тарифы и оплата</h2>
+                <h3>7.1. Что даёт каждый тариф</h3>
+                <div class="table-responsive">
+                    <table>
+                        <thead>
+                            <tr><th>Функция</th><th>Бесплатный</th><th>Базовый</th><th>Расширенный</th></tr>
+                        </thead>
+                        <tbody>
+                            <tr><td>Количество источников</td><td>до 5</td><td>до 30</td><td>до 100</td></tr>
+                            <tr><td>Ежедневный дайджест</td><td>✅</td><td>✅</td><td>✅</td></tr>
+                            <tr><td>AI-обработка (перевод, фильтрация)</td><td>✅</td><td>✅</td><td>✅ (улучшенная)</td></tr>
+                            <tr><td>Выбор времени получения</td><td>❌</td><td>❌</td><td>✅</td></tr>
+                            <tr><td>Ручной запуск (до 3 раз в день)</td><td>❌</td><td>❌</td><td>✅</td></tr>
+                            <tr><td>Поддержка всех типов источников</td><td>✅</td><td>✅</td><td>✅</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <h3>7.2. Стоимость</h3>
+                <ul>
+                    <li><strong>Бесплатный</strong> — 0 ₽, всегда.</li>
+                    <li><strong>Базовый</strong> — 190 ₽/месяц или 1 900 ₽/год (экономия 20%).</li>
+                    <li><strong>Расширенный</strong> — 490 ₽/месяц или 4 900 ₽/год (экономия 20%).</li>
+                </ul>
+                <p>Годовая подписка выгоднее — вы получаете 12 месяцев за цену 10.</p>
+
+                <h3>7.3. Как оплатить</h3>
+                <ol>
+                    <li>В веб-приложении (или в боте) нажмите кнопку <strong>«Оплатить тариф»</strong>.</li>
+                    <li>Выберите нужный тариф (Базовый или Расширенный) и период (месяц или год).</li>
+                    <li>Вы перейдёте на страницу платёжной системы (Robokassa), где сможете оплатить картой, СБП или другим способом.</li>
+                    <li>После успешной оплаты ваш тариф активируется мгновенно.</li>
+                </ol>
+
+                <h3>7.4. Автопродление (рекуррентные платежи)</h3>
+                <p>Чтобы вы не забывали продлевать подписку, мы включили <strong>автоматическое продление</strong>.</p>
+                <ul>
+                    <li>За <strong>3 дня</strong> до окончания подписки вы получите уведомление.</li>
+                    <li>За <strong>1 день</strong> до окончания с вашей карты будет списана сумма за следующий месяц (или год) по той же цене.</li>
+                    <li>Если оплата не прошла (недостаточно средств, истёк срок карты и т.п.), подписка не продлевается, и после окончания оплаченного периода вы переходите на Бесплатный тариф.</li>
+                </ul>
+                <p><strong>Как отключить автоплатеж?</strong></p>
+                <ul>
+                    <li>Напишите нам на почту <a href="mailto:news@proid.studio" style="color:var(--accent2);">news@proid.studio</a>.</li>
+                    <li>Или отвяжите карту в личном кабинете Robokassa (ссылка будет в письме с подтверждением оплаты).</li>
+                </ul>
+                <p>Вы также можете просто не продлевать подписку вручную — тогда после окончания оплаченного периода доступ к платным функциям прекратится, но Бесплатный тариф останется активным.</p>
+            </div>
+        </section>
+
+        <!-- ===== СЕКЦИЯ 8: РАБОТА В MAX ===== -->
+        <section id="section8">
+            <div class="section-inner">
+                <h2>8. Работа в MAX (особенности)</h2>
+                <p>Если вы используете MAX-бота, интерфейс почти такой же, как и в Telegram. Но есть несколько нюансов:</p>
+                <ul>
+                    <li>Вход в веб-приложение происходит автоматически через MAX Bridge — вам не нужно вводить логин и пароль.</li>
+                    <li>Кнопки в MAX-боте работают по-своему: они отправляют команды (например, <code>/list</code>), а не являются ссылками.</li>
+                    <li>Веб-приложение внутри MAX открывается как мини-приложение (не в браузере), но все функции те же.</li>
+                    <li><strong>Аккаунты Telegram и MAX не связаны</strong> — это два независимых кабинета. Если вы хотите получать дайджест в обоих местах, нужно авторизоваться отдельно в каждом из них.</li>
+                    <li>Добавление MAX-каналов невозможно из-за ограничений платформы.</li>
+                </ul>
+                <div class="highlight">
+                    <strong>Объединение аккаунтов</strong><br>
+                    Если вы зарегистрировались и в Telegram, и в MAX, но хотите, чтобы источники и тарифы были общими (единый кабинет), напишите нам в поддержку (контакты в разделе 10). Мы вручную объединим ваши аккаунты. Обратите внимание: после объединения дайджест будет приходить в оба места, а управление источниками станет общим.
+                </div>
+            </div>
+        </section>
+
+        <!-- ===== СЕКЦИЯ 9: FAQ ===== -->
+        <section id="section9">
+            <div class="section-inner">
+                <h2>9. Часто задаваемые вопросы (FAQ)</h2>
+
+                <h3>9.1. Зачем нужен агрегатор, если у меня уже есть подписки в соцсетях?</h3>
+                <p>Вы не отвлекаетесь днём на уведомления. Вместо того чтобы вылавливать новости между рекламой, вы получаете готовую ленту раз в день — и читаете всё, что важно, без лишнего шума. Это экономит время и нервы.</p>
+
+                <h3>9.2. Нужно ли отписываться от каналов после настройки?</h3>
+                <p>Да, после настройки можно отписаться от каналов в соцсетях, чтобы они не отвлекали. Но если вам нужно оперативно следить за каким-то источником (например, для работы), оставьте подписку — дайджест будет дублировать информацию, но вы не пропустите срочное.</p>
+
+                <h3>9.3. Какие источники нельзя добавить?</h3>
+                <ul>
+                    <li>Приватные Telegram-каналы и группы (без username) — их нельзя добавить, потому что бот не имеет доступа к их содержимому.</li>
+                    <li>Закрытые VK-сообщества — аналогично.</li>
+                    <li><strong>MAX-каналы</strong> — их добавление запрещено самой платформой MAX, мы не можем обойти это ограничение.</li>
+                    <li>Сайты, которые не отдают RSS или требуют сложного обхода (но мы стараемся поддерживать большинство популярных ресурсов).</li>
+                </ul>
+
+                <h3>9.4. Что делать, если новость не перевелась или перевелась криво?</h3>
+                <p>Перевод выполняется искусственным интеллектом, который иногда ошибается. Если вы заметили явную ошибку, напишите нам на почту — мы посмотрим, что можно улучшить. В целом качество перевода постоянно улучшается.</p>
+
+                <h3>9.5. Как часто обновляются источники?</h3>
+                <p>Дайджест собирается один раз в сутки (в выбранное вами время). Это сделано специально, чтобы вы не отвлекались в течение дня. Если вам нужна более свежая информация, можно воспользоваться ручным запуском (на Расширенном тарифе).</p>
+
+                <h3>9.6. Могу ли я получать дайджест в нескольких мессенджерах одновременно?</h3>
+                <p>Да, но учтите, что аккаунты Telegram и MAX <strong>не связаны</strong> — это два независимых кабинета. Чтобы получать дайджест и там, и там, нужно авторизоваться отдельно в каждом из них. Настройки источников и тарифы у каждого кабинета свои. Если хотите объединить их — напишите в поддержку.</p>
+
+                <h3>9.7. Как удалить аккаунт?</h3>
+                <p>Напишите нам на почту <a href="mailto:news@proid.studio" style="color:var(--accent2);">news@proid.studio</a> с запросом на удаление. Мы удалим все ваши данные в течение 10 рабочих дней.</p>
+
+                <h3>9.8. Безопасно ли мои данные?</h3>
+                <p>Да. Мы обрабатываем только ваш идентификатор в Telegram/MAX, IP-адрес и технические данные для работы сервиса. Мы не передаём данные третьим лицам, не используем их для рекламы и не продаём. Подробнее — читайте Политику конфиденциальности на сайте.</p>
+
+                <h3>9.9. Что такое «цензура запрещённых слов»?</h3>
+                <p>В некоторых странах существуют списки слов, которые нежелательно упоминать. Чтобы вы не нарушали закон и не получали лишних проблем, мы автоматически заменяем такие слова на <code>*****</code> в вашем дайджесте. Список обновляется по мере необходимости. Это не цензура в политическом смысле, а техническая мера для соблюдения законодательства.</p>
+
+                <h3>9.10. Могу ли я предложить новый источник или функцию?</h3>
+                <p>Конечно! Напишите нам в поддержку (контакты ниже) — мы всегда рады обратной связи. Если ваше предложение будет полезно многим пользователям, мы постараемся его реализовать.</p>
+            </div>
+        </section>
+
+        <!-- ===== СЕКЦИЯ 10: ПОДДЕРЖКА ===== -->
+        <section id="section10">
+            <div class="section-inner">
+                <h2>10. Поддержка и контакты</h2>
+                <p>Если у вас возникли вопросы, проблемы или предложения, вы можете связаться с нами:</p>
+                <div class="contact-block">
+                    <p><strong>Почта:</strong> <a href="mailto:news@proid.studio">news@proid.studio</a> (для всех вопросов, включая отзыв согласия на обработку данных, жалобы, предложения, а также запрос на объединение аккаунтов).</p>
+                    <p><strong>Автор проекта:</strong> профессиональный интерьер-дизайнер и разработчик, который создал этот сервис для себя и для вас. Вы можете связаться с ним через Telegram: <a href="https://t.me/professional_interior_design">@professional_interior_design</a>.</p>
+                    <p><strong>Объединение аккаунтов:</strong> если у вас есть отдельные аккаунты в Telegram и MAX, и вы хотите их объединить, напишите нам — мы сделаем это вручную.</p>
+                </div>
+                <p>Мы стараемся отвечать в течение 2 рабочих дней. Если вопрос срочный — пишите в Telegram, мы постараемся ответить быстрее.</p>
+            </div>
+        </section>
+
+        <!-- ===== СЕКЦИЯ 11: ЗАКЛЮЧЕНИЕ ===== -->
+        <section id="section11">
+            <div class="section-inner">
+                <h2>11. Заключение и планы развития</h2>
+                <p><strong>«Мои AI Новости»</strong> — это ваш личный помощник, который забирает на себя рутину чтения новостей. Вы настраиваете источники один раз, а дальше просто получаете готовый дайджест в удобное время. Никакой рекламы, никакого шума — только то, что вы выбрали.</p>
+                <p>Мы постоянно работаем над улучшением сервиса. В ближайшее время планируется добавить:</p>
+                <ul>
+                    <li><strong>Фильтр «только позитивные новости»</strong> — для максимальной защиты от стресса и негативной информации.</li>
+                    <li>Расширение каталога источников и интеграцию с новыми платформами.</li>
+                    <li>Улучшение качества перевода и суммаризации с помощью новых моделей ИИ.</li>
+                </ul>
+                <p>Попробуйте — и уже в первый день вы почувствуете разницу: освободится время, снизится тревожность, вы станете более продуктивным.</p>
+                <p style="text-align:center; margin-top:20px;">❤️ Спасибо, что пользуетесь нашим сервисом!</p>
+                <p style="text-align:center; font-size:14px; color:var(--text-secondary);">
+                    Версия справки: 1.4 &bull; 5 августа 2026 &bull; <a href="https://news.proid.studio" style="color:var(--accent2);">news.proid.studio</a>
+                </p>
+            </div>
+        </section>
+
+    </div>
+</div>
+
+<!-- ===== ФУТЕР ===== -->
+<div class="footer-wrapper" id="docs">
+    <div class="footer-inner">
+        <span>© 2026 Мои AI Новости</span>
+        <span class="docs">
+            <a href="/privacy" target="_blank">Политика</a>
+            <a href="/offer" target="_blank">Оферта</a>
+            <a href="/consent" target="_blank">Согласие</a>
+        </span>
+        <span class="sep">|</span>
+        <span>Проект <a href="https://proid.studio" target="_blank" class="studio-link">proid.studio</a></span>
+        <span class="sep">|</span>
+        <span>ИП Ерыков А.А. (ИНН 772609477460)</span>
+        <a href="mailto:news@proid.studio" style="color: var(--accent2);">news@proid.studio</a>
+    </div>
+</div>
+
+<!-- Service Worker -->
+<script>
+    if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.register('/sw.js')
+            .then(reg => console.log('✅ SW registered'))
+            .catch(err => console.log('❌ SW registration failed:', err));
+    }
+</script>
+
+</body>
+</html>

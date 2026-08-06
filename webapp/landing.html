@@ -1,0 +1,1241 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Мои AI Новости — персонализированные дайджесты с AI</title>
+    <meta name="description" content="Ежедневные дайджесты новостей с искусственным интеллектом. Telegram, VK, RSS, MAX — только то, что вы выбрали.">
+    
+    <meta name="robots" content="index, follow">
+    <link rel="canonical" href="https://news.proid.studio/">
+
+    <meta property="og:title" content="Мои AI Новости — персонализированные дайджесты с AI">
+    <meta property="og:description" content="Ежедневные дайджесты новостей с искусственным интеллектом. Telegram, VK, RSS, MAX — только то, что вы выбрали.">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://news.proid.studio/">
+    <meta property="og:image" content="https://news.proid.studio/picture/LOGO.jpg">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
+    <meta property="og:locale" content="ru_RU">
+    <meta property="og:site_name" content="Мои AI Новости">
+
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Мои AI Новости — персонализированные дайджесты с AI">
+    <meta name="twitter:description" content="Ежедневные дайджесты новостей с искусственным интеллектом. Telegram, VK, RSS, MAX — только то, что вы выбрали.">
+    <meta name="twitter:image" content="https://news.proid.studio/picture/LOGO.jpg">
+
+    <link rel="icon" href="/icons/favicon.ico">
+    
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "WebSite",
+        "name": "Мои AI Новости",
+        "url": "https://news.proid.studio/",
+        "description": "Ежедневные персонализированные дайджесты новостей с использованием искусственного интеллекта.",
+        "potentialAction": {
+            "@type": "SearchAction",
+            "target": "https://news.proid.studio/search?q={search_term_string}",
+            "query-input": "required name=search_term_string"
+        }
+    }
+    </script>
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "Organization",
+        "name": "ИП Ерыков Артём Андреевич",
+        "legalName": "Индивидуальный предприниматель Ерыков Артём Андреевич",
+        "url": "https://news.proid.studio/",
+        "logo": "https://news.proid.studio/picture/LOGO.jpg",
+        "email": "news@proid.studio",
+        "address": {
+            "@type": "PostalAddress",
+            "addressCountry": "RU",
+            "addressLocality": "Москва",
+            "streetAddress": "ул. Сумская, д. 6, корп. 2, кв. 259"
+        },
+        "taxID": "772609477460"
+    }
+    </script>
+
+    <style>
+
+        * { margin:0; padding:0; box-sizing:border-box; }
+        :root {
+            --bg-color: #010715;
+            --line-color: #103d60;
+            --def-transition: .2s ease;
+            --text: #fff;
+            --text-secondary: #8a9bb5;
+            --accent: #6c5ce7;
+            --accent2: #3088ff;
+            --card-bg: rgba(255,255,255,0.04);
+            --border: rgba(255,255,255,0.06);
+            --radius: 20px;
+            --shadow: 0 12px 48px rgba(0,0,0,0.6);
+            --footer-bg: #111c40;
+        }
+        html { scroll-behavior: smooth; }
+        html, body {
+            overflow-x: hidden;
+            max-width: 100%;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "Fira Sans", "Droid Sans", "Helvetica Neue", Arial, sans-serif;
+            background: var(--footer-bg) linear-gradient(180deg, #020e33 0%, var(--bg-color) 25%, var(--bg-color) 84%, var(--footer-bg) 100%);
+            color: var(--text);
+            line-height: 1.6;
+            padding: 0;
+            min-height: 100vh;
+            -webkit-font-smoothing: antialiased;
+            font-variant-ligatures: none;
+            display: flex;
+            flex-direction: column;
+        }
+        .page-wrap {
+            padding: 0 20px;
+            flex: 1 0 auto;
+            display: flex;
+            flex-direction: column;
+            width: 100%;
+        }
+        .container {
+            max-width: 1100px;
+            margin: 0 auto;
+            flex: 1 0 auto;
+            display: flex;
+            flex-direction: column;
+            width: 100%;
+        }
+
+        /* Header */
+        header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 20px 0 10px;
+            border-bottom: 1px solid var(--border);
+            flex-wrap: wrap;
+            flex-shrink: 0;
+        }
+        .logo {
+            font-size: 28px;
+            font-weight: 700;
+            background: linear-gradient(290deg, #d235ff 0%, #a062ff 30%, #3088ff 66%, #61d8ff 100%);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            letter-spacing: -0.5px;
+        }
+        .logo span { font-weight: 300; color: var(--text-secondary); background: none; -webkit-background-clip: unset; background-clip: unset; }
+        .nav { display: flex; gap: 24px; font-size: 15px; flex-wrap: wrap; }
+        .nav a { color: var(--text-secondary); text-decoration: none; transition: color 0.2s; }
+        .nav a:hover { color: var(--text); }
+
+        /* Hero */
+        .hero {
+            padding: 60px 0 30px;
+            text-align: center;
+            position: relative;
+            flex-shrink: 0;
+        }
+        .hero-glow {
+            position: absolute;
+            top: -20%;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 800px;
+            height: 800px;
+            background: radial-gradient(circle at center, rgba(108,92,231,0.15) 0%, transparent 70%);
+            pointer-events: none;
+            z-index: 0;
+        }
+        .hero-content { position: relative; z-index: 1; }
+        .hero h1 {
+            font-size: clamp(2.4rem, 6vw, 4.2rem);
+            font-weight: 700;
+            letter-spacing: -1px;
+            margin-bottom: 16px;
+            display: inline-block;
+            background: linear-gradient(290deg, #d235ff 0%, #a062ff 30%, #3088ff 66%, #61d8ff 100%);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            line-height: 1.1;
+            text-align: center;
+        }
+        .hero h1 .ai-badge {
+            background: linear-gradient(290deg, #d235ff 0%, #a062ff 30%, #3088ff 66%, #61d8ff 100%);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+        .hero p {
+            font-size: clamp(1.1rem, 2vw, 1.4rem);
+            color: var(--text-secondary);
+            max-width: 680px;
+            margin: 0 auto 28px;
+        }
+        .hero-actions { display: flex; gap: 14px; justify-content: center; flex-wrap: wrap; }
+
+        /* Buttons */
+        .btn {
+            font-size: 17px;
+            font-weight: bold;
+            line-height: 20px;
+            padding: 16px 24px;
+            position: relative;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 26px;
+            text-decoration: none;
+            cursor: pointer;
+            border-width: 1px;
+            color: #fff;
+            transition: transform 0.2s, box-shadow 0.2s;
+            border: 1px solid transparent;
+            background: linear-gradient(180deg, var(--fill-colors)) padding-box,
+                        linear-gradient(var(--bg-color), var(--bg-color)) padding-box,
+                        linear-gradient(180deg, var(--border-colors)) border-box,
+                        linear-gradient(180deg, var(--fill-colors)) border-box;
+        }
+        .btn:hover { transform: scale(1.03); }
+        .btn::before {
+            content: '';
+            pointer-events: none;
+            position: absolute;
+            inset: -1px;
+            border-radius: 26px;
+            opacity: 0;
+            transition: opacity var(--def-transition);
+            background: #fff;
+        }
+        .btn:hover::before { opacity: 0.1; }
+
+        .btn-primary {
+            --fill-colors: rgba(159, 103, 255, .22), rgba(197, 66, 255, .35);
+            --border-colors: rgba(171, 78, 252, .82) 0%, rgba(108, 31, 198, .24) 53%, #7C45C2 100%;
+        }
+        .btn-secondary {
+            --fill-colors: rgba(31, 89, 198, .26), rgba(31, 89, 198, .26);
+            --border-colors: rgba(78, 173, 252, .61) 0%, #1F59C6 53%, #20397F 100%;
+        }
+        .btn-plan-primary {
+            --fill-colors: rgba(159, 103, 255, .22), rgba(197, 66, 255, .35);
+            --border-colors: rgba(171, 78, 252, .82) 0%, rgba(108, 31, 198, .24) 53%, #7C45C2 100%;
+        }
+        .btn-plan-secondary {
+            --fill-colors: rgba(31, 89, 198, .26), rgba(31, 89, 198, .26);
+            --border-colors: rgba(78, 173, 252, .61) 0%, #1F59C6 53%, #20397F 100%;
+        }
+        .btn-bot-primary {
+            --fill-colors: rgba(159, 103, 255, .22), rgba(197, 66, 255, .35);
+            --border-colors: rgba(171, 78, 252, .82) 0%, rgba(108, 31, 198, .24) 53%, #7C45C2 100%;
+            font-size: 18px;
+            padding: 16px 40px;
+            min-width: 200px;
+        }
+        .btn-bot-secondary {
+            --fill-colors: rgba(31, 89, 198, .26), rgba(31, 89, 198, .26);
+            --border-colors: rgba(78, 173, 252, .61) 0%, #1F59C6 53%, #20397F 100%;
+            font-size: 18px;
+            padding: 16px 40px;
+            min-width: 200px;
+        }
+
+        .btn-telegram {
+            --fill-colors: rgba(159, 103, 255, .22), rgba(197, 66, 255, .35);
+            --border-colors: rgba(171, 78, 252, .82) 0%, rgba(108, 31, 198, .24) 53%, #7C45C2 100%;
+        }
+        .btn-max {
+            --fill-colors: rgba(31, 89, 198, .26), rgba(31, 89, 198, .26);
+            --border-colors: rgba(78, 173, 252, .61) 0%, #1F59C6 53%, #20397F 100%;
+        }
+
+        /* Sections */
+        section { padding: 50px 0; border-bottom: 1px solid var(--border); flex-shrink: 0; }
+        section:last-of-type { border-bottom: none; }
+        .section-label {
+            font-size: 13px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            color: var(--accent2);
+            margin-bottom: 6px;
+            font-weight: 600;
+            text-align: left;
+        }
+        .section-title {
+            font-size: clamp(1.8rem, 3.5vw, 2.6rem);
+            font-weight: 700;
+            margin-bottom: 10px;
+            display: inline-block;
+            background: linear-gradient(290deg, #d235ff 0%, #a062ff 30%, #3088ff 66%, #61d8ff 100%);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            text-align: center;
+            width: 100%;
+        }
+        .section-desc {
+            color: var(--text-secondary);
+            max-width: 600px;
+            font-size: 1.05rem;
+            text-align: center;
+            margin-left: auto;
+            margin-right: auto;
+            margin-bottom: 30px;
+        }
+        .text-center { text-align: center; }
+        .mx-auto { margin-left: auto; margin-right: auto; }
+
+        /* Cards */
+        .grid-2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 24px; margin-top: 30px; }
+        .grid-3 { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin-top: 30px; }
+        .grid-pricing { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 28px; margin-top: 30px; }
+        .grid-tech { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 20px; margin-top: 30px; }
+
+        .card {
+            background: var(--card-bg);
+            padding: 24px 20px;
+            border-radius: var(--radius);
+            border: 1px solid var(--border);
+            transition: transform 0.2s, box-shadow 0.2s;
+            backdrop-filter: blur(4px);
+        }
+        .card:hover { transform: translateY(-4px); box-shadow: 0 8px 30px rgba(0,0,0,0.3); }
+        .card .icon { font-size: 32px; margin-bottom: 10px; display: block; }
+        .card h3 { font-size: 18px; margin-bottom: 4px; }
+        .card p { color: var(--text-secondary); font-size: 14px; }
+
+        /* Feature list */
+        .feature-list {
+            list-style: none;
+            padding: 0;
+            max-width: 900px;
+            margin: 20px auto 0;
+            text-align: left;
+        }
+        .feature-list li {
+            padding: 8px 0;
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            font-size: 16px;
+            color: var(--text-secondary);
+            border-bottom: 1px solid var(--border);
+        }
+        .feature-list li:last-child { border-bottom: none; }
+        .feature-list li::before {
+            content: "✓";
+            color: var(--accent2);
+            font-weight: 700;
+            font-size: 20px;
+            line-height: 1.4;
+        }
+
+        /* Pricing */
+        .plan {
+            background: var(--card-bg);
+            padding: 28px 20px;
+            border-radius: var(--radius);
+            border: 1px solid var(--border);
+            text-align: center;
+            transition: 0.2s;
+            position: relative;
+            backdrop-filter: blur(4px);
+            display: flex;
+            flex-direction: column;
+        }
+        .plan.popular { border-color: var(--accent); box-shadow: 0 0 30px rgba(108,92,231,0.15); }
+        .plan .badge {
+            position: absolute;
+            top: -12px;
+            right: 16px;
+            background: linear-gradient(290deg, #d235ff 0%, #a062ff 30%, #3088ff 66%, #61d8ff 100%);
+            padding: 4px 16px;
+            border-radius: 40px;
+            font-size: 12px;
+            font-weight: 600;
+            color: #fff;
+        }
+        .plan .price { font-size: 42px; font-weight: 700; margin: 12px 0 2px; }
+        .plan .price small { font-size: 16px; font-weight: 400; color: var(--text-secondary); }
+        .plan .period { color: var(--text-secondary); font-size: 14px; }
+        .plan ul { list-style: none; padding: 14px 0; text-align: left; flex: 1; }
+        .plan ul li { padding: 5px 0; display: flex; align-items: center; gap: 8px; font-size: 14px; color: var(--text-secondary); }
+        .plan ul li::before { content: "✓"; color: var(--accent2); font-weight: 700; }
+
+        .plan-actions {
+            margin-top: 12px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        .plan-actions .btn {
+            width: 100%;
+        }
+        .plan-choice {
+            display: none;
+            flex-direction: column;
+            gap: 8px;
+        }
+        .plan-choice .btn {
+            width: 100%;
+        }
+
+        /* FAQ Accordion */
+        .faq-item {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            margin-bottom: 12px;
+            overflow: hidden;
+            transition: border-color 0.2s;
+            backdrop-filter: blur(4px);
+        }
+        .faq-item:hover { border-color: var(--accent); }
+        .faq-question {
+            padding: 18px 20px;
+            font-weight: 600;
+            font-size: 17px;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            user-select: none;
+            color: var(--text);
+        }
+        .faq-question .arrow {
+            font-size: 20px;
+            transition: transform 0.3s;
+            color: var(--text-secondary);
+        }
+        .faq-item.active .faq-question .arrow { transform: rotate(180deg); }
+        .faq-answer {
+            max-height: 0;
+            padding: 0 20px;
+            overflow: hidden;
+            transition: max-height 0.3s ease, padding 0.3s ease;
+            color: var(--text-secondary);
+            font-size: 15px;
+            line-height: 1.6;
+        }
+        .faq-item.active .faq-answer {
+            max-height: 300px;
+            padding: 0 20px 18px 20px;
+        }
+
+        /* CTA Block */
+        .cta-wrapper {
+            margin-top: 80px;
+            padding-bottom: 30px;
+            position: relative;
+            flex-shrink: 0;
+        }
+        .cta-wrapper::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 10%;
+            width: 80%;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, var(--accent2), var(--accent), transparent);
+            opacity: 0.4;
+            box-shadow: 0 0 20px rgba(48,136,255,0.2);
+        }
+        .cta {
+            background: var(--card-bg);
+            border-radius: var(--radius);
+            padding: 40px 30px;
+            text-align: center;
+            border: 1px solid var(--border);
+            backdrop-filter: blur(4px);
+            box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+        }
+        .cta .btns { display: flex; gap: 16px; justify-content: center; flex-wrap: wrap; margin-top: 20px; }
+
+        /* Footer */
+        .footer-wrapper {
+            width: 100%;
+            background: var(--footer-bg);
+            border-top: 1px solid var(--border);
+            padding: 12px 0;
+            margin-top: auto;
+            flex-shrink: 0;
+        }
+        .footer-inner {
+            max-width: 1100px;
+            margin: 0 auto;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            align-items: center;
+            gap: 6px 16px;
+            font-size: 13px;
+            color: var(--text-secondary);
+            padding: 0 20px;
+        }
+        @media (min-width: 768px) {
+            .footer-inner {
+                flex-wrap: nowrap;
+                gap: 8px 20px;
+            }
+        }
+        .footer-inner a {
+            color: var(--text-secondary);
+            text-decoration: none;
+            transition: 0.2s;
+        }
+        .footer-inner a:hover { color: var(--text); }
+        .footer-inner .docs a {
+            color: var(--accent2);
+            font-weight: 500;
+        }
+        .footer-inner .docs a:hover { text-decoration: underline; }
+        .footer-inner .studio-link {
+            color: #3088ff !important;
+            font-weight: 500;
+        }
+        .footer-inner .studio-link:hover { text-decoration: underline; }
+        .footer-inner .sep {
+            color: var(--text-secondary);
+            opacity: 0.3;
+        }
+
+        /* ===== АНИМАЦИЯ ПОЯВЛЕНИЯ (замедленная) ===== */
+        [data-reveal] {
+            opacity: 0;
+            transform: translateY(40px);
+            transition: opacity 1s cubic-bezier(0.25, 0.46, 0.45, 0.94),
+                        transform 1s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+        }
+        [data-reveal].visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .ai-badge {
+            background: linear-gradient(290deg, #d235ff 0%, #a062ff 30%, #3088ff 66%, #61d8ff 100%);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+
+        /* ===== НОВЫЕ СТИЛИ ===== */
+
+        .wide-grid {
+            max-width: 1500px;
+            margin: 0 auto;
+            width: 100%;
+        }
+
+        /* Две колонки в блоке "О проекте" с премиальной стрелкой */
+        .intro-grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            justify-content: center;
+            align-items: center;
+            margin-top: 30px;
+        }
+        .intro-col {
+            flex: 1 1 280px;
+            max-width: 360px;
+            text-align: center;
+        }
+        .intro-col .intro-block {
+            background: var(--card-bg);
+            border-radius: var(--radius);
+            padding: 20px;
+            border: 1px solid var(--border);
+            backdrop-filter: blur(4px);
+        }
+        .intro-col .intro-block img {
+            width: 100%;
+            border-radius: 12px;
+            border: 1px solid var(--border);
+            box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+            background: var(--bg-color);
+            display: block;
+        }
+
+        /* Премиальная стрелка — крупная */
+        .intro-arrow {
+            font-size: 5rem;
+            font-weight: 300;
+            background: linear-gradient(290deg, #d235ff 0%, #a062ff 30%, #3088ff 66%, #61d8ff 100%);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            animation: pulse-arrow 2s ease-in-out infinite;
+            flex-shrink: 0;
+            padding: 0 20px;
+            line-height: 1;
+        }
+        @keyframes pulse-arrow {
+            0% { transform: translateX(0); opacity: 0.6; }
+            50% { transform: translateX(12px); opacity: 1; }
+            100% { transform: translateX(0); opacity: 0.6; }
+        }
+
+        /* Текст под картинками – без ограничения ширины */
+        .intro-text-below {
+            color: var(--text-secondary);
+            font-size: 1.05rem;
+            text-align: center;
+            width: 100%;
+            margin: 24px auto 0;
+            line-height: 1.6;
+        }
+
+        /* Сетка шагов – 3 шага */
+        .steps-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+            gap: 30px;
+            margin-top: 30px;
+            align-items: stretch;
+        }
+        .step-item {
+            background: var(--card-bg);
+            border-radius: var(--radius);
+            padding: 24px 20px;
+            border: 1px solid var(--border);
+            backdrop-filter: blur(4px);
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+        }
+        .step-item .step-num {
+            display: inline-block;
+            background: linear-gradient(290deg, #d235ff 0%, #a062ff 30%, #3088ff 66%, #61d8ff 100%);
+            color: #fff;
+            font-weight: 700;
+            font-size: 14px;
+            padding: 4px 14px;
+            border-radius: 40px;
+            margin-bottom: 12px;
+            align-self: center;
+        }
+        .step-item h3 {
+            font-size: 20px;
+            margin-bottom: 4px;
+        }
+        .step-item p {
+            color: var(--text-secondary);
+            font-size: 15px;
+            flex-grow: 1;
+        }
+        .step-item img {
+            width: 100%;
+            border-radius: 12px;
+            border: 1px solid var(--border);
+            box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+            background: var(--bg-color);
+            display: block;
+            margin-top: 20px;
+        }
+
+        .how-it-works-label {
+            font-size: 13px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            color: var(--accent2);
+            margin-top: 0;
+            margin-bottom: 6px;
+            font-weight: 600;
+            text-align: left;
+        }
+
+        .final-message {
+            text-align: center;
+            color: var(--text-secondary);
+            margin-top: 20px;
+            font-size: 1.05rem;
+        }
+
+        /* Разделитель внутри секции */
+        .section-divider {
+            width: 100%;
+            height: 1px;
+            background: var(--border);
+            margin: 40px 0 30px 0;
+            opacity: 0.4;
+        }
+
+        /* ===== АНИМАЦИЯ ДЛЯ ЛОГОТИПА В CTA ===== */
+        .logo-pulse {
+            animation: pulse-logo 2s ease-in-out infinite;
+        }
+        @keyframes pulse-logo {
+            0% { transform: translateY(0); opacity: 0.7; }
+            50% { transform: translateY(-12px); opacity: 1; }
+            100% { transform: translateY(0); opacity: 0.7; }
+        }
+
+        @media (max-width: 640px) {
+            header { flex-direction: column; align-items: stretch; gap: 10px; }
+            .nav { justify-content: center; gap: 14px; }
+            .hero { padding: 30px 0 10px; }
+            .hero-glow {
+                width: 100vw;
+                height: 100vw;
+                top: -10%;
+            }
+            section { padding: 30px 0; }
+            .grid-2, .grid-3, .grid-pricing, .grid-tech { grid-template-columns: 1fr; }
+            .cta .btns { flex-direction: column; align-items: center; }
+            .btn-bot-primary, .btn-bot-secondary { width: 100%; text-align: center; }
+            .footer-inner {
+                gap: 4px 8px;
+                font-size: 12px;
+                padding: 0 16px;
+                flex-wrap: wrap;
+            }
+            .intro-grid { flex-direction: column; align-items: center; }
+            .intro-col { max-width: 100%; }
+            .intro-arrow {
+                transform: rotate(90deg);
+                padding: 10px 0;
+                font-size: 4rem;
+            }
+            @keyframes pulse-arrow-vertical {
+                0% { transform: rotate(90deg) translateY(0); opacity: 0.6; }
+                50% { transform: rotate(90deg) translateY(8px); opacity: 1; }
+                100% { transform: rotate(90deg) translateY(0); opacity: 0.6; }
+            }
+            .intro-arrow {
+                animation: pulse-arrow-vertical 2s ease-in-out infinite;
+            }
+            .section-label, .how-it-works-label { text-align: center; }
+            .section-title { text-align: center; }
+            .section-desc { text-align: center; }
+            .section-divider { margin: 30px 0 20px 0; }
+            .logo-pulse {
+                animation: pulse-logo 2s ease-in-out infinite;
+            }
+            /* Анимация на мобилках тоже замедлена */
+            [data-reveal] {
+                transform: translateY(20px);
+                transition: opacity 0.8s ease-out, transform 0.8s ease-out;
+            }
+        }
+        @media (max-width: 640px) { .logo { text-align: center; } }
+    </style>
+</head>
+<body>
+    <div class="page-wrap">
+        <div class="container">
+
+            <header>
+                <a href="/landing" class="logo" style="text-decoration: none;">Мои <span>AI Новости</span></a>
+                <nav class="nav">
+                    <a href="#about">О проекте</a>
+                    <a href="#features">Возможности</a>
+                    <a href="#health">Здоровье</a>
+                    <a href="#tech">Технологии</a>
+                    <a href="#pricing">Тарифы</a>
+                    <a href="#faq">FAQ</a>
+                    <a href="#start">Начать</a>
+                    <a href="/support">Справка</a>
+                </nav>
+            </header>
+
+            <!-- ===== HERO ===== -->
+            <section class="hero" id="top">
+                <div class="hero-glow"></div>
+                <div class="hero-content">
+                    <h1>Ваш личный <span class="ai-badge">AI дайджест</span> новостей — полноценный агрегатор</h1>
+                    <p>Настройте за <strong>5 минут</strong> и получайте ежедневную подборку только того, что вам интересно — без рекламы, без шума, без лишних уведомлений. Интеллектуальная обработка с использованием искусственного интеллекта.</p>
+                    <div class="hero-actions">
+                        <a href="/pwa" class="btn btn-primary">Попробовать в Браузере</a>
+                        <a href="#about" class="btn btn-secondary">Узнать больше</a>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ===== СЕКЦИЯ «О ПРОЕКТЕ» ===== -->
+            <section id="about" data-reveal>
+                <div class="section-label">О проекте</div>
+
+                <div class="section-title">Устали от информационного шума?</div>
+                <p class="section-desc">Вы тратите часы, чтобы быть в курсе и найти нужное.</p>
+
+                <!-- Две колонки с картинками и стрелкой -->
+                <div class="intro-grid">
+                    <div class="intro-col">
+                        <div class="intro-block">
+                            <img src="/picture/1.png" alt="Информационный шум в мессенджерах" loading="lazy">
+                        </div>
+                    </div>
+                    <div class="intro-arrow">➜</div>
+                    <div class="intro-col">
+                        <div class="intro-block">
+                            <img src="/picture/04.jpg" alt="AI-пересказ обсуждений в Telegram-группе" loading="lazy">
+                        </div>
+                    </div>
+                </div>
+
+                <p class="intro-text-below">❗ «Мои AI Новости» собирает всё в один дайджест — без рекламы, без спама, только суть.</p>
+
+                <!-- ===== РАЗДЕЛИТЕЛЬ ===== -->
+                <div class="section-divider"></div>
+
+                <!-- Блок "Как это работает" и "Настройка за 5 минут" с отдельной анимацией -->
+                <div data-reveal>
+                    <div class="how-it-works-label">Как это работает</div>
+                    <h2 class="section-title" style="margin-top: 0;">Настройка за 5 минут</h2>
+                    <p class="section-desc" style="margin-bottom: 10px;">Выберите источники — и всё. Дайджест будет приходить каждый день в указанное время.</p>
+
+                    <!-- Сетка из 3 шагов -->
+                    <div class="wide-grid">
+                        <div class="steps-grid">
+                            <div class="step-item">
+                                <div class="step-num">Шаг 1</div>
+                                <h3>Добавьте источники</h3>
+                                <p>Выберите: Telegram, VK, Forbes, YouTube, RSS, Дзен, Хабр и другие.</p>
+                                <img src="/picture/02.jpg" alt="Интерфейс добавления источников в WebApp" loading="lazy">
+                            </div>
+                            <div class="step-item">
+                                <div class="step-num">Шаг 2</div>
+                                <h3>Настройте ленту</h3>
+                                <p>Выберите интересующие темы — бот пришлёт только то, что вам важно.</p>
+                                <img src="/picture/03.jpg" alt="Выбор категорий Дзен в WebApp" loading="lazy">
+                            </div>
+                            <div class="step-item">
+                                <div class="step-num">Шаг 3</div>
+                                <h3>Получайте дайджест</h3>
+                                <p>Ежедневно в удобное время вы получаете готовую ленту новостей.</p>
+                                <img src="/picture/05.jpg" alt="Готовый дайджест новостей с заголовками и ссылками" loading="lazy">
+                            </div>
+                        </div>
+                    </div>
+
+                    <p class="final-message">🌟 Больше не придётся отвлекаться на уведомления и заходить в разные источники вручную!</p>
+                </div>
+            </section>
+
+            <!-- ===== ОСТАЛЬНЫЕ СЕКЦИИ ===== -->
+            <section id="features" data-reveal>
+                <div class="section-label">Возможности</div>
+                <h2 class="section-title">Всё, что нужно для комфортного чтения</h2>
+                <ul class="feature-list">
+                    <li>Объединяет любые СМИ, Telegram-каналы/группы, VK-сообщества и RSS в одной ленте</li>
+                    <li>Без VPN и во время «белых списков» все ваши источники: Telegram, YouTube, Google, GitHub, Reddit и др.</li>
+                    <li>Автоматический перевод иностранных источников на русский с использованием нейросетей</li>
+                    <li>Интеллектуальная обработка — отбор и удаление похожих новостей из разных источников</li>
+                    <li>Единая лента новостей в вашем Telegram и MAX — как в полноценной соцсети</li>
+                    <li>Обработка сотни сообщений из групп в виде коротких тем бесед</li>
+                    <li>Блокировка рекламы, мата, смайлов, хештегов и донатов</li>
+                    <li>Выбор времени получения дайджеста или ручной запуск сбора в любое время</li>
+                    <li>Уведомления и метка непрочитанных не отвлекают в течение дня</li>
+                    <li>Готовая личная лента за последние сутки приходит 1 раз ближе к вечеру</li>
+                    <li>Экономия времени на просмотр новостей в 5–10 раз</li>
+                    <li>Удобный контроль источников в одном месте</li>
+                    <li>Пополняемый каталог готовых источников на любые темы</li>
+                    <li>Краткие тексты без картинок — только суть, как профессиональной газете</li>
+                    <li>Под каждой новостью ссылка на источник с пометкой tg, vk или url</li>
+                    <li>Скоро: фильтр «только позитивные новости» для максимальной защиты от стресса</li>
+                </ul>
+            </section>
+
+            <section id="health" data-reveal>
+                <div class="section-label">Забота о здоровье</div>
+                <h2 class="section-title">Меньше стресса, больше времени</h2>
+                <p class="section-desc">Постоянные уведомления и информационный шум — один из главных факторов тревожности. Мы помогаем вам оставаться в курсе без вреда для психики.</p>
+                <div class="grid-3">
+                    <div class="card text-center">
+                        <span class="icon">🧘</span>
+                        <h3>Снижение тревожности</h3>
+                        <p>Вы получаете новости один раз в день, а не десятки раз в час. Никаких внезапных уведомлений и стресса от «срочных» новостей.</p>
+                    </div>
+                    <div class="card text-center">
+                        <span class="icon">⏰</span>
+                        <h3>Экономия времени</h3>
+                        <p>Вместо бесконечного скроллинга вы тратите 5–10 минут в день на чтение самого важного. Освобождается время для отдыха и близких.</p>
+                    </div>
+                    <div class="card text-center">
+                        <span class="icon">🛡️</span>
+                        <h3>Защита от негатива</h3>
+                        <p>Мы блокируем рекламу, токсичные комментарии и спам. Вы читаете только проверенную информацию в спокойной обстановке.</p>
+                    </div>
+                </div>
+                <p style="text-align:center; color: var(--text-secondary); font-size: 1.1rem; margin-top: 24px;">
+                    ✨ Вы всегда знаете, когда придут новости — это создаёт приятное ожидание и позитивный настрой.
+                </p>
+            </section>
+
+            <section id="tech" data-reveal>
+                <div class="section-label">Технологии</div>
+                <h2 class="section-title">Современный стек</h2>
+                <p class="section-desc">Мы используем передовые технологии, чтобы ваш дайджест был идеальным.</p>
+                <div class="grid-tech">
+                    <div class="card text-center">
+                        <span class="icon">🤖</span>
+                        <h3>AI</h3>
+                        <p>Нейросети для перевода, блокировки рекламы, ранжирования и удаления дублей.</p>
+                    </div>
+                    <div class="card text-center">
+                        <span class="icon">⚡</span>
+                        <h3>Высокая скорость</h3>
+                        <p>Парсинг и обработка тысяч источников за секунды.</p>
+                    </div>
+                    <div class="card text-center">
+                        <span class="icon">🔒</span>
+                        <h3>Приватность</h3>
+                        <p>Ваши данные защищены, никакой рекламы и трекеров. Всё анонимно. Не собираем Cookie.</p>
+                    </div>
+                    <div class="card text-center">
+                        <span class="icon">🌐</span>
+                        <h3>Кросс-платформенность</h3>
+                        <p>Работает в Telegram, MAX и браузере — 100% пользовательский охват.</p>
+                    </div>
+                </div>
+                <p class="final-message">🚀 Максимально простая настройка пользователем — всё продумано нами заранее!</p>
+            </section>
+
+            <section data-reveal>
+                <div class="section-label">Почему мы</div>
+                <h2 class="section-title">Сделано для людей</h2>
+                <p class="section-desc">Проект родился из личной потребности — и теперь доступен каждому.</p>
+                <div class="grid-3" style="grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));">
+                    <div class="card">
+                        <span class="icon">🧠</span>
+                        <h3>Разработка с нуля</h3>
+                        <p>«Я разработал AI бота, потому что готовые решения меня не устраивали. Результат превзошёл все ожидания.» <a href="https://proid.studio/Erykov-Artem-Andreevich" target="_blank" style="color: var(--accent2);">Автор</a></p>
+                    </div>
+                    <div class="card">
+                        <span class="icon">⏱️</span>
+                        <h3>Экономия времени</h3>
+                        <p>Вы тратите на новости в 5–10 раз меньше времени, получая только самое важное.</p>
+                    </div>
+                    <div class="card">
+                        <span class="icon">🌍</span>
+                        <h3>Доступность</h3>
+                        <p>Читайте Telegram-каналы в MAX даже без VPN, а также во время «белых списков».</p>
+                    </div>
+                </div>
+                <p style="text-align:center; color: var(--text-secondary); margin-top: 20px;">
+                    ❤️ <strong>Обязательно расскажите друзьям</strong> — я открыл этот проект, чтобы помочь всем людям.
+                </p>
+            </section>
+
+            <section id="pricing" data-reveal>
+                <div class="section-label">Тарифы</div>
+                <h2 class="section-title">Выберите свой план</h2>
+                <p class="section-desc">Доступные цены для любого бюджета.</p>
+                <div class="grid-pricing">
+                    <div class="plan">
+                        <h3>Бесплатный</h3>
+                        <div class="price">0 <small>₽</small></div>
+                        <div class="period">всегда бесплатно</div>
+                        <ul>
+                            <li>До 5 источников</li>
+                            <li>Ежедневный дайджест</li>
+                            <li>AI фильтрация</li>
+                            <li>Поддержка всех типов</li>
+                        </ul>
+                        <div class="plan-actions">
+                            <a href="/pwa" class="btn btn-plan-secondary">Начать</a>
+                        </div>
+                    </div>
+                    <div class="plan">
+                        <h3>Базовый</h3>
+                        <div class="price">190 <small>₽/мес</small></div>
+                        <div class="period">или 1 900 ₽/год (экономия 20%)</div>
+                        <ul>
+                            <li>До 30 источников</li>
+                            <li>Ежедневный дайджест</li>
+                            <li>AI фильтрация</li>
+                            <li>Поддержка всех типов</li>
+                        </ul>
+                        <div class="plan-actions">
+                            <a href="/pwa" class="btn btn-plan-secondary">Выбрать</a>
+                        </div>
+                    </div>
+                    <div class="plan popular">
+                        <div class="badge">Популярный</div>
+                        <h3>Расширенный</h3>
+                        <div class="price">490 <small>₽/мес</small></div>
+                        <div class="period">или 4 900 ₽/год (экономия 20%)</div>
+                        <ul>
+                            <li>До 100 источников</li>
+                            <li>Ежедневный дайджест</li>
+                            <li>Улучшенная AI фильтрация</li>
+                            <li>Выбор времени получения</li>
+                            <li>Ручной запуск дайджеста</li>
+                        </ul>
+                        <div class="plan-actions">
+                            <a href="/pwa" class="btn btn-plan-primary">Выбрать</a>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section id="faq" data-reveal>
+                <div class="section-label">Вопросы и ответы</div>
+                <h2 class="section-title">Часто задаваемые вопросы</h2>
+                <div style="max-width: 800px; margin: 30px auto 0;">
+                    <div class="faq-item">
+                        <div class="faq-question">
+                            <span>Зачем нужен агрегатор, если есть подписки в соцсетях?</span>
+                            <span class="arrow">▼</span>
+                        </div>
+                        <div class="faq-answer">Вы больше не отвлекаетесь днём на несрочную информацию. Вместо того чтобы вылавливать новости между рекламой, вы получаете готовую ленту раз в день — и читаете всё, что важно, без лишнего шума.</div>
+                    </div>
+                    <div class="faq-item">
+                        <div class="faq-question">
+                            <span>Нужно ли отписываться от каналов после настройки?</span>
+                            <span class="arrow">▼</span>
+                        </div>
+                        <div class="faq-answer">Да, после настройки можно отписаться от каналов в соцсетях, чтобы они не отвлекали. Но не отписывайтесь от источников, за которыми нужно оперативно следить — для них оставьте подписки.</div>
+                    </div>
+                    <div class="faq-item">
+                        <div class="faq-question">
+                            <span>Какие источники можно добавить?</span>
+                            <span class="arrow">▼</span>
+                        </div>
+                        <div class="faq-answer">Любые RSS-ленты, Telegram-каналы и группы, VK-сообщества. Всё собирается в одну ленту. Кроме приватных каналов и групп.</div>
+                    </div>
+                    <div class="faq-item">
+                        <div class="faq-question">
+                            <span>Сколько это стоит?</span>
+                            <span class="arrow">▼</span>
+                        </div>
+                        <div class="faq-answer">Есть бесплатный тариф с 5 источниками. Базовый — 190 ₽/мес или 1 900 ₽/год. Расширенный — 490 ₽/мес или 4 900 ₽/год. Годовая подписка даёт экономию 20%.</div>
+                    </div>
+                    <div class="faq-item">
+                        <div class="faq-question">
+                            <span>Как часто приходит дайджест?</span>
+                            <span class="arrow">▼</span>
+                        </div>
+                        <div class="faq-answer">Один раз в день, ближе к вечеру. Всё собирается автоматически, вы ничего не пропускаете.</div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ===== CTA с логотипом и анимацией ===== -->
+            <div class="cta-wrapper" id="start" data-reveal>
+                <div class="cta">
+                    <img src="/picture/LOGO.jpg" alt="Мои AI Новости — логотип" class="logo-pulse" style="max-width: 160px; margin: 0 auto 20px; display: block; border-radius: 12px;">
+                    <h2 style="font-size: 28px; margin-bottom: 10px;">Начните прямо сейчас</h2>
+                    <p style="color: var(--text-secondary); font-size: 18px; max-width: 600px; margin: 0 auto 20px;">
+                        Попробуйте бота — и уже <b>в первый день</b> вы почувствуете разницу! Это бесплатно.
+                    </p>
+                    <div class="btns">
+                        <a href="https://t.me/My_AI_News_Aggregator_bot" class="btn btn-bot-primary">🚀 Telegram бот</a>
+                        
+                        <a href="/pwa" class="btn btn-bot-secondary" style="margin-left: 0;">🚀 Web App</a><a href="https://max.ru/id772609477460_bot" class="btn btn-bot-secondary">🚀 MAX бот</a>
+                    </div>
+                    <p style="color: var(--text-secondary); font-size: 14px; margin-top: 16px;">
+                        Работает в Telegram, MAX и браузере. Скоро приложения на iPhone и Android.
+                    </p>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- ===== ФУТЕР ===== -->
+    <div class="footer-wrapper" id="docs">
+        <div class="footer-inner">
+            <span>© 2026 Мои AI Новости</span>
+            <span class="docs">
+                <a href="/privacy" target="_blank">Политика</a>
+                <a href="/offer" target="_blank">Оферта</a>
+                <a href="/consent" target="_blank">Согласие</a>
+            </span>
+            <span class="sep">|</span>
+            <span>Проект <a href="https://proid.studio" target="_blank" class="studio-link">proid.studio</a></span>
+            <span class="sep">|</span>
+            <span>ИП Ерыков А.А. (ИНН 772609477460)</span>
+            <a href="mailto:news@proid.studio" style="color: var(--accent2);">news@proid.studio</a>
+        </div>
+    </div>
+
+    <script>
+        (function() {
+            const els = document.querySelectorAll('[data-reveal]');
+            if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+                els.forEach(el => el.classList.add('visible'));
+            } else {
+                const observer = new IntersectionObserver((entries) => {
+                    entries.forEach(entry => {
+                        if (entry.isIntersecting) {
+                            entry.target.classList.add('visible');
+                            observer.unobserve(entry.target);
+                        }
+                    });
+                }, { 
+                    threshold: 0.1,
+                    rootMargin: '0px 0px 30px 0px'
+                });
+                els.forEach(el => observer.observe(el));
+            }
+
+            document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+                anchor.addEventListener('click', function(e) {
+                    const target = document.querySelector(this.getAttribute('href'));
+                    if (target) {
+                        e.preventDefault();
+                        target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    }
+                });
+            });
+
+            document.querySelectorAll('.faq-question').forEach(q => {
+                q.addEventListener('click', function() {
+                    const item = this.parentElement;
+                    const isActive = item.classList.contains('active');
+                    document.querySelectorAll('.faq-item').forEach(el => el.classList.remove('active'));
+                    if (!isActive) item.classList.add('active');
+                });
+            });
+            document.querySelector('.faq-item')?.classList.add('active');
+
+            // Убираем обработку для btn-main, так как теперь они просто ссылки
+        })();
+    </script>
+
+<script>
+    (function() {
+        let deferredPrompt;
+        let bannerShown = false;
+        const BANNER_KEY = 'pwa_install_banner_dismissed';
+
+        // Если уже установлено — не показываем
+        if (window.matchMedia('(display-mode: standalone)').matches) {
+            return;
+        }
+
+        // Если пользователь уже закрыл баннер — не показываем
+        if (localStorage.getItem(BANNER_KEY) === 'true') {
+            return;
+        }
+
+        // Определяем iOS
+        const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+
+        // Создаём баннер
+        const installBanner = document.createElement('div');
+        installBanner.style.cssText = `
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(1, 7, 21, 0.95);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 16px;
+            padding: 16px 24px;
+            display: none;
+            align-items: center;
+            gap: 16px;
+            z-index: 9999;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.6);
+            max-width: 90%;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "Fira Sans", "Droid Sans", "Helvetica Neue", Arial, sans-serif;
+            color: #fff;
+            flex-wrap: wrap;
+            justify-content: center;
+            text-align: center;
+        `;
+        installBanner.innerHTML = `
+            <span style="font-size: 14px; font-weight: 500;">📱 ${isIOS ? 'Добавить на экран «Домой»' : 'Установить приложение'}</span>
+            <button id="installBtn" style="
+                background: linear-gradient(290deg, #d235ff 0%, #a062ff 30%, #3088ff 66%, #61d8ff 100%);
+                border: none;
+                border-radius: 40px;
+                padding: 10px 24px;
+                color: #fff;
+                font-weight: 600;
+                font-size: 14px;
+                cursor: pointer;
+                transition: transform 0.2s;
+            ">${isIOS ? 'Как установить?' : 'Установить'}</button>
+            <button id="closeInstallBanner" style="
+                background: transparent;
+                border: none;
+                color: #8a9bb5;
+                font-size: 20px;
+                cursor: pointer;
+                padding: 0 4px;
+            ">✕</button>
+        `;
+        document.body.appendChild(installBanner);
+
+        const btn = document.getElementById('installBtn');
+        const closeBtn = document.getElementById('closeInstallBanner');
+
+        // ---- Показ баннера ----
+        function showBanner() {
+            if (bannerShown) return;
+            bannerShown = true;
+            installBanner.style.display = 'flex';
+        }
+
+        // Для iOS показываем сразу (первый визит)
+        if (isIOS) {
+            showBanner();
+        }
+
+        // ---- Обработчик beforeinstallprompt (Android) ----
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredPrompt = e;
+            // Если ещё не показали (например, не iOS и событие пришло раньше таймаута)
+            if (!bannerShown) {
+                showBanner();
+            }
+        });
+
+        // Кнопка установки
+        btn.addEventListener('click', async () => {
+            if (isIOS) {
+                // iOS: показываем подсказку с инструкцией
+                alert('Нажмите кнопку «Поделиться» (квадрат со стрелкой) внизу экрана, затем выберите «На экран «Домой»».');
+                return;
+            }
+            if (deferredPrompt) {
+                deferredPrompt.prompt();
+                const result = await deferredPrompt.userChoice;
+                if (result.outcome === 'accepted') {
+                    console.log('✅ PWA установлено');
+                    installBanner.style.display = 'none';
+                    localStorage.setItem(BANNER_KEY, 'true');
+                } else {
+                    console.log('❌ Установка отклонена');
+                }
+                deferredPrompt = null;
+            }
+        });
+
+        // Закрытие баннера
+        closeBtn.addEventListener('click', () => {
+            installBanner.style.display = 'none';
+            localStorage.setItem(BANNER_KEY, 'true');
+            bannerShown = true;
+        });
+
+        // Если установка произошла через другие каналы
+        window.addEventListener('appinstalled', () => {
+            installBanner.style.display = 'none';
+            localStorage.setItem(BANNER_KEY, 'true');
+            console.log('✅ PWA установлено');
+        });
+
+        // ---- Таймаут для Android: если beforeinstallprompt не пришёл, скрываем ----
+        if (!isIOS) {
+            setTimeout(() => {
+                if (!deferredPrompt && !bannerShown) {
+                    installBanner.style.display = 'none';
+                }
+            }, 5000);
+        }
+
+    })();
+</script>
+</body>
+</html>
