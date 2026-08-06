@@ -1,0 +1,6 @@
+User-agent: *
+Disallow: /api/
+Disallow: /webapp/
+Disallow: /pwa
+Disallow: /payment/
+Allow: /
