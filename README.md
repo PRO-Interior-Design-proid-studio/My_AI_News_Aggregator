@@ -43,7 +43,6 @@
 
 - `webapp/` – все HTML-страницы, стили, скрипты, изображения и иконки.
 - `webapp/app/` – готовые установочные пакеты для Android и Windows.
-- `robots.txt` – инструкции для поисковых роботов.
 
 ## Как это работает
 
@@ -61,4 +60,4 @@
 
 ## Лицензия
 
-MIT License © 2026 [Ерыков А.А.](https://proid.studio)
+MIT License © 2026 [Ерыков А.А.](https://proid.studio/Erykov-Artem-Andreevich)
