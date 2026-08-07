@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>404 — Страница не найдена — Мои AI Новости</title>
+    <title>Технические работы — Мои AI Новости</title>
     <style>
         * { margin:0; padding:0; box-sizing:border-box; }
         :root {
@@ -68,13 +68,55 @@
             margin-bottom: 24px;
             line-height: 1.5;
         }
-        .icon-big {
-            font-size: 64px;
-            margin: 10px 0 20px;
-            display: block;
-            opacity: 0.8;
+        .loader-wrapper {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin: 10px 0 24px 0;
         }
-        .btn-home {
+        .loader-circle {
+            position: relative;
+            width: 80px;
+            height: 80px;
+        }
+        .loader-circle svg {
+            transform: rotate(-90deg);
+            width: 80px;
+            height: 80px;
+        }
+        .loader-circle .bg {
+            fill: none;
+            stroke: rgba(255,255,255,0.06);
+            stroke-width: 6;
+        }
+        .loader-circle .progress {
+            fill: none;
+            stroke-width: 6;
+            stroke-linecap: round;
+            stroke-dasharray: 226;
+            stroke-dashoffset: 226;
+            animation: spin-progress 2s ease-in-out infinite;
+            stroke: url(#gradient);
+        }
+        @keyframes spin-progress {
+            0% { stroke-dashoffset: 226; }
+            50% { stroke-dashoffset: 40; }
+            100% { stroke-dashoffset: 226; }
+        }
+        .loader-circle .icon {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 32px;
+            opacity: 0.7;
+            animation: pulse-icon 2s ease-in-out infinite;
+        }
+        @keyframes pulse-icon {
+            0%, 100% { transform: translate(-50%, -50%) scale(1); opacity: 0.7; }
+            50% { transform: translate(-50%, -50%) scale(1.1); opacity: 1; }
+        }
+        .btn-retry {
             display: inline-block;
             margin-top: 8px;
             padding: 14px 40px;
@@ -91,11 +133,11 @@
                         linear-gradient(180deg, rgba(171,78,252,.82) 0%, rgba(108,31,198,.24) 53%, #7C45C2 100%) border-box,
                         linear-gradient(180deg, rgba(159,103,255,.22), rgba(197,66,255,.35)) border-box;
         }
-        .btn-home:hover {
+        .btn-retry:hover {
             transform: scale(1.04);
             box-shadow: 0 0 30px rgba(48,136,255,0.3);
         }
-        .btn-home:active { transform: scale(0.96); }
+        .btn-retry:active { transform: scale(0.96); }
         .footer {
             margin-top: 40px;
             color: var(--text-secondary);
@@ -107,18 +149,40 @@
             .logo { font-size: 26px; }
             .title { font-size: 24px; }
             .subtitle { font-size: 16px; }
-            .icon-big { font-size: 48px; }
+            .loader-circle { width: 64px; height: 64px; }
+            .loader-circle svg { width: 64px; height: 64px; }
+            .loader-circle .icon { font-size: 26px; }
         }
     </style>
 </head>
 <body>
     <div class="container">
         <div class="logo">Мои <span>AI Новости</span></div>
-        <span class="icon-big">🔍</span>
-        <div class="title">404</div>
-        <div class="subtitle">Страница не найдена. Возможно, она была перемещена или удалена.</div>
-        <a href="/" class="btn-home">На главную</a>
+        <div class="title">Технические работы</div>
+        <div class="subtitle">Пожалуйста, подождите несколько секунд. Сервер обновляется.</div>
+        <div class="loader-wrapper">
+            <div class="loader-circle">
+                <svg viewBox="0 0 80 80">
+                    <defs>
+                        <linearGradient id="gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                            <stop offset="0%" style="stop-color:#d235ff" />
+                            <stop offset="50%" style="stop-color:#a062ff" />
+                            <stop offset="100%" style="stop-color:#3088ff" />
+                        </linearGradient>
+                    </defs>
+                    <circle class="bg" cx="40" cy="40" r="36" />
+                    <circle class="progress" cx="40" cy="40" r="36" />
+                </svg>
+                <span class="icon">⚙️</span>
+            </div>
+        </div>
+        <button class="btn-retry" onclick="location.reload()">Обновить сейчас</button>
     </div>
     <div class="footer">© 2026 Мои AI Новости</div>
+    <script>
+        setTimeout(() => {
+            location.reload();
+        }, 5000);
+    </script>
 </body>
 </html>
