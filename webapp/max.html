@@ -94,7 +94,7 @@
         @media(max-width:480px){.quick-buttons button{flex:1 0 calc(33.33% - 6px);}
         .github-grid{grid-template-columns:repeat(2,1fr);}
         .footer-inner{flex-wrap:wrap;gap:4px 8px;font-size:12px;padding:0 16px;}}
-        .payment-toggle-btn{width:100%;padding:14px;font-size:18px;font-weight:700;border-radius:var(--radius);background:linear-gradient(290deg,#d235ff 0%,#a062ff 30%,#3088ff 66%,#61d8ff 100%);color:#fff;border:none;cursor:pointer;transition:all .2s;margin:4px 0 8px;margin-top:50px;}
+        .payment-toggle-btn{width:100%;padding:14px;font-size:18px;font-weight:700;border-radius:var(--radius);background:linear-gradient(290deg,#d235ff 0%,#a062ff 30%,#3088ff 66%,#61d8ff 100%);color:#fff;border:none;cursor:pointer;transition:all .2s;margin:16px 0 8px;}
         .payment-toggle-btn:hover{opacity:.9;transform:scale(1.01);}
         .payment-toggle-btn:active{transform:scale(.98);}
         .tariff-block{display:none;margin-top:10px;animation:fadeIn .3s ease;}
@@ -136,6 +136,37 @@
         .category-grid button{flex:1 0 calc(50% - 6px);padding:8px 10px;background:var(--card-bg);border:1px solid var(--border);border-radius:12px;color:var(--text);font-size:13px;cursor:pointer;transition:all .2s;text-align:left;backdrop-filter:blur(4px);}
         .category-grid button:hover{background:linear-gradient(180deg,rgba(159,103,255,.22),rgba(197,66,255,.35)) padding-box,linear-gradient(var(--bg-color),var(--bg-color)) padding-box,linear-gradient(180deg,rgba(171,78,252,.82) 0%,rgba(108,31,198,.24) 53%,#7C45C2 100%) border-box,linear-gradient(180deg,rgba(159,103,255,.22),rgba(197,66,255,.35)) border-box;border:1px solid transparent;color:#fff;}
         .category-grid button:active{background:linear-gradient(180deg,rgba(159,103,255,.22),rgba(197,66,255,.35)) padding-box,linear-gradient(var(--bg-color),var(--bg-color)) padding-box,linear-gradient(180deg,rgba(171,78,252,.82) 0%,rgba(108,31,198,.24) 53%,#7C45C2 100%) border-box,linear-gradient(180deg,rgba(159,103,255,.22),rgba(197,66,255,.35)) border-box;border:1px solid transparent;color:#fff;transform:scale(.97);}
+
+        /* Дополнительные стили для отображения дайджеста */
+        #digestContent .status-block {
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            padding: 16px;
+            margin-bottom: 12px;
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            backdrop-filter: blur(4px);
+            list-style: none !important;
+        }
+        #digestContent .status-block * {
+            list-style: none !important;
+            padding-left: 0 !important;
+            margin-left: 0 !important;
+            text-indent: 0 !important;
+        }
+        #digestContent .status-block a {
+            background: linear-gradient(290deg, #d235ff 0%, #a062ff 30%, #3088ff 66%, #61d8ff 100%);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            text-decoration: none;
+            font-weight: 500;
+        }
+        #digestContent .status-block a:hover {
+            text-decoration: underline;
+            opacity: 0.8;
+        }
     </style>
 </head>
 <body>
@@ -154,11 +185,11 @@
                 <button onclick="openAddForm('rss')">RSS/HTML</button>
                 <button onclick="openAddForm('telegram')">Telegram</button>
                 <button onclick="openAddForm('vk')">VK</button>
-                <button onclick="openGitHubForm()">GitHub</button>
-                <button onclick="openYouTubeForm()">YouTube</button>
-                <button onclick="openRedditForm()">Reddit</button>
+                <button onclick="toggleGitHubForm()">GitHub</button>
+                <button onclick="toggleYouTubeForm()">YouTube</button>
+                <button onclick="toggleRedditForm()">Reddit</button>
                 <button onclick="toggleCategoryForm('bbc')">BBC</button>
-                <button onclick="openGoogleNewsForm()">Google News</button>
+                <button onclick="toggleGoogleNewsForm()">Google News</button>
                 <button onclick="toggleCategoryForm('cnn')">CNN</button>
             </div>
 
@@ -272,6 +303,13 @@
                 <button class="btn-secondary" id="categoryBackBtn" style="display: none; margin-top: 8px; width: 100%;" onclick="goBackLevel()">← Назад</button>
             </div>
 
+            <!-- === НОВАЯ КНОПКА И БЛОК ДЛЯ ДАЙДЖЕСТА === -->
+            <button class="payment-toggle-btn" id="digestToggleBtn" onclick="toggleDigest()">📰 Смотреть новости</button>
+            <div id="digestContainer" style="display: none; margin-top: 0;">
+                <div id="digestContent"></div>
+            </div>
+            <!-- ============================================ -->
+
             <div class="section-header">Мои источники (<span id="counter">0</span>)</div>
             <div id="sourceListContainer"></div>
 
@@ -353,6 +391,7 @@
     <script src="/webapp/categories.js?v=50"></script>
     <script>
         let currentSources=[],currentLimit=5,currentAddType='rss',currentSendTime=null,isPremium=false,defaultSendHour=18;
+        let digestVisible = false;
         const CATEGORY_CACHE_TTL=3600000;
 
         function hapticFeedback(){if(navigator.vibrate)navigator.vibrate(10);if(window.WebApp&&window.WebApp.HapticFeedback)window.WebApp.HapticFeedback.impactOccurred('light');}
@@ -367,6 +406,20 @@
             });
         }
 
+        function getAuthHeaders(){
+            const initData=localStorage.getItem('max_init_data');
+            if(initData)return{'Content-Type':'application/json','X-MAX-Init-Data':initData};
+            return{'Content-Type':'application/json'};
+        }
+
+        function getHeaders(){
+            const token = localStorage.getItem('auth_token');
+            return {
+                'Content-Type':'application/json',
+                ...(token ? { 'X-Auth-Token': token } : {})
+            };
+        }
+
         function getIconGradient(type){
             switch(type){
                 case'telegram':return'linear-gradient(290deg,#d235ff 0%,#a062ff 30%,#3088ff 66%,#61d8ff 100%)';
@@ -375,18 +428,6 @@
                 case'max':return'linear-gradient(290deg,#004d40 0%,#00897b 30%,#26a69a 66%,#80cbc4 100%)';
                 default:return'linear-gradient(290deg,#d235ff 0%,#a062ff 30%,#3088ff 66%,#61d8ff 100%)';
             }
-        }
-
-        function askOpenLink(url){
-            hapticFeedback();
-            if(!window.WebApp){if(confirm('Открыть ссылку?\n\n'+url))window.open(url,'_blank');return;}
-            if(window.WebApp.showPopup){
-                window.WebApp.showPopup({
-                    title:'Открыть ссылку?',
-                    message:url,
-                    buttons:[{id:'cancel',type:'cancel',text:'Отмена'},{id:'open',type:'default',text:'Открыть'}]
-                },function(btnId){if(btnId==='open'){if(window.WebApp.openLink)window.WebApp.openLink(url);else window.open(url,'_blank');}});
-            }else{if(confirm('Открыть ссылку?\n\n'+url)){if(window.WebApp.openLink)window.WebApp.openLink(url);else window.open(url,'_blank');}}
         }
 
         function getTypeLabel(type){const m={'rss':'RSS/HTML','telegram':'Telegram','vk':'VK','max':'MAX'};return m[type]||type;}
@@ -406,10 +447,16 @@
             return u;
         }
 
-        function getAuthHeaders(){
-            const initData=localStorage.getItem('max_init_data');
-            if(initData)return{'Content-Type':'application/json','X-MAX-Init-Data':initData};
-            return{'Content-Type':'application/json'};
+        function askOpenLink(url){
+            hapticFeedback();
+            if(!window.WebApp){if(confirm('Открыть ссылку?\n\n'+url))window.open(url,'_blank');return;}
+            if(window.WebApp.showPopup){
+                window.WebApp.showPopup({
+                    title:'Открыть ссылку?',
+                    message:url,
+                    buttons:[{id:'cancel',type:'cancel',text:'Отмена'},{id:'open',type:'default',text:'Открыть'}]
+                },function(btnId){if(btnId==='open'){if(window.WebApp.openLink)window.WebApp.openLink(url);else window.open(url,'_blank');}});
+            }else{if(confirm('Открыть ссылку?\n\n'+url)){if(window.WebApp.openLink)window.WebApp.openLink(url);else window.open(url,'_blank');}}
         }
 
         function updateStatus(data){
@@ -677,45 +724,50 @@
             .catch(err=>showAddError(err));
         }
 
-        function addForbesTelegram(){
+        function addForbesTelegram() {
             hapticFeedback();
-            if(window.WebApp&&window.WebApp.showPopup){
-                window.WebApp.showPopup({
-                    title:"Подтверждение",
-                    message:"Добавить источник Forbes (Telegram-канал @forbesrussia)?",
-                    buttons:[{id:"cancel",type:"cancel",text:"Отмена"},{id:"confirm",type:"default",text:"Добавить"}]
-                },function(btnId){if(btnId==="confirm")addCategorySource("telegram","forbesrussia","Forbes (Telegram)");});
-            }else{if(confirm("Добавить источник Forbes (Telegram-канал @forbesrussia)?"))addCategorySource("telegram","forbesrussia","Forbes (Telegram)");}
+            addCategorySource("telegram", "forbesrussia", "Forbes (Telegram)");
         }
 
         function openAddForm(type){
             hapticFeedback();
-            currentAddType=type;
-            const form=document.getElementById('addForm');
-            const title=document.getElementById('addFormTitle');
-            const labels={'rss':'RSS/HTML','telegram':'Telegram','vk':'VK'};
-            title.textContent='Добавить '+labels[type];
-            const input=document.getElementById('sourceValue');
-            input.placeholder=type==='rss'?'Введите URL...':(type==='telegram'?'Введите username (без @)...':'Введите username (без @)...');
-            input.value='';
-            document.querySelectorAll('.category-form, .add-form').forEach(f=>f.style.display='none');
-            form.style.display='block';
+            const form = document.getElementById('addForm');
+            const isVisible = form.style.display === 'block';
+            const currentType = currentAddType;
+            if (isVisible && currentType === type) {
+                form.style.display = 'none';
+                return;
+            }
+            currentAddType = type;
+            const title = document.getElementById('addFormTitle');
+            const labels = {'rss':'RSS/HTML','telegram':'Telegram','vk':'VK'};
+            title.textContent = 'Добавить ' + labels[type];
+            const input = document.getElementById('sourceValue');
+            input.placeholder = type === 'rss' ? 'Введите URL...' : (type === 'telegram' ? 'Введите username (без @)...' : 'Введите username (без @)...');
+            input.value = '';
+            document.querySelectorAll('.category-form, .add-form').forEach(f => f.style.display = 'none');
+            form.style.display = 'block';
         }
         function closeAddForm(){document.getElementById('addForm').style.display='none';}
 
-        function openGitHubForm() {
-    hapticFeedback();
-    document.querySelectorAll('.category-form, .add-form').forEach(f => f.style.display = 'none');
-    document.getElementById('githubForm').style.display = 'block';
-    updateGitHubButtons('');
-    // === ДОБАВЛЕНО: обработчик ввода ===
-    const input = document.getElementById('githubInput');
-    input.removeEventListener('input', window._githubInputHandler);
-    window._githubInputHandler = function() {
-        updateGitHubButtons(this.value);
-    };
-    input.addEventListener('input', window._githubInputHandler);
-}
+        function toggleGitHubForm() {
+            hapticFeedback();
+            const form = document.getElementById('githubForm');
+            const isHidden = window.getComputedStyle(form).display === 'none';
+            document.querySelectorAll('.category-form, .add-form').forEach(f => f.style.display = 'none');
+            if (isHidden) {
+                form.style.display = 'block';
+                updateGitHubButtons('');
+                const input = document.getElementById('githubInput');
+                input.removeEventListener('input', window._githubInputHandler);
+                window._githubInputHandler = function() {
+                    updateGitHubButtons(this.value);
+                };
+                input.addEventListener('input', window._githubInputHandler);
+            } else {
+                form.style.display = 'none';
+            }
+        }
         function closeGitHubForm(){document.getElementById('githubForm').style.display='none';}
         function updateGitHubButtons(v){const grid=document.getElementById('githubGrid');const btns=grid.querySelectorAll('button');const hasSlash=v&&v.includes('/');btns.forEach(btn=>{const type=btn.dataset.type;if(type==='username')btn.disabled=!v||!v.trim();else btn.disabled=!(hasSlash&&v.trim());});}
         function generateGitHubRSS(type){
@@ -730,7 +782,17 @@
             confirmAddSource(url,display);
         }
 
-        function openYouTubeForm(){hapticFeedback();document.querySelectorAll('.category-form, .add-form').forEach(f=>f.style.display='none');document.getElementById('youtubeForm').style.display='block';}
+        function toggleYouTubeForm() {
+            hapticFeedback();
+            const form = document.getElementById('youtubeForm');
+            const isHidden = window.getComputedStyle(form).display === 'none';
+            document.querySelectorAll('.category-form, .add-form').forEach(f => f.style.display = 'none');
+            if (isHidden) {
+                form.style.display = 'block';
+            } else {
+                form.style.display = 'none';
+            }
+        }
         function closeYouTubeForm(){document.getElementById('youtubeForm').style.display='none';}
         async function generateYouTubeRSS(){
             hapticFeedback();
@@ -756,7 +818,17 @@
             }catch(err){alert('Ошибка: '+err.message);}
         }
 
-        function openRedditForm(){hapticFeedback();document.querySelectorAll('.category-form, .add-form').forEach(f=>f.style.display='none');document.getElementById('redditForm').style.display='block';}
+        function toggleRedditForm() {
+            hapticFeedback();
+            const form = document.getElementById('redditForm');
+            const isHidden = window.getComputedStyle(form).display === 'none';
+            document.querySelectorAll('.category-form, .add-form').forEach(f => f.style.display = 'none');
+            if (isHidden) {
+                form.style.display = 'block';
+            } else {
+                form.style.display = 'none';
+            }
+        }
         function closeRedditForm(){document.getElementById('redditForm').style.display='none';}
         function generateRedditRSS(){
             hapticFeedback();
@@ -770,7 +842,17 @@
             confirmAddSource(url,'Reddit (r/'+subreddit+')');
         }
 
-        function openGoogleNewsForm(){hapticFeedback();document.querySelectorAll('.category-form, .add-form').forEach(f=>f.style.display='none');document.getElementById('googleNewsForm').style.display='block';}
+        function toggleGoogleNewsForm() {
+            hapticFeedback();
+            const form = document.getElementById('googleNewsForm');
+            const isHidden = window.getComputedStyle(form).display === 'none';
+            document.querySelectorAll('.category-form, .add-form').forEach(f => f.style.display = 'none');
+            if (isHidden) {
+                form.style.display = 'block';
+            } else {
+                form.style.display = 'none';
+            }
+        }
         function closeGoogleNewsForm(){document.getElementById('googleNewsForm').style.display='none';}
         function generateGoogleNewsRSS(){
             hapticFeedback();
@@ -932,6 +1014,112 @@
             else{console.warn('Добавление источника типа '+type+' пока не реализовано, добавляем как RSS');addRSSSource(url,name);}
         }
 
+        // ===== НОВАЯ ФУНКЦИЯ "СМОТРЕТЬ НОВОСТИ" (с удалением лишних пустых строк) =====
+        async function toggleDigest() {
+            const container = document.getElementById('digestContainer');
+            const content = document.getElementById('digestContent');
+            if (digestVisible) {
+                container.style.display = 'none';
+                digestVisible = false;
+                return;
+            }
+            container.style.display = 'block';
+            digestVisible = true;
+            content.innerHTML = '<div style="text-align:center; padding:20px; color: var(--text-secondary);">⏳ Загрузка...</div>';
+
+            try {
+                const headers = getAuthHeaders();
+                const resp = await apiRequest('/api/webapp/max/digest', { headers: headers });
+                if (!resp) return;
+                if (!resp.ok) {
+                    const err = await resp.json();
+                    content.innerHTML = `<div style="color: #ff6b6b; text-align:center; padding:20px;">❌ Ошибка: ${err.detail || 'Не удалось загрузить дайджест'}</div>`;
+                    return;
+                }
+                const data = await resp.json();
+                let digestHtml = data.digest;
+
+                if (!digestHtml || digestHtml.trim() === '' || digestHtml.includes('Дайджест ещё не формировался')) {
+                    content.innerHTML = `<div style="text-align:center; padding:20px; color: var(--text-secondary);">📭 Дайджест ещё не формировался. Запустите сбор вручную или дождитесь автоматического.</div>`;
+                    return;
+                }
+
+                digestHtml = digestHtml.replace(/[\x00-\x1F\x7F-\x9F\u200B\u200C\u200D\uFEFF\u2028\u2029\r]/g, '');
+
+                let blocks = digestHtml.split(/(?=\n- <b>)/).filter(b => b.trim().length > 0);
+                if (blocks.length <= 1) {
+                    blocks = digestHtml.split(/(?=\n-)/).filter(b => b.trim().length > 0);
+                }
+                if (blocks.length <= 1) {
+                    blocks = digestHtml.split(/(?=- <b>)/).filter(b => b.trim().length > 0);
+                    if (blocks[0] && blocks[0].trim() === '') blocks.shift();
+                }
+                blocks = blocks.map(b => b.startsWith('\n') ? b.slice(1) : b);
+
+                let html = '';
+                for (let block of blocks) {
+                    let lines = block.split('\n');
+                    lines = lines.map(line => line.replace(/^[\s\u00A0]+/, ''));
+                    while (lines.length > 0 && lines[0].trim() === '') lines.shift();
+                    while (lines.length > 0 && lines[lines.length - 1].trim() === '') lines.pop();
+
+                    let cleanedBlock = lines.join('\n');
+
+                    // Определяем, является ли блок суммаризацией
+                    let isSummary = cleanedBlock.indexOf('<b>Обсуждения в ') !== -1;
+
+                    // Добавляем принудительные переносы (для всех)
+                    if (cleanedBlock.includes('</b>')) {
+                        cleanedBlock = cleanedBlock.replace(/(<\/b>)(?!\n)/, '$1\n');
+                    }
+                    if (cleanedBlock.includes('<a href')) {
+                        cleanedBlock = cleanedBlock.replace(/(?!\n)(<a href)/, '\n$1');
+                    }
+
+                    // Обработка суммаризаций: расставляем пустые строки между пунктами
+                    if (isSummary) {
+                        let summaryStart = cleanedBlock.indexOf('<b>Обсуждения в ');
+                        if (summaryStart !== -1) {
+                            let closeBpos = cleanedBlock.indexOf('</b>', summaryStart);
+                            if (closeBpos !== -1) {
+                                let linkStart = cleanedBlock.indexOf('<a href', closeBpos);
+                                if (linkStart === -1) linkStart = cleanedBlock.length;
+                                let before = cleanedBlock.slice(0, closeBpos + 4);
+                                let body = cleanedBlock.slice(closeBpos + 4, linkStart);
+                                let after = cleanedBlock.slice(linkStart);
+                                let parts = body.split(/\s*-\s*/).filter(p => p.trim() !== '');
+                                if (parts.length > 1) {
+                                    let first = parts[0].trim();
+                                    let rest = parts.slice(1).map(p => '- ' + p.trim()).join('\n\n- ');
+                                    let newBody = first + '\n\n' + rest;
+                                    cleanedBlock = before + newBody + after;
+                                }
+                            }
+                        }
+                    } else {
+                        // Для обычных новостей удаляем все лишние пустые строки (два и более переноса подряд)
+                        cleanedBlock = cleanedBlock.replace(/\n{2,}/g, '\n');
+                    }
+
+                    if (cleanedBlock) {
+                        html += `<div class="status-block">${cleanedBlock}</div>`;
+                    }
+                }
+
+                if (html) {
+                    content.innerHTML = html;
+                    content.querySelectorAll('a').forEach(link => link.target = '_blank');
+                } else {
+                    content.innerHTML = `<div style="text-align:center; padding:20px; color: var(--text-secondary);">📭 Новости не найдены.</div>`;
+                }
+
+            } catch (e) {
+                console.error('Ошибка в toggleDigest:', e);
+                content.innerHTML = `<div style="color: #ff6b6b; text-align:center; padding:20px;">❌ Ошибка: ${e.message}</div>`;
+            }
+        }
+        // ============================================================
+
         (function(){
             const appContainer=document.getElementById('appContainer');
             if(typeof window.WebApp==='undefined'){document.body.innerHTML='<div style="text-align:center;padding:40px;color:#aaa;">❌ MAX Bridge не найден. Откройте страницу через MAX-бота.</div>';return;}
@@ -974,16 +1162,16 @@
         window.closeTimePicker=closeTimePicker;
         window.setTime=setTime;
         window.suggestSource=suggestSource;
-        window.openGitHubForm=openGitHubForm;
+        window.toggleGitHubForm=toggleGitHubForm;
         window.closeGitHubForm=closeGitHubForm;
         window.generateGitHubRSS=generateGitHubRSS;
-        window.openYouTubeForm=openYouTubeForm;
+        window.toggleYouTubeForm=toggleYouTubeForm;
         window.closeYouTubeForm=closeYouTubeForm;
         window.generateYouTubeRSS=generateYouTubeRSS;
-        window.openRedditForm=openRedditForm;
+        window.toggleRedditForm=toggleRedditForm;
         window.closeRedditForm=closeRedditForm;
         window.generateRedditRSS=generateRedditRSS;
-        window.openGoogleNewsForm=openGoogleNewsForm;
+        window.toggleGoogleNewsForm=toggleGoogleNewsForm;
         window.closeGoogleNewsForm=closeGoogleNewsForm;
         window.generateGoogleNewsRSS=generateGoogleNewsRSS;
         window.toggleCategoryBrowser=toggleCategoryBrowser;
@@ -995,6 +1183,7 @@
         window.showCategoryGrid=showCategoryGrid;
         window.sortItems=sortItems;
         window.shortenCategoryName=shortenCategoryName;
+        window.toggleDigest = toggleDigest;
     </script>
 </body>
 </html>
