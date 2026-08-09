@@ -155,7 +155,18 @@ body{font-family:-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, 
 @keyframes spin{to{transform:rotate(360deg);}}
 .hidden{display:none !important;}
 
-/* Стили для карточек */
+/* ===== БЛОКИРОВКА ИНТЕРФЕЙСА ДО ПРИНЯТИЯ СОГЛАСИЯ ===== */
+.consent-pending #appScreen > *:not(#consentBlock) {
+    pointer-events: none;
+    opacity: 0.5;
+}
+.consent-pending #consentBlock {
+    pointer-events: auto;
+    opacity: 1;
+}
+/* ===== КОНЕЦ БЛОКИРОВКИ ===== */
+
+/* Стили для отображения дайджеста */
 #digestContent .status-block {
     white-space: pre-wrap;
     word-wrap: break-word;
@@ -193,7 +204,6 @@ body{font-family:-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, 
 <div id="loginScreen">
 <div class="header"><h1>Мои AI Новости</h1></div>
 <div class="auth-container">
-    <!-- КНОПКИ ВХОДА С onclick - ГАРАНТИРОВАННАЯ РАБОТА -->
     <button class="auth-btn telegram" id="botLoginBtn" onclick="startBotAuth()"><span class="icon">🚀</span> Войти через Telegram</button>
     <button class="auth-btn max" id="maxLoginBtn" onclick="startMaxAuth()"><span class="icon">🚀</span> Войти через MAX</button>
     <p class="small-note">*аккаунт будет привязан к одному методу входа</p>
@@ -202,6 +212,29 @@ body{font-family:-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, 
 </div>
 <div id="appScreen" class="hidden">
 <div class="header"><h1>Мои AI Новости</h1></div>
+
+<!-- Блок конфиденциальности (всегда отображается, если согласие не дано или тестовый пользователь) -->
+<div class="status-block" id="consentBlock" style="display: none;">
+    <div class="status-title">Конфиденциальность</div>
+    <p style="color: var(--text-secondary); font-size: 14px; margin-bottom: 12px; line-height: 1.6;">
+        Для работы приложения необходимо ваше согласие на обработку персональных данных.
+        Мы собираем минимальный набор данных (идентификатор в Telegram/MAX, IP-адрес, технические параметры) для предоставления сервиса.
+        Ваши данные не передаются третьим лицам и не используются для рекламы.
+        Подробнее в <a href="/privacy" target="_blank" style="color: var(--accent2);">Политике обработки персональных данных</a>.
+    </p>
+    <div style="display: flex; align-items: flex-start; gap: 12px; margin: 12px 0;">
+        <input type="checkbox" id="consentCheck" style="width: 20px; height: 20px; margin-top: 2px; flex-shrink: 0; accent-color: var(--accent2); cursor: pointer;">
+        <label for="consentCheck" style="color: var(--text-secondary); font-size: 14px; line-height: 1.5; cursor: pointer;">
+            Я ознакомлен(а) и согласен(на) с условиями обработки персональных данных
+        </label>
+    </div>
+    <button id="consentAcceptBtn" disabled style="width: 100%; padding: 12px; background: linear-gradient(290deg, #d235ff 0%, #a062ff 30%, #3088ff 66%, #61d8ff 100%); border: none; border-radius: 12px; color: #fff; font-weight: 600; font-size: 16px; cursor: pointer; transition: opacity .2s; opacity: 0.5; pointer-events: none;">
+        Принимаю
+    </button>
+</div>
+
+<!-- Остальной контент (будет заблокирован, если consent-pending) -->
+<div id="appContent">
 <div class="section-header">Добавить</div>
 <div class="quick-buttons" id="quickButtons">
 <button onclick="toggleCategoryForm('dzen')">Дзен</button>
@@ -320,7 +353,8 @@ body{font-family:-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, 
 <button class="close-picker-btn" onclick="closeTimePicker()">Закрыть</button>
 </div>
 </div>
-</div>
+</div> <!-- /appContent -->
+</div> <!-- /appScreen -->
 </div>
 </div>
 <div class="footer-wrapper">
@@ -338,8 +372,20 @@ body{font-family:-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, 
 </div>
 <script src="/webapp/categories.js?v=50"></script>
 <script>
-// ===== ВСЕ ОСНОВНЫЕ ФУНКЦИИ =====
-let currentSources=[],currentLimit=5,currentAddType='rss',currentSendTime=null,isPremium=false,defaultSendHour=18,authToken=localStorage.getItem('auth_token')||null;
+// ===== КОНСТАНТЫ =====
+const TEST_TOKEN = 'vol7Js5SZnjPuaTfkk46zea3I-k_vsInqyqQPho_dF0';
+
+// ===== ГЛОБАЛЬНЫЕ ПЕРЕМЕННЫЕ =====
+let currentSources = [];
+let currentLimit = 5;
+let currentAddType = 'rss';
+let currentSendTime = null;
+let isPremium = false;
+let defaultSendHour = 18;
+let authToken = localStorage.getItem('auth_token') || null;
+let isTestUser = false;
+let consentGiven = false;
+
 function hapticFeedback(){if(navigator.vibrate)navigator.vibrate(10);}
 (function(){const p=new URLSearchParams(window.location.search);const t=p.get('auth_token');if(t){try{localStorage.setItem('auth_token',t);}catch(e){sessionStorage.setItem('auth_token',t);}
 window.history.replaceState({},document.title,window.location.pathname);authToken=t;if(document.readyState==='complete')loadApp();else window.addEventListener('load',function onLoad(){loadApp();window.removeEventListener('load',onLoad);});}})();
@@ -348,10 +394,117 @@ function showLoginScreen(){document.getElementById('loginScreen').style.display=
 function showAppScreen(){document.getElementById('loginScreen').style.display='none';document.getElementById('appScreen').classList.remove('hidden');}
 async function apiRequest(url,options={}){try{const resp=await fetch(url,options);if(resp.status===503){alert('⚠️ Сервер временно недоступен. Пожалуйста, обновите страницу через несколько секунд.');return null;}
 return resp;}catch(err){throw err;}}
-async function loadApp(){if(!authToken){showLoginScreen();return;}
-const headers=getHeaders();try{const resp=await apiRequest('/api/webapp/sources',{headers});if(!resp)return;if(!resp.ok){if(resp.status===401||resp.status===403){document.getElementById('sourceListContainer').innerHTML='<div class="empty-state"><div class="empty-icon">🔒</div><h3>Ошибка авторизации</h3><p>Попробуйте обновить страницу или перелогиниться.</p></div>';showAppScreen();return;}
-const err=await resp.json();throw new Error(err.detail||'Ошибка загрузки');}
-const data=await resp.json();showAppScreen();currentSources=data.sources||[];currentLimit=data.limit||5;renderGroupedSources(currentSources);document.getElementById('counter').textContent=currentSources.length;updateStatus(data);document.getElementById('quickButtons').style.display='flex';document.getElementById('paymentToggleBtn').style.display='block';}catch(err){document.getElementById('sourceListContainer').innerHTML='<div class="empty-state"><div class="empty-icon">⚠️</div><h3>Ошибка загрузки</h3><p>'+err.message+'</p></div>';showAppScreen();}}
+
+// ===== ПРОВЕРКА СОГЛАСИЯ ВО ВСЕХ ДЕЙСТВИЯХ =====
+function ensureConsent() {
+    if (!consentGiven && !isTestUser) {
+        alert('Сначала примите согласие на обработку данных.');
+        return false;
+    }
+    return true;
+}
+
+// ===== ЗАГРУЗКА ПРИЛОЖЕНИЯ =====
+async function loadApp(){
+    if(!authToken){showLoginScreen();return;}
+    const headers=getHeaders();
+    try{
+        const resp=await apiRequest('/api/webapp/sources',{headers});
+        if(!resp)return;
+        if(!resp.ok){
+            if(resp.status===401||resp.status===403){
+                document.getElementById('sourceListContainer').innerHTML='<div class="empty-state"><div class="empty-icon">🔒</div><h3>Ошибка авторизации</h3><p>Попробуйте обновить страницу или перелогиниться.</p></div>';
+                showAppScreen();return;
+            }
+            const err=await resp.json();throw new Error(err.detail||'Ошибка загрузки');
+        }
+        const data=await resp.json();
+        showAppScreen();
+        currentSources=data.sources||[];
+        currentLimit=data.limit||5;
+        renderGroupedSources(currentSources);
+        document.getElementById('counter').textContent=currentSources.length;
+        updateStatus(data);
+
+        // === УПРАВЛЕНИЕ СОГЛАСИЕМ ===
+        const appScreen = document.getElementById('appScreen');
+        const consentBlock = document.getElementById('consentBlock');
+
+        // Явно определяем тестового пользователя: по токену или по id из ответа
+        isTestUser = (authToken === TEST_TOKEN) || (data.user_id === 0);
+        consentGiven = data.consent_given === true;
+
+        console.log('🔍 isTestUser:', isTestUser, 'consentGiven:', consentGiven, 'user_id:', data.user_id);
+
+        if (!consentGiven || isTestUser) {
+            consentBlock.style.display = 'block';
+            appScreen.classList.add('consent-pending');
+            window.TEST_MODE = isTestUser;
+        } else {
+            consentBlock.style.display = 'none';
+            appScreen.classList.remove('consent-pending');
+            window.TEST_MODE = false;
+        }
+
+        document.getElementById('quickButtons').style.display='flex';
+        document.getElementById('paymentToggleBtn').style.display='block';
+    }catch(err){
+        document.getElementById('sourceListContainer').innerHTML='<div class="empty-state"><div class="empty-icon">⚠️</div><h3>Ошибка загрузки</h3><p>'+err.message+'</p></div>';
+        showAppScreen();
+    }
+}
+
+// ===== ОБРАБОТЧИК КНОПКИ "ПРИНИМАЮ" =====
+document.addEventListener('DOMContentLoaded', function() {
+    const check = document.getElementById('consentCheck');
+    const btn = document.getElementById('consentAcceptBtn');
+    if (check && btn) {
+        check.addEventListener('change', function() {
+            if (this.checked) {
+                btn.disabled = false;
+                btn.style.opacity = '1';
+                btn.style.pointerEvents = 'auto';
+            } else {
+                btn.disabled = true;
+                btn.style.opacity = '0.5';
+                btn.style.pointerEvents = 'none';
+            }
+        });
+        btn.addEventListener('click', async function() {
+            if (!check.checked) return;
+            const appScreen = document.getElementById('appScreen');
+            const consentBlock = document.getElementById('consentBlock');
+            // Тестовый режим: просто скрываем блок и разблокируем
+            if (window.TEST_MODE) {
+                consentBlock.style.display = 'none';
+                appScreen.classList.remove('consent-pending');
+                // consentGiven остаётся false, но isTestUser true, поэтому проверки будут пропускать
+                return;
+            }
+            // Обычный пользователь: отправляем запрос
+            try {
+                const resp = await fetch('/api/webapp/consent', {
+                    method: 'POST',
+                    headers: getHeaders()
+                });
+                if (resp.ok) {
+                    consentBlock.style.display = 'none';
+                    appScreen.classList.remove('consent-pending');
+                    consentGiven = true;
+                    // Обновляем данные, чтобы обновить статус
+                    await loadApp();
+                } else {
+                    const err = await resp.json();
+                    alert('❌ Ошибка: ' + (err.detail || 'Не удалось сохранить согласие'));
+                }
+            } catch (e) {
+                alert('❌ Ошибка: ' + e.message);
+            }
+        });
+    }
+});
+
+// ===== ОСТАЛЬНЫЕ ФУНКЦИИ (с проверкой согласия) =====
 function getTypeLabel(t){const m={'rss':'RSS/HTML','telegram':'Telegram','vk':'VK','max':'MAX'};return m[t]||t;}
 function truncate(s,l){l=l||40;return s.length>l?s.slice(0,l)+'…':s;}
 function safeDecodeUrl(u){try{return decodeURIComponent(u);}catch(e){return u;}}
@@ -415,10 +568,12 @@ function renderGroupedSources(sources) {
 
 function getIconGradient(t){switch(t){case'telegram':return'linear-gradient(290deg,#d235ff 0%,#a062ff 30%,#3088ff 66%,#61d8ff 100%)';case'vk':return'linear-gradient(290deg,#0d47a1 0%,#1565c0 30%,#1e88e5 66%,#64b5f6 100%)';case'rss':return'linear-gradient(290deg,#d84315 0%,#f57c00 30%,#f9a825 66%,#ffee58 100%)';default:return'linear-gradient(290deg,#d235ff 0%,#a062ff 30%,#3088ff 66%,#61d8ff 100%)';}}
 function updateStatus(d){document.getElementById('statusTariff').textContent=d.tariff_name||'—';document.getElementById('statusSources').textContent=d.used||0;document.getElementById('statusLimit').textContent=d.limit||5;document.getElementById('statusAutoSend').textContent='✅';document.getElementById('statusLastSent').textContent=d.last_sent||'—';document.getElementById('statusExpires').textContent=d.expires_at||'—';isPremium=d.is_premium||false;defaultSendHour=d.default_send_hour||18;currentSendTime=d.send_time||null;const display=currentSendTime?currentSendTime:(defaultSendHour.toString().padStart(2,'0')+':00');document.getElementById('currentTimeDisplay').textContent=display+' MSK';const btn=document.getElementById('changeTimeBtn');const hint=document.getElementById('upgradeHint');if(isPremium){btn.style.display='inline-block';btn.disabled=false;hint.style.display='none';}else{btn.style.display='none';hint.style.display='inline-block';if(document.getElementById('timePicker').style.display!=='none')closeTimePicker();}}
+
 function confirmDelete(id){hapticFeedback();const s=currentSources.find(s=>s.id===id);if(!s){alert('Источник не найден');return;}
 const f=formatSourceValue(s);if(window.confirm('Удалить источник?\n\n'+f+'\n\nЭто действие нельзя отменить.'))deleteSource(id);}
-async function deleteSource(id){try{const resp=await apiRequest('/api/webapp/delete',{method:'POST',headers:getHeaders(),body:JSON.stringify({source_id:id})});if(!resp)return;if(!resp.ok){const err=await resp.json();alert('❌ Ошибка удаления: '+err.detail);return;}
+async function deleteSource(id){if(!ensureConsent())return; try{const resp=await apiRequest('/api/webapp/delete',{method:'POST',headers:getHeaders(),body:JSON.stringify({source_id:id})});if(!resp)return;if(!resp.ok){const err=await resp.json();alert('❌ Ошибка удаления: '+err.detail);return;}
 await loadApp();alert('✅ Источник удалён');}catch(err){alert('❌ Ошибка: '+err.message);}}
+
 function closeAddForm(){document.getElementById('addForm').style.display='none';}
 function closeGitHubForm(){document.getElementById('githubForm').style.display='none';}
 function closeYouTubeForm(){document.getElementById('youtubeForm').style.display='none';}
@@ -439,8 +594,7 @@ function toggleForm(formId) {
     }
 }
 
-function toggleCategoryForm(type) {
-    hapticFeedback();
+function toggleCategoryForm(type) { if(!ensureConsent())return; hapticFeedback();
     const map = {
         'bbc':'bbcForm','cnn':'cnnForm','dzen':'dzenForm',
         'rb':'rbForm','habr':'habrForm','lifehacker':'lifehackerForm',
@@ -455,7 +609,7 @@ function toggleCategoryForm(type) {
     }
     toggleForm(id);
     if (form && form.style.display === 'block') {
-        const grid = document.getElementById(id.replace('Form','Grid'));
+        const grid = document.getElementById(id.replace('Form', 'Grid'));
         if (grid && grid.children.length === 0) {
             let cats;
             if (type === 'bbc') cats = window.BBC_CATEGORIES;
@@ -479,8 +633,7 @@ function toggleCategoryForm(type) {
     }
 }
 
-function toggleAddForm(type) {
-    hapticFeedback();
+function toggleAddForm(type) { if(!ensureConsent())return; hapticFeedback();
     const form = document.getElementById('addForm');
     const isHidden = window.getComputedStyle(form).display === 'none';
     document.querySelectorAll('.category-form, .add-form').forEach(el => el.style.display = 'none');
@@ -498,8 +651,7 @@ function toggleAddForm(type) {
     }
 }
 
-function toggleGitHubForm() {
-    hapticFeedback();
+function toggleGitHubForm() { if(!ensureConsent())return; hapticFeedback();
     const form = document.getElementById('githubForm');
     const isHidden = window.getComputedStyle(form).display === 'none';
     document.querySelectorAll('.category-form, .add-form').forEach(el => el.style.display = 'none');
@@ -517,8 +669,7 @@ function toggleGitHubForm() {
     }
 }
 
-function toggleYouTubeForm() {
-    hapticFeedback();
+function toggleYouTubeForm() { if(!ensureConsent())return; hapticFeedback();
     const form = document.getElementById('youtubeForm');
     const isHidden = window.getComputedStyle(form).display === 'none';
     document.querySelectorAll('.category-form, .add-form').forEach(el => el.style.display = 'none');
@@ -529,8 +680,7 @@ function toggleYouTubeForm() {
     }
 }
 
-function toggleRedditForm() {
-    hapticFeedback();
+function toggleRedditForm() { if(!ensureConsent())return; hapticFeedback();
     const form = document.getElementById('redditForm');
     const isHidden = window.getComputedStyle(form).display === 'none';
     document.querySelectorAll('.category-form, .add-form').forEach(el => el.style.display = 'none');
@@ -541,8 +691,7 @@ function toggleRedditForm() {
     }
 }
 
-function toggleGoogleNewsForm() {
-    hapticFeedback();
+function toggleGoogleNewsForm() { if(!ensureConsent())return; hapticFeedback();
     const form = document.getElementById('googleNewsForm');
     const isHidden = window.getComputedStyle(form).display === 'none';
     document.querySelectorAll('.category-form, .add-form').forEach(el => el.style.display = 'none');
@@ -553,13 +702,11 @@ function toggleGoogleNewsForm() {
     }
 }
 
-function addForbesTelegram() {
-    hapticFeedback();
+function addForbesTelegram() { if(!ensureConsent())return; hapticFeedback();
     addCategorySource('telegram','forbesrussia','Forbes (Telegram)');
 }
 
-async function addSourceSubmit(){
-    hapticFeedback();
+async function addSourceSubmit(){ if(!ensureConsent())return; hapticFeedback();
     const val=document.getElementById('sourceValue').value.trim();
     if(!val){alert('Введите значение');return;}
     if(!window.confirm('Добавить источник?\n\n'+val))return;
@@ -578,8 +725,7 @@ async function addSourceSubmit(){
     }catch(err){alert('❌ Ошибка добавления: '+err.message);}
 }
 
-async function addCategorySource(t,u,n){
-    hapticFeedback();
+async function addCategorySource(t,u,n){ if(!ensureConsent())return; hapticFeedback();
     if(!u||!u.trim()){alert('URL не может быть пустым');return;}
     let final=u.trim();
     let type=t||'rss';
@@ -601,8 +747,7 @@ async function addCategorySource(t,u,n){
     }catch(err){alert('❌ Ошибка добавления: '+err.message);}
 }
 
-function addRSSSource(u,n){
-    hapticFeedback();
+function addRSSSource(u,n){ if(!ensureConsent())return; hapticFeedback();
     if(!u||!u.trim()){alert('URL не может быть пустым.');return;}
     let final=u.trim();
     if(!final.startsWith('http://')&&!final.startsWith('https://'))final='https://'+final;
@@ -621,8 +766,7 @@ function addRSSSource(u,n){
     .catch(err=>{alert('❌ Ошибка: '+err.message);});
 }
 
-function addSourceByType(t,u,n){
-    hapticFeedback();
+function addSourceByType(t,u,n){ if(!ensureConsent())return; hapticFeedback();
     let type=t;
     if(!['rss','telegram','vk','max'].includes(type))type='rss';
     addCategorySource(type,u,n);
@@ -638,8 +782,7 @@ function updateGitHubButtons(v){
         else btn.disabled=!(hasSlash&&v.trim());
     });
 }
-function generateGitHubRSS(t){
-    hapticFeedback();
+function generateGitHubRSS(t){ if(!ensureConsent())return; hapticFeedback();
     const input=document.getElementById('githubInput');
     let raw=input.value.trim();
     if(!raw){alert('Введите owner/repo или username.');return;}
@@ -672,8 +815,7 @@ function generateGitHubRSS(t){
     addRSSSource(url,display);
 }
 
-async function generateYouTubeRSS(){
-    hapticFeedback();
+async function generateYouTubeRSS(){ if(!ensureConsent())return; hapticFeedback();
     const input=document.getElementById('youtubeInput');
     let val=input.value.trim();
     if(!val){alert('Введите имя канала или channelId.');return;}
@@ -697,8 +839,7 @@ async function generateYouTubeRSS(){
     }catch(err){alert('Ошибка: '+err.message);}
 }
 
-function generateRedditRSS(){
-    hapticFeedback();
+function generateRedditRSS(){ if(!ensureConsent())return; hapticFeedback();
     const input=document.getElementById('redditInput');
     let sub=input.value.trim();
     if(!sub){alert('Введите название сабреддита.');return;}
@@ -710,8 +851,7 @@ function generateRedditRSS(){
     addRSSSource(url,'Reddit (r/'+sub+')');
 }
 
-function generateGoogleNewsRSS(){
-    hapticFeedback();
+function generateGoogleNewsRSS(){ if(!ensureConsent())return; hapticFeedback();
     const input=document.getElementById('googleNewsInput');
     let q=input.value.trim();
     if(!q){alert('Введите ключевое слово или фразу для поиска.');return;}
@@ -774,8 +914,7 @@ function sortItems(items){
     lateItems.sort((a,b)=>a.name.localeCompare(b.name,'ru'));
     return[...rus,...eng,...lateItems];
 }
-function toggleCategoryBrowser(){
-    hapticFeedback();
+function toggleCategoryBrowser(){ if(!ensureConsent())return; hapticFeedback();
     const b=document.getElementById('categoryBrowser');
     if(b.style.display==='block'){b.style.display='none';return;}
     document.querySelectorAll('.add-form,.category-form').forEach(f=>f.style.display='none');
@@ -810,16 +949,14 @@ function showLevel(parentId){
     }).catch(err=>{grid.innerHTML='<div style="text-align:center;padding:10px;color:red;">Ошибка: '+err.message+'</div>';});
 }
 function openLevel(id,name){hapticFeedback();categoryHistory.push({id:id,name:name});showLevel(id);}
-function goBackLevel(){
-    hapticFeedback();
+function goBackLevel(){ if(!ensureConsent())return; hapticFeedback();
     if(categoryHistory.length===0){document.getElementById('categoryBrowser').style.display='none';return;}
     categoryHistory.pop();
     if(categoryHistory.length===0)showLevel(null);
     else showLevel(categoryHistory[categoryHistory.length-1].id);
 }
 
-function toggleTimePicker(){
-    hapticFeedback();
+function toggleTimePicker(){ if(!ensureConsent())return; hapticFeedback();
     if(!isPremium){alert('⛔ Доступно только для Расширенного тарифа. Оформите подписку.');return;}
     const p=document.getElementById('timePicker');
     if(p.style.display==='none')openTimePicker();
@@ -839,8 +976,7 @@ function renderTimePicker(){
         grid.appendChild(btn);
     }
 }
-async function setTime(hour){
-    hapticFeedback();
+async function setTime(hour){ if(!ensureConsent())return; hapticFeedback();
     try{
         const resp=await apiRequest('/api/webapp/set_time',{
             method:'POST',
@@ -859,9 +995,8 @@ async function setTime(hour){
     }catch(err){alert('❌ Ошибка: '+err.message);}
 }
 
-function toggleTariffs(){hapticFeedback();document.getElementById('tariffBlock').classList.toggle('visible');}
-async function handlePayment(tariffKey){
-    hapticFeedback();
+function toggleTariffs(){ if(!ensureConsent())return; hapticFeedback();document.getElementById('tariffBlock').classList.toggle('visible');}
+async function handlePayment(tariffKey){ if(!ensureConsent())return; hapticFeedback();
     if(!authToken){alert('❌ Вы не авторизованы. Пожалуйста, войдите через Telegram.');return;}
     try{
         const resp=await apiRequest('/api/payment/create-invoice',{
@@ -878,8 +1013,7 @@ async function handlePayment(tariffKey){
 }
 
 // ---- ФУНКЦИИ ВХОДА (ГАРАНТИРОВАННАЯ РАБОТА) ----
-async function startBotAuth(){
-    hapticFeedback();
+async function startBotAuth(){ if(!ensureConsent())return; hapticFeedback();
     document.getElementById('loginScreen').querySelector('.auth-container').style.display='none';
     const w=document.getElementById('widgetContainer');
     w.innerHTML='<div class="loader"></div>';
@@ -943,8 +1077,7 @@ function pollBotAuthStatus(token){
     },3000);
 }
 
-async function startMaxAuth(){
-    hapticFeedback();
+async function startMaxAuth(){ if(!ensureConsent())return; hapticFeedback();
     document.getElementById('loginScreen').querySelector('.auth-container').style.display='none';
     const w=document.getElementById('widgetContainer');
     w.innerHTML='<div class="loader"></div>';
@@ -987,11 +1120,10 @@ function startMaxWaiting(token){
     },3000);
 }
 
-(function init(){if(authToken){if(document.getElementById('sourceListContainer').children.length===0)loadApp();}else showLoginScreen();})();
-
-// ===== КНОПКА "СМОТРЕТЬ НОВОСТИ" (ГАРАНТИРОВАННОЕ РАЗБИЕНИЕ) =====
+// ===== КНОПКА "СМОТРЕТЬ НОВОСТИ" (ГАРАНТИРОВАННОЕ РАЗБИЕНИЕ С УДАЛЕНИЕМ ПУСТЫХ СТРОК) =====
 let digestVisible = false;
 async function toggleDigest() {
+    if (!ensureConsent()) return;
     const container = document.getElementById('digestContainer');
     const content = document.getElementById('digestContent');
     if (digestVisible) {
@@ -1014,9 +1146,6 @@ async function toggleDigest() {
         const data = await resp.json();
         let digestHtml = data.digest;
 
-        console.log('=== СЫРОЙ ДАЙДЖЕСТ (JSON) ===');
-        console.log(JSON.stringify(digestHtml));
-
         if (!digestHtml || digestHtml.trim() === '' || digestHtml.includes('Дайджест ещё не формировался')) {
             content.innerHTML = `<div style="text-align:center; padding:20px; color: var(--text-secondary);">📭 Дайджест ещё не формировался. Запустите сбор вручную или дождитесь автоматического.</div>`;
             return;
@@ -1025,42 +1154,61 @@ async function toggleDigest() {
         // Удаляем управляющие символы
         digestHtml = digestHtml.replace(/[\x00-\x1F\x7F-\x9F\u200B\u200C\u200D\uFEFF\u2028\u2029\r]/g, '');
 
-        // ---- УНИВЕРСАЛЬНОЕ РАЗБИЕНИЕ ----
-        // Всегда разбиваем по \n- (перенос, дефис, пробел) – это самый надёжный маркер
-        let blocks = digestHtml.split(/(?=\n- )/).filter(b => b.trim().length > 0);
-        // Если не сработало, пробуем \n- без пробела
+        // ---- РАЗБИЕНИЕ НА БЛОКИ ПО МАРКЕРУ "- <b>" ----
+        let blocks = digestHtml.split(/(?=\n- <b>)/).filter(b => b.trim().length > 0);
         if (blocks.length <= 1) {
             blocks = digestHtml.split(/(?=\n-)/).filter(b => b.trim().length > 0);
         }
-        // Если всё ещё один блок, пробуем разделить по - <b> (на случай, если первая новость без переноса)
         if (blocks.length <= 1) {
             blocks = digestHtml.split(/(?=- <b>)/).filter(b => b.trim().length > 0);
             if (blocks[0] && blocks[0].trim() === '') blocks.shift();
         }
-        // Убираем начальный перенос у блоков
         blocks = blocks.map(b => b.startsWith('\n') ? b.slice(1) : b);
 
-        console.log('=== КОЛИЧЕСТВО БЛОКОВ ===', blocks.length);
-
-        // ---- ОТРИСОВКА ----
         let html = '';
         for (let block of blocks) {
             let lines = block.split('\n');
-            // Удаляем ведущие пробелы у каждой строки (кроме пустых)
             lines = lines.map(line => line.replace(/^[\s\u00A0]+/, ''));
-            // Удаляем пустые строки в начале и конце блока
             while (lines.length > 0 && lines[0].trim() === '') lines.shift();
             while (lines.length > 0 && lines[lines.length - 1].trim() === '') lines.pop();
             let cleanedBlock = lines.join('\n');
-            // Добавляем принудительные переносы для красоты
+
+            // Определяем, является ли блок суммаризацией
+            let isSummary = cleanedBlock.indexOf('<b>Обсуждения в ') !== -1;
+
+            // Добавляем принудительные переносы (для всех)
             if (cleanedBlock.includes('</b>')) {
                 cleanedBlock = cleanedBlock.replace(/(<\/b>)(?!\n)/, '$1\n');
             }
             if (cleanedBlock.includes('<a href')) {
                 cleanedBlock = cleanedBlock.replace(/(?!\n)(<a href)/, '\n$1');
             }
-            // Убираем более двух переносов подряд
-            cleanedBlock = cleanedBlock.replace(/\n{3,}/g, '\n\n');
+
+            // Обработка суммаризаций: расставляем пустые строки между пунктами
+            if (isSummary) {
+                let summaryStart = cleanedBlock.indexOf('<b>Обсуждения в ');
+                if (summaryStart !== -1) {
+                    let closeBpos = cleanedBlock.indexOf('</b>', summaryStart);
+                    if (closeBpos !== -1) {
+                        let linkStart = cleanedBlock.indexOf('<a href', closeBpos);
+                        if (linkStart === -1) linkStart = cleanedBlock.length;
+                        let before = cleanedBlock.slice(0, closeBpos + 4);
+                        let body = cleanedBlock.slice(closeBpos + 4, linkStart);
+                        let after = cleanedBlock.slice(linkStart);
+                        let parts = body.split(/\s*-\s*/).filter(p => p.trim() !== '');
+                        if (parts.length > 1) {
+                            let first = parts[0].trim();
+                            let rest = parts.slice(1).map(p => '- ' + p.trim()).join('\n\n- ');
+                            let newBody = first + '\n\n' + rest;
+                            cleanedBlock = before + newBody + after;
+                        }
+                    }
+                }
+            } else {
+                // Для обычных новостей удаляем все лишние пустые строки (два и более переноса подряд)
+                cleanedBlock = cleanedBlock.replace(/\n{2,}/g, '\n');
+            }
+
             if (cleanedBlock) {
                 html += `<div class="status-block">${cleanedBlock}</div>`;
             }
@@ -1069,7 +1217,6 @@ async function toggleDigest() {
         if (html) {
             content.innerHTML = html;
             content.querySelectorAll('a').forEach(link => link.target = '_blank');
-            console.log('✅ Отображено блоков:', blocks.length);
         } else {
             content.innerHTML = `<div style="text-align:center; padding:20px; color: var(--text-secondary);">📭 Новости не найдены.</div>`;
         }
@@ -1081,13 +1228,21 @@ async function toggleDigest() {
 }
 
 window.suggestSource = function(){
+    if (!ensureConsent()) return;
     hapticFeedback();
     const url='https://t.me/professional_interior_design';
     const text='Добрый день. Хочу предложить источник:';
     window.open(url+'?text='+encodeURIComponent(text),'_blank');
 };
 
-// ---- ЯВНО ЭКСПОРТИРУЕМ ФУНКЦИИ ВХОДА В window (ГАРАНТИЯ) ----
+// ---- ИНИЦИАЛИЗАЦИЯ ----
+(function init(){
+    if(authToken){
+        if(document.getElementById('sourceListContainer').children.length===0)loadApp();
+    } else showLoginScreen();
+})();
+
+// ---- ЯВНО ЭКСПОРТИРУЕМ ФУНКЦИИ В window (ГАРАНТИЯ) ----
 window.startBotAuth = startBotAuth;
 window.startMaxAuth = startMaxAuth;
 window.pollBotAuthStatus = pollBotAuthStatus;
@@ -1131,10 +1286,8 @@ window.generateGoogleNewsRSS = generateGoogleNewsRSS;
 window.addRSSSource = addRSSSource;
 window.toggleDigest = toggleDigest;
 window.suggestSource = window.suggestSource;
+window.ensureConsent = ensureConsent;
 </script>
 <script>if('serviceWorker' in navigator){navigator.serviceWorker.register('/sw.js').then(r=>console.log('✅ SW registered')).catch(e=>console.log('❌ SW registration failed:',e));}</script>
-<script>(function(){if(localStorage.getItem('consent_given')==='true')return;const overlay=document.createElement('div');overlay.id='consentOverlay';overlay.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,0.85);display:flex;align-items:center;justify-content:center;z-index:999999;font-family:\'Roboto\',-apple-system,sans-serif;padding:20px;backdrop-filter:blur(4px);animation:fadeIn .3s ease;';const modal=document.createElement('div');modal.style.cssText='background:#010715;border:1px solid rgba(255,255,255,0.1);border-radius:20px;padding:32px 28px;max-width:480px;width:100%;color:#fff;box-shadow:0 20px 60px rgba(0,0,0,0.8);text-align:center;animation:slideUp .4s ease;';modal.innerHTML='<h2 style="font-size:24px;margin-bottom:12px;background:linear-gradient(290deg,#d235ff 0%,#a062ff 30%,#3088ff 66%,#61d8ff 100%);-webkit-background-clip:text;background-clip:text;color:transparent;">Конфиденциальность</h2><p style="color:#8a9bb5;font-size:15px;line-height:1.6;margin-bottom:20px;">Мы собираем минимальный набор данных для работы сервиса. Подробнее в <a href="/privacy" target="_blank" style="color:#3088ff;text-decoration:none;font-weight:500;">Политике обработки персональных данных</a>.</p><div style="display:flex;align-items:flex-start;gap:12px;text-align:left;margin:16px 0 20px 0;cursor:pointer;padding:8px 12px;border-radius:12px;transition:background .2s;" id="consentLabel"><input type="checkbox" id="consentCheck" style="width:20px;height:20px;margin-top:2px;flex-shrink:0;accent-color:#3088ff;cursor:pointer;"><span style="color:#8a9bb5;font-size:14px;line-height:1.5;">Я ознакомлен(а) и согласен(на) с условиями обработки персональных данных</span></div><button id="consentAcceptBtn" disabled style="background:linear-gradient(290deg,#d235ff 0%,#a062ff 30%,#3088ff 66%,#61d8ff 100%);border:none;border-radius:40px;padding:12px 40px;color:#fff;font-weight:600;font-size:16px;cursor:pointer;transition:opacity .2s,transform .2s;width:100%;opacity:.5;pointer-events:none;">Принимаю</button>';overlay.appendChild(modal);document.body.appendChild(overlay);const check=document.getElementById('consentCheck');const btn=document.getElementById('consentAcceptBtn');const label=document.getElementById('consentLabel');function toggleBtn(){if(check.checked){btn.disabled=false;btn.style.opacity='1';btn.style.pointerEvents='auto';}else{btn.disabled=true;btn.style.opacity='.5';btn.style.pointerEvents='none';}}
-check.addEventListener('change',toggleBtn);label.addEventListener('click',function(e){if(e.target.tagName!=='INPUT'){check.checked=!check.checked;toggleBtn();}});btn.addEventListener('click',function(){if(check.checked){localStorage.setItem('consent_given','true');overlay.remove();}});const styleSheet=document.createElement("style");styleSheet.textContent='@keyframes fadeIn{from{opacity:0;}to{opacity:1;}}@keyframes slideUp{from{transform:translateY(20px);opacity:0;}to{transform:translateY(0);opacity:1;}}';document.head.appendChild(styleSheet);})();
-</script>
 </body>
 </html>

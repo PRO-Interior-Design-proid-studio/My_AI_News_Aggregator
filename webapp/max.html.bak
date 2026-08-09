@@ -729,15 +729,18 @@
             addCategorySource("telegram", "forbesrussia", "Forbes (Telegram)");
         }
 
+        // ===== ИСПРАВЛЕННАЯ openAddForm (теперь toggle) =====
         function openAddForm(type){
             hapticFeedback();
             const form = document.getElementById('addForm');
             const isVisible = form.style.display === 'block';
             const currentType = currentAddType;
+            // Если форма уже открыта с тем же типом — закрываем
             if (isVisible && currentType === type) {
                 form.style.display = 'none';
                 return;
             }
+            // Иначе открываем с новым типом
             currentAddType = type;
             const title = document.getElementById('addFormTitle');
             const labels = {'rss':'RSS/HTML','telegram':'Telegram','vk':'VK'};
@@ -745,9 +748,12 @@
             const input = document.getElementById('sourceValue');
             input.placeholder = type === 'rss' ? 'Введите URL...' : (type === 'telegram' ? 'Введите username (без @)...' : 'Введите username (без @)...');
             input.value = '';
+            // Скрываем все другие формы
             document.querySelectorAll('.category-form, .add-form').forEach(f => f.style.display = 'none');
             form.style.display = 'block';
         }
+        // ======================================================
+
         function closeAddForm(){document.getElementById('addForm').style.display='none';}
 
         function toggleGitHubForm() {
@@ -1014,7 +1020,7 @@
             else{console.warn('Добавление источника типа '+type+' пока не реализовано, добавляем как RSS');addRSSSource(url,name);}
         }
 
-        // ===== НОВАЯ ФУНКЦИЯ "СМОТРЕТЬ НОВОСТИ" (с удалением лишних пустых строк) =====
+        // ===== НОВАЯ ФУНКЦИЯ "СМОТРЕТЬ НОВОСТИ" =====
         async function toggleDigest() {
             const container = document.getElementById('digestContainer');
             const content = document.getElementById('digestContent');
@@ -1062,43 +1068,33 @@
                     lines = lines.map(line => line.replace(/^[\s\u00A0]+/, ''));
                     while (lines.length > 0 && lines[0].trim() === '') lines.shift();
                     while (lines.length > 0 && lines[lines.length - 1].trim() === '') lines.pop();
-
                     let cleanedBlock = lines.join('\n');
 
-                    // Определяем, является ли блок суммаризацией
-                    let isSummary = cleanedBlock.indexOf('<b>Обсуждения в ') !== -1;
-
-                    // Добавляем принудительные переносы (для всех)
                     if (cleanedBlock.includes('</b>')) {
                         cleanedBlock = cleanedBlock.replace(/(<\/b>)(?!\n)/, '$1\n');
                     }
                     if (cleanedBlock.includes('<a href')) {
                         cleanedBlock = cleanedBlock.replace(/(?!\n)(<a href)/, '\n$1');
                     }
+                    cleanedBlock = cleanedBlock.replace(/\n{3,}/g, '\n\n');
 
-                    // Обработка суммаризаций: расставляем пустые строки между пунктами
-                    if (isSummary) {
-                        let summaryStart = cleanedBlock.indexOf('<b>Обсуждения в ');
-                        if (summaryStart !== -1) {
-                            let closeBpos = cleanedBlock.indexOf('</b>', summaryStart);
-                            if (closeBpos !== -1) {
-                                let linkStart = cleanedBlock.indexOf('<a href', closeBpos);
-                                if (linkStart === -1) linkStart = cleanedBlock.length;
-                                let before = cleanedBlock.slice(0, closeBpos + 4);
-                                let body = cleanedBlock.slice(closeBpos + 4, linkStart);
-                                let after = cleanedBlock.slice(linkStart);
-                                let parts = body.split(/\s*-\s*/).filter(p => p.trim() !== '');
-                                if (parts.length > 1) {
-                                    let first = parts[0].trim();
-                                    let rest = parts.slice(1).map(p => '- ' + p.trim()).join('\n\n- ');
-                                    let newBody = first + '\n\n' + rest;
-                                    cleanedBlock = before + newBody + after;
-                                }
+                    let summaryStart = cleanedBlock.indexOf('<b>Обсуждения в ');
+                    if (summaryStart !== -1) {
+                        let closeBpos = cleanedBlock.indexOf('</b>', summaryStart);
+                        if (closeBpos !== -1) {
+                            let linkStart = cleanedBlock.indexOf('<a href', closeBpos);
+                            if (linkStart === -1) linkStart = cleanedBlock.length;
+                            let before = cleanedBlock.slice(0, closeBpos + 4);
+                            let body = cleanedBlock.slice(closeBpos + 4, linkStart);
+                            let after = cleanedBlock.slice(linkStart);
+                            let parts = body.split(/\s*-\s*/).filter(p => p.trim() !== '');
+                            if (parts.length > 1) {
+                                let first = parts[0].trim();
+                                let rest = parts.slice(1).map(p => '- ' + p.trim()).join('\n\n- ');
+                                let newBody = first + '\n\n' + rest;
+                                cleanedBlock = before + newBody + after;
                             }
                         }
-                    } else {
-                        // Для обычных новостей удаляем все лишние пустые строки (два и более переноса подряд)
-                        cleanedBlock = cleanedBlock.replace(/\n{2,}/g, '\n');
                     }
 
                     if (cleanedBlock) {
