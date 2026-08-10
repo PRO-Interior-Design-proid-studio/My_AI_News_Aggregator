@@ -393,6 +393,14 @@
 
 <script src="/webapp/categories.js?v=50"></script>
 <script>
+    // ============================================================
+    //  ПРАВИЛО ДЛЯ TELEGRAM WEBAPP:
+    //  НЕ ИСПОЛЬЗОВАТЬ localStorage ДЛЯ ХРАНЕНИЯ ТОКЕНА!
+    //  Всегда авторизоваться через initData.
+    //  Токен хранить ТОЛЬКО в памяти (переменная authToken).
+    //  При 401 — перезапрашивать токен через initData.
+    // ============================================================
+
     // ===== ГЛОБАЛЬНЫЕ ПЕРЕМЕННЫЕ =====
     let currentSources = [];
     let currentLimit = 5;
@@ -401,7 +409,7 @@
     let isPremium = false;
     let defaultSendHour = 18;
     let digestVisible = false;
-    let authToken = localStorage.getItem('auth_token') || null;
+    let authToken = null;  // ← НЕ используем localStorage!
     let categoryHistory = [];
     const CATEGORY_CACHE_TTL = 3600000;
     const tg = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
@@ -420,30 +428,136 @@
         };
     }
 
-    function apiRequest(url, options = {}) {
-        return fetch(url, options).then(resp => {
-            if (resp.status === 503) {
-                alert('⚠️ Сервер временно недоступен. Пожалуйста, обновите страницу через несколько секунд.');
-                return null;
+    // ===== ОБРАБОТКА 401: переавторизация через initData =====
+    async function apiRequest(url, options = {}) {
+        let resp = await fetch(url, options);
+        if (resp.status === 503) {
+            alert('⚠️ Сервер временно недоступен. Пожалуйста, обновите страницу через несколько секунд.');
+            return null;
+        }
+        if (resp.status === 401) {
+            // Токен невалиден — пробуем переавторизоваться
+            console.warn('401 Unauthorized, re-authenticating...');
+            authToken = null;
+            // Пытаемся получить новый токен через initData
+            try {
+                const authResp = await fetch('/api/auth/get-token', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ init_data: initData })
+                });
+                if (authResp.ok) {
+                    const data = await authResp.json();
+                    if (data.token) {
+                        authToken = data.token;
+                        // Повторяем исходный запрос с новым токеном
+                        const newOptions = { ...options };
+                        newOptions.headers = { ...newOptions.headers, 'X-Auth-Token': authToken };
+                        resp = await fetch(url, newOptions);
+                        return resp;
+                    }
+                }
+            } catch (e) {
+                console.error('Re-auth failed:', e);
             }
-            return resp;
-        });
+            // Если переавторизация не удалась — показываем ошибку и предлагаем перезагрузить
+            alert('🔒 Сессия истекла. Пожалуйста, нажмите «Выход» и войдите заново через бота.');
+            document.getElementById('sourceListContainer').innerHTML =
+                '<div class="empty-state"><div class="empty-icon">🔒</div><h3>Сессия истекла</h3><p>Нажмите «Выход» и войдите заново через бота.</p></div>';
+            return null;
+        }
+        return resp;
     }
+
+    // ===== АВТОРИЗАЦИЯ: всегда через initData =====
+    async function initTelegramAuth() {
+        if (!initData) {
+            document.getElementById('sourceListContainer').innerHTML = '<div class="empty-state"><div class="empty-icon">🔒</div><h3>Не удалось получить данные авторизации</h3><p>Попробуйте перезагрузить страницу или откройте через кнопку в боте.</p></div>';
+            document.querySelector('.container').classList.add('disabled-overlay');
+            document.getElementById('quickButtons').style.display = 'none';
+            document.getElementById('paymentToggleBtn').style.display = 'none';
+            return;
+        }
+        // Всегда запрашиваем токен заново через initData (игнорируем старые токены)
+        try {
+            const resp = await fetch('/api/auth/get-token', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ init_data: initData })
+            });
+            if (!resp.ok) {
+                const err = await resp.json();
+                throw new Error(err.detail || 'Ошибка авторизации');
+            }
+            const data = await resp.json();
+            if (data.token) {
+                authToken = data.token;
+                // НЕ сохраняем в localStorage — только в памяти!
+                await loadSources();
+            } else {
+                throw new Error('Токен не получен');
+            }
+        } catch (e) {
+            console.error('Auth error:', e);
+            document.getElementById('sourceListContainer').innerHTML =
+                '<div class="empty-state"><div class="empty-icon">❌</div><h3>Ошибка авторизации</h3><p>' + e.message + '</p><p>Попробуйте нажать «Выход» и войти заново.</p></div>';
+        }
+    }
+
+    // ===== ЗАГРУЗКА ИСТОЧНИКОВ =====
+    async function loadSources() {
+        if (!authToken) {
+            // Если по какой-то причине токена нет — инициализируем авторизацию
+            await initTelegramAuth();
+            return;
+        }
+        try {
+            const resp = await apiRequest('/api/webapp/sources', { headers: getHeaders() });
+            if (!resp) return;
+            if (!resp.ok) {
+                if (resp.status === 403) {
+                    const err = await resp.json();
+                    document.getElementById('sourceListContainer').innerHTML = '<div class="empty-state"><div class="empty-icon">🔒</div><h3>Требуется согласие</h3><p>' + (err.detail || 'Для использования приложения необходимо принять Согласие на обработку персональных данных. Откройте бота и нажмите /start.') + '</p></div>';
+                    document.querySelector('.container').classList.add('disabled-overlay');
+                    document.getElementById('quickButtons').style.display = 'none';
+                    document.getElementById('paymentToggleBtn').style.display = 'none';
+                    return;
+                }
+                if (resp.status === 401) {
+                    // 401 обрабатывается в apiRequest, но если мы сюда попали — значит переавторизация не помогла
+                    throw new Error('Сессия истекла, попробуйте нажать «Выход» и войти заново.');
+                }
+                const err = await resp.json();
+                throw new Error(err.detail || 'Ошибка загрузки');
+            }
+            const data = await resp.json();
+            currentSources = data.sources || [];
+            currentLimit = data.limit || 5;
+            renderGroupedSources(currentSources);
+            document.getElementById('counter').textContent = currentSources.length;
+            updateStatus(data);
+            document.querySelector('.container').classList.remove('disabled-overlay');
+            document.getElementById('quickButtons').style.display = 'flex';
+            document.getElementById('paymentToggleBtn').style.display = 'block';
+        } catch (err) {
+            console.error(err);
+            document.getElementById('sourceListContainer').innerHTML = '<div class="empty-state"><div class="empty-icon">⚠️</div><h3>Ошибка загрузки</h3><p>' + err.message + '</p></div>';
+        }
+    }
+
+    // ===== ОСТАЛЬНЫЕ ФУНКЦИИ (без изменений, кроме logout) =====
 
     function getTypeLabel(t) {
         const m = { 'rss': 'RSS/HTML', 'telegram': 'Telegram', 'vk': 'VK', 'max': 'MAX' };
         return m[t] || t;
     }
-
     function truncate(s, l) {
         l = l || 40;
         return s.length > l ? s.slice(0, l) + '…' : s;
     }
-
     function safeDecodeUrl(u) {
         try { return decodeURIComponent(u); } catch (e) { return u; }
     }
-
     function formatSourceValue(s) {
         let v = s.value;
         if (s.type === 'telegram' || s.type === 'vk') {
@@ -454,14 +568,12 @@
         }
         return v;
     }
-
     function getSourceUrl(s) {
         let u = s.value;
         if (s.type === 'telegram') u = 'https://t.me/' + u.replace(/^@/, '');
         else if (s.type === 'vk') u = 'https://vk.com/' + u.replace(/^@/, '');
         return u;
     }
-
     function askOpenLink(u) {
         hapticFeedback();
         if (!tg) { if (confirm('Открыть ссылку?\n\n' + u)) window.open(u, '_blank'); return; }
@@ -483,96 +595,14 @@
             }
         }
     }
-
     function getIconGradient(t) {
         switch (t) {
-            case 'telegram':
-                return 'linear-gradient(290deg,#d235ff 0%,#a062ff 30%,#3088ff 66%,#61d8ff 100%)';
-            case 'vk':
-                return 'linear-gradient(290deg,#0d47a1 0%,#1565c0 30%,#1e88e5 66%,#64b5f6 100%)';
-            case 'rss':
-                return 'linear-gradient(290deg,#d84315 0%,#f57c00 30%,#f9a825 66%,#ffee58 100%)';
-            default:
-                return 'linear-gradient(290deg,#d235ff 0%,#a062ff 30%,#3088ff 66%,#61d8ff 100%)';
+            case 'telegram': return 'linear-gradient(290deg,#d235ff 0%,#a062ff 30%,#3088ff 66%,#61d8ff 100%)';
+            case 'vk': return 'linear-gradient(290deg,#0d47a1 0%,#1565c0 30%,#1e88e5 66%,#64b5f6 100%)';
+            case 'rss': return 'linear-gradient(290deg,#d84315 0%,#f57c00 30%,#f9a825 66%,#ffee58 100%)';
+            default: return 'linear-gradient(290deg,#d235ff 0%,#a062ff 30%,#3088ff 66%,#61d8ff 100%)';
         }
     }
-
-    // ===== АВТОРИЗАЦИЯ =====
-    async function initTelegramAuth() {
-        if (!initData) {
-            document.getElementById('sourceListContainer').innerHTML = '<div class="empty-state"><div class="empty-icon">🔒</div><h3>Не удалось получить данные авторизации</h3><p>Попробуйте перезагрузить страницу или откройте через кнопку в боте.</p></div>';
-            document.querySelector('.container').classList.add('disabled-overlay');
-            document.getElementById('quickButtons').style.display = 'none';
-            document.getElementById('paymentToggleBtn').style.display = 'none';
-            return;
-        }
-        if (authToken) {
-            await loadSources();
-            return;
-        }
-        // Пытаемся получить токен через initData
-        try {
-            const resp = await apiRequest('/api/auth/get-token', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ init_data: initData })
-            });
-            if (!resp) return;
-            if (!resp.ok) {
-                document.getElementById('sourceListContainer').innerHTML = '<div class="empty-state"><div class="empty-icon">⚠️</div><h3>Требуется вход в боте</h3><p>Пожалуйста, откройте бота @My_AI_News_Aggregator_bot и нажмите /start, затем вернитесь.</p></div>';
-                return;
-            }
-            const data = await resp.json();
-            if (data.token) {
-                authToken = data.token;
-                localStorage.setItem('auth_token', authToken);
-                await loadSources();
-            } else {
-                document.getElementById('sourceListContainer').innerHTML = '<div class="empty-state"><div class="empty-icon">🤖</div><h3>Нажмите /start в боте</h3><p>Откройте @My_AI_News_Aggregator_bot, нажмите /start, затем вернитесь и обновите страницу.</p></div>';
-            }
-        } catch (e) {
-            console.error('Auth error:', e);
-            document.getElementById('sourceListContainer').innerHTML = '<div class="empty-state"><div class="empty-icon">❌</div><h3>Ошибка авторизации</h3><p>' + e.message + '</p></div>';
-        }
-    }
-
-    // ===== ЗАГРУЗКА ИСТОЧНИКОВ =====
-    async function loadSources() {
-        if (!authToken) {
-            await initTelegramAuth();
-            return;
-        }
-        try {
-            const resp = await apiRequest('/api/webapp/sources', { headers: getHeaders() });
-            if (!resp) return;
-            if (!resp.ok) {
-                if (resp.status === 403) {
-                    const err = await resp.json();
-                    document.getElementById('sourceListContainer').innerHTML = '<div class="empty-state"><div class="empty-icon">🔒</div><h3>Требуется согласие</h3><p>' + (err.detail || 'Для использования приложения необходимо принять Согласие на обработку персональных данных. Откройте бота и нажмите /start.') + '</p></div>';
-                    document.querySelector('.container').classList.add('disabled-overlay');
-                    document.getElementById('quickButtons').style.display = 'none';
-                    document.getElementById('paymentToggleBtn').style.display = 'none';
-                    return;
-                }
-                if (resp.status === 401) throw new Error('Сессия истекла, перезагрузите страницу');
-                const err = await resp.json();
-                throw new Error(err.detail || 'Ошибка загрузки');
-            }
-            const data = await resp.json();
-            currentSources = data.sources || [];
-            currentLimit = data.limit || 5;
-            renderGroupedSources(currentSources);
-            document.getElementById('counter').textContent = currentSources.length;
-            updateStatus(data);
-            document.querySelector('.container').classList.remove('disabled-overlay');
-            document.getElementById('quickButtons').style.display = 'flex';
-            document.getElementById('paymentToggleBtn').style.display = 'block';
-        } catch (err) {
-            console.error(err);
-            document.getElementById('sourceListContainer').innerHTML = '<div class="empty-state"><div class="empty-icon">⚠️</div><h3>Ошибка загрузки</h3><p>' + err.message + '</p></div>';
-        }
-    }
-
     function renderGroupedSources(sources) {
         const container = document.getElementById('sourceListContainer');
         if (!container) return;
@@ -624,7 +654,6 @@
             container.appendChild(list);
         });
     }
-
     function updateStatus(data) {
         document.getElementById('statusTariff').textContent = data.tariff_name || '—';
         document.getElementById('statusSources').textContent = data.used || 0;
@@ -650,7 +679,6 @@
         }
     }
 
-    // ===== УДАЛЕНИЕ ИСТОЧНИКА =====
     function confirmDelete(id) {
         hapticFeedback();
         const s = currentSources.find(s => s.id === id);
@@ -668,7 +696,6 @@
             if (confirm('Удалить источник?\n\n' + f + '\n\nЭто действие нельзя отменить.')) deleteSource(id);
         }
     }
-
     async function deleteSource(id) {
         try {
             const resp = await apiRequest('/api/webapp/delete', {
@@ -685,7 +712,7 @@
         }
     }
 
-    // ===== ФОРМЫ (TOGGLE) =====
+    // ===== ФОРМЫ =====
     function toggleForm(formId) {
         const form = document.getElementById(formId);
         if (!form) return;
@@ -699,7 +726,6 @@
             form.style.display = 'none';
         }
     }
-
     function openAddForm(type) {
         hapticFeedback();
         const form = document.getElementById('addForm');
@@ -719,18 +745,12 @@
         document.querySelectorAll('.category-form, .add-form').forEach(f => f.style.display = 'none');
         form.style.display = 'block';
     }
-
     function closeAddForm() { document.getElementById('addForm').style.display = 'none'; }
-
     function toggleCategoryForm(type) {
         hapticFeedback();
         const map = {
-            'bbc': 'bbcForm',
-            'cnn': 'cnnForm',
-            'dzen': 'dzenForm',
-            'rb': 'rbForm',
-            'habr': 'habrForm',
-            'lifehacker': 'lifehackerForm',
+            'bbc': 'bbcForm', 'cnn': 'cnnForm', 'dzen': 'dzenForm',
+            'rb': 'rbForm', 'habr': 'habrForm', 'lifehacker': 'lifehackerForm',
             'vc': 'vcForm'
         };
         const id = map[type];
@@ -748,7 +768,6 @@
             form.style.display = 'none';
         }
     }
-
     async function showCategoryGrid(type, gridId) {
         const grid = document.getElementById(gridId);
         if (!grid) return;
@@ -769,7 +788,6 @@
         }
         grid.innerHTML = '<div style="text-align:center;padding:10px;color:var(--text-secondary);">Категории не загружены</div>';
     }
-
     function toggleGitHubForm() {
         hapticFeedback();
         const form = document.getElementById('githubForm');
@@ -788,9 +806,7 @@
             form.style.display = 'none';
         }
     }
-
     function closeGitHubForm() { document.getElementById('githubForm').style.display = 'none'; }
-
     function toggleYouTubeForm() {
         hapticFeedback();
         const form = document.getElementById('youtubeForm');
@@ -802,9 +818,7 @@
             form.style.display = 'none';
         }
     }
-
     function closeYouTubeForm() { document.getElementById('youtubeForm').style.display = 'none'; }
-
     function toggleRedditForm() {
         hapticFeedback();
         const form = document.getElementById('redditForm');
@@ -816,9 +830,7 @@
             form.style.display = 'none';
         }
     }
-
     function closeRedditForm() { document.getElementById('redditForm').style.display = 'none'; }
-
     function toggleGoogleNewsForm() {
         hapticFeedback();
         const form = document.getElementById('googleNewsForm');
@@ -830,10 +842,9 @@
             form.style.display = 'none';
         }
     }
-
     function closeGoogleNewsForm() { document.getElementById('googleNewsForm').style.display = 'none'; }
 
-    // ===== ДОБАВЛЕНИЕ ИСТОЧНИКОВ =====
+    // ===== ДОБАВЛЕНИЕ =====
     async function addSourceSubmit() {
         hapticFeedback();
         const val = document.getElementById('sourceValue').value.trim();
@@ -855,7 +866,6 @@
             alert('❌ Ошибка добавления: ' + err.message);
         }
     }
-
     async function addCategorySource(t, u, n) {
         hapticFeedback();
         if (!u || !u.trim()) { alert('URL не может быть пустым'); return; }
@@ -888,12 +898,10 @@
             alert('❌ Ошибка добавления: ' + err.message);
         }
     }
-
     function addForbesTelegram() {
         hapticFeedback();
         addCategorySource('telegram', 'forbesrussia', 'Forbes (Telegram)');
     }
-
     function addRSSSource(u, n) {
         hapticFeedback();
         if (!u || !u.trim()) { alert('URL не может быть пустым.'); return; }
@@ -913,7 +921,6 @@
             })
             .catch(err => { alert('❌ Ошибка: ' + err.message); });
     }
-
     function addSourceByType(t, u, n) {
         hapticFeedback();
         let type = t;
@@ -921,7 +928,7 @@
         addCategorySource(type, u, n);
     }
 
-    // ===== GITHUB ГЕНЕРАТОР =====
+    // ===== ГЕНЕРАТОРЫ =====
     function updateGitHubButtons(v) {
         const grid = document.getElementById('githubGrid');
         const btns = grid.querySelectorAll('button');
@@ -932,7 +939,6 @@
             else btn.disabled = !(hasSlash && v.trim());
         });
     }
-
     function generateGitHubRSS(type) {
         hapticFeedback();
         const input = document.getElementById('githubInput');
@@ -949,28 +955,16 @@
         } else {
             if (!raw.includes('/')) { alert('Для этого типа нужен owner/repo.'); return; }
             const parts = raw.split('/');
-            const owner = parts[0],
-                repo = parts.slice(1).join('/');
+            const owner = parts[0], repo = parts.slice(1).join('/');
             if (!owner || !repo) { alert('Некорректный owner/repo.'); return; }
             let path = '';
             switch (type) {
-                case 'releases':
-                    path = 'releases.atom';
-                    break;
-                case 'tags':
-                    path = 'tags.atom';
-                    break;
-                case 'commits':
-                    path = 'commits.atom';
-                    break;
-                case 'main':
-                    path = 'commits/main.atom';
-                    break;
-                case 'master':
-                    path = 'commits/master.atom';
-                    break;
-                default:
-                    path = 'releases.atom';
+                case 'releases': path = 'releases.atom'; break;
+                case 'tags': path = 'tags.atom'; break;
+                case 'commits': path = 'commits.atom'; break;
+                case 'main': path = 'commits/main.atom'; break;
+                case 'master': path = 'commits/master.atom'; break;
+                default: path = 'releases.atom';
             }
             url = 'https://github.com/' + owner + '/' + repo + '/' + path;
             display = 'GitHub (' + owner + '/' + repo + ')';
@@ -978,8 +972,6 @@
         if (!window.confirm('Добавить источник?\n' + display + '\n' + url)) return;
         addRSSSource(url, display);
     }
-
-    // ===== YOUTUBE ГЕНЕРАТОР =====
     async function generateYouTubeRSS() {
         hapticFeedback();
         const input = document.getElementById('youtubeInput');
@@ -1006,8 +998,6 @@
             alert('Ошибка: ' + err.message);
         }
     }
-
-    // ===== REDDIT ГЕНЕРАТОР =====
     function generateRedditRSS() {
         hapticFeedback();
         const input = document.getElementById('redditInput');
@@ -1020,8 +1010,6 @@
         if (!window.confirm('Добавить источник?\nReddit (r/' + sub + ')\n' + url)) return;
         addRSSSource(url, 'Reddit (r/' + sub + ')');
     }
-
-    // ===== GOOGLE NEWS ГЕНЕРАТОР =====
     function generateGoogleNewsRSS() {
         hapticFeedback();
         const input = document.getElementById('googleNewsInput');
@@ -1034,7 +1022,7 @@
         addRSSSource(url, 'Google News: ' + q);
     }
 
-    // ===== КАТЕГОРИИ БРАУЗЕР =====
+    // ===== КАТЕГОРИИ =====
     async function loadCategoryLevel(parentId = null) {
         const key = parentId === null ? 'categories_root' : 'categories_' + parentId;
         const cached = localStorage.getItem(key);
@@ -1052,7 +1040,6 @@
         localStorage.setItem(key, JSON.stringify({ timestamp: Date.now(), data }));
         return data;
     }
-
     function shortenCategoryName(n) {
         const map = {
             'DevOps и инфраструктура': 'DevOps',
@@ -1127,7 +1114,6 @@
         };
         return map[n] || n;
     }
-
     function sortItems(items) {
         const late = ['IT и разработка', 'DevOps и инфраструктура'];
         const normal = items.filter(i => !late.includes(i.name));
@@ -1139,7 +1125,6 @@
         lateItems.sort((a, b) => a.name.localeCompare(b.name, 'ru'));
         return [...rus, ...eng, ...lateItems];
     }
-
     function toggleCategoryBrowser() {
         hapticFeedback();
         const b = document.getElementById('categoryBrowser');
@@ -1149,7 +1134,6 @@
         categoryHistory = [];
         showLevel(null);
     }
-
     function showLevel(parentId) {
         const header = document.getElementById('categoryBrowserHeader');
         const grid = document.getElementById('categoryGrid');
@@ -1176,11 +1160,9 @@
             back.style.display = categoryHistory.length > 0 ? 'block' : 'none';
         }).catch(err => { grid.innerHTML = '<div style="text-align:center;padding:10px;color:red;">Ошибка: ' + err.message + '</div>'; });
     }
-
     function openLevel(id, name) { hapticFeedback();
         categoryHistory.push({ id: id, name: name });
         showLevel(id); }
-
     function goBackLevel() {
         hapticFeedback();
         if (categoryHistory.length === 0) { document.getElementById('categoryBrowser').style.display = 'none'; return; }
@@ -1189,7 +1171,7 @@
         else showLevel(categoryHistory[categoryHistory.length - 1].id);
     }
 
-    // ===== ВРЕМЯ ПОЛУЧЕНИЯ =====
+    // ===== ВРЕМЯ =====
     function toggleTimePicker() {
         hapticFeedback();
         if (!isPremium) { alert('⛔ Доступно только для Расширенного тарифа. Оформите подписку.'); return; }
@@ -1197,13 +1179,10 @@
         if (p.style.display === 'none') openTimePicker();
         else closeTimePicker();
     }
-
     function openTimePicker() { if (!isPremium) return;
         document.getElementById('timePicker').style.display = 'block';
         renderTimePicker(); }
-
     function closeTimePicker() { document.getElementById('timePicker').style.display = 'none'; }
-
     function renderTimePicker() {
         const grid = document.getElementById('timePickerGrid');
         grid.innerHTML = '';
@@ -1216,7 +1195,6 @@
             grid.appendChild(btn);
         }
     }
-
     async function setTime(hour) {
         hapticFeedback();
         try {
@@ -1242,10 +1220,9 @@
     // ===== ТАРИФЫ =====
     function toggleTariffs() { hapticFeedback();
         document.getElementById('tariffBlock').classList.toggle('visible'); }
-
     async function handlePayment(tariffKey) {
         hapticFeedback();
-        if (!authToken) { alert('❌ Вы не авторизованы. Пожалуйста, войдите через Telegram.'); return; }
+        if (!authToken) { alert('❌ Вы не авторизованы.'); return; }
         try {
             const resp = await apiRequest('/api/payment/create-invoice', {
                 method: 'POST',
@@ -1262,7 +1239,7 @@
         }
     }
 
-    // ===== КНОПКА "СМОТРЕТЬ НОВОСТИ" (с удалением лишних пустых строк) =====
+    // ===== ДАЙДЖЕСТ =====
     async function toggleDigest() {
         const container = document.getElementById('digestContainer');
         const content = document.getElementById('digestContent');
@@ -1312,10 +1289,8 @@
 
                 let cleanedBlock = lines.join('\n');
 
-                // Определяем, является ли блок суммаризацией
                 let isSummary = cleanedBlock.indexOf('<b>Обсуждения в ') !== -1;
 
-                // Добавляем принудительные переносы (для всех)
                 if (cleanedBlock.includes('</b>')) {
                     cleanedBlock = cleanedBlock.replace(/(<\/b>)(?!\n)/, '$1\n');
                 }
@@ -1323,7 +1298,6 @@
                     cleanedBlock = cleanedBlock.replace(/(?!\n)(<a href)/, '\n$1');
                 }
 
-                // Обработка суммаризаций: расставляем пустые строки между пунктами
                 if (isSummary) {
                     let summaryStart = cleanedBlock.indexOf('<b>Обсуждения в ');
                     if (summaryStart !== -1) {
@@ -1344,7 +1318,6 @@
                         }
                     }
                 } else {
-                    // Для обычных новостей удаляем все лишние пустые строки (два и более переноса подряд)
                     cleanedBlock = cleanedBlock.replace(/\n{2,}/g, '\n');
                 }
 
@@ -1374,16 +1347,13 @@
         window.open(url + '?text=' + encodeURIComponent(text), '_blank');
     }
 
-    // ===== ВЫХОД ИЗ АККАУНТА =====
+    // ===== ВЫХОД (очищаем только память, не localStorage) =====
     function logout() {
         const confirmLogout = () => {
-            localStorage.removeItem('auth_token');
-            localStorage.removeItem('bot_auth_token');
-            localStorage.removeItem('max_auth_token');
-            sessionStorage.removeItem('auth_token');
-            sessionStorage.removeItem('bot_auth_token');
-            sessionStorage.removeItem('max_auth_token');
+            // Очищаем токен из памяти и sessionStorage (если используется)
             authToken = null;
+            sessionStorage.removeItem('auth_token');
+            // НЕ трогаем localStorage — он может использоваться другими версиями (PWA, расширение)
             currentSources = [];
             window.location.reload();
         };
@@ -1405,21 +1375,17 @@
             }
         }
     }
-    // ===== КОНЕЦ ВЫХОДА =====
 
     // ===== ИНИЦИАЛИЗАЦИЯ =====
     (function init() {
         if (!tg) {
             console.warn('Telegram WebApp не найден, работа в обычном браузере');
         }
-        if (authToken) {
-            loadSources();
-        } else {
-            initTelegramAuth();
-        }
+        // Всегда запускаем авторизацию через initData, игнорируя старые токены
+        initTelegramAuth();
     })();
 
-    // Экспортируем в window для onclick
+    // Экспорты для onclick
     window.toggleTariffs = toggleTariffs;
     window.handlePayment = handlePayment;
     window.startPayment = handlePayment;
@@ -1460,7 +1426,7 @@
     window.suggestSource = suggestSource;
     window.loadSources = loadSources;
     window.authToken = authToken;
-    window.logout = logout;   // Добавлен экспорт функции выхода
+    window.logout = logout;
 </script>
 </body>
 </html>
