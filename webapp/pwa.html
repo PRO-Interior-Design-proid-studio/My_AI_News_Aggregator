@@ -155,14 +155,18 @@ body{font-family:-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, 
 @keyframes spin{to{transform:rotate(360deg);}}
 .hidden{display:none !important;}
 
-/* ===== БЛОКИРОВКА ИНТЕРФЕЙСА ДО ПРИНЯТИЯ СОГЛАСИЯ ===== */
-.consent-pending #appScreen > *:not(#consentBlock) {
-    pointer-events: none;
-    opacity: 0.5;
+/* ===== БЛОКИРОВКА ИНТЕРФЕЙСА ДО ПРИНЯТИЯ СОГЛАСИЯ (УСИЛЕННАЯ) ===== */
+.consent-pending #appContent,
+.consent-pending #appContent * {
+    pointer-events: none !important;
+    opacity: 0.5 !important;
+    user-select: none !important;
 }
-.consent-pending #consentBlock {
-    pointer-events: auto;
-    opacity: 1;
+.consent-pending #consentBlock,
+.consent-pending #consentBlock * {
+    pointer-events: auto !important;
+    opacity: 1 !important;
+    user-select: auto !important;
 }
 /* ===== КОНЕЦ БЛОКИРОВКИ ===== */
 
@@ -196,6 +200,21 @@ body{font-family:-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, 
     text-decoration: underline;
     opacity: 0.8;
 }
+
+#logoutContainer {
+    text-align: center;
+    margin-top: 12px;
+    font-size: 14px;
+    color: var(--text-secondary);
+    cursor: pointer;
+    text-decoration: none;
+    user-select: none;
+    transition: color 0.2s;
+}
+#logoutContainer:hover {
+    color: var(--text) !important;
+}
+
 </style>
 </head>
 <body>
@@ -353,22 +372,27 @@ body{font-family:-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, 
 <button class="close-picker-btn" onclick="closeTimePicker()">Закрыть</button>
 </div>
 </div>
+<div id="logoutContainer" onclick="logout()">Выход</div>
 </div> <!-- /appContent -->
 </div> <!-- /appScreen -->
 </div>
 </div>
 <div class="footer-wrapper">
-<div class="footer-inner">
-<span>© 2026 Мои AI Новости</span>
-<span class="docs"><a href="/privacy" target="_blank">Политика</a> <a href="/offer" target="_blank">Оферта</a> <a href="/consent" target="_blank">Согласие</a></span>
-<span class="sep">|</span>
-<span>Проект <a href="https://proid.studio" target="_blank" class="studio-link">proid.studio</a></span>
-<span class="sep">|</span>
-<a href="/landing" class="landing-link">О сервисе</a>
-<span class="sep">|</span>
-<span>ИП Ерыков А.А. (ИНН 772609477460)</span>
-<a href="mailto:news@proid.studio" style="color:var(--accent2);">news@proid.studio</a>
-</div>
+    <div class="footer-inner">
+        <span>© 2026 «Мои AI Новости»</span>
+        <span class="sep">|</span>
+        <a href="/privacy" target="_blank">Политика</a>
+        <span class="sep">|</span>
+        <a href="/offer" target="_blank">Оферта</a>
+        <span class="sep">|</span>
+        <a href="/consent" target="_blank">Согласие</a>
+        <span class="sep">|</span>
+        <a href="/offer#requisites" target="_blank">Реквизиты</a>
+        <span class="sep">|</span>
+        <a href="/support" target="_blank">Помощь</a>
+        <span class="sep">|</span>
+        <span>Создано: <a href="https://proid.studio" target="_blank" class="studio-link">proid.studio</a></span>
+    </div>
 </div>
 <script src="/webapp/categories.js?v=50"></script>
 <script>
@@ -430,8 +454,8 @@ async function loadApp(){
         const appScreen = document.getElementById('appScreen');
         const consentBlock = document.getElementById('consentBlock');
 
-        // Явно определяем тестового пользователя: по токену или по id из ответа
-        isTestUser = (authToken === TEST_TOKEN) || (data.user_id === 0);
+        // Явно определяем тестового пользователя: по токену (или по id, но мы не используем id)
+        isTestUser = (authToken === TEST_TOKEN);
         consentGiven = data.consent_given === true;
 
         console.log('🔍 isTestUser:', isTestUser, 'consentGiven:', consentGiven, 'user_id:', data.user_id);
@@ -1012,8 +1036,10 @@ async function handlePayment(tariffKey){ if(!ensureConsent())return; hapticFeedb
     }catch(err){alert('❌ Ошибка: '+err.message);}
 }
 
-// ---- ФУНКЦИИ ВХОДА (ГАРАНТИРОВАННАЯ РАБОТА) ----
-async function startBotAuth(){ if(!ensureConsent())return; hapticFeedback();
+// ---- ФУНКЦИИ ВХОДА (без проверки согласия) ----
+async function startBotAuth(){
+    // Убрана проверка ensureConsent()
+    hapticFeedback();
     document.getElementById('loginScreen').querySelector('.auth-container').style.display='none';
     const w=document.getElementById('widgetContainer');
     w.innerHTML='<div class="loader"></div>';
@@ -1027,6 +1053,26 @@ async function startBotAuth(){ if(!ensureConsent())return; hapticFeedback();
         localStorage.setItem('bot_auth_token',token);
         window.open('https://t.me/'+botUsername+'?start='+encodeURIComponent(token),'_blank');
         pollBotAuthStatus(token);
+    }catch(err){alert('❌ Ошибка: '+err.message);document.getElementById('loginScreen').querySelector('.auth-container').style.display='block';w.innerHTML='';}
+}
+
+async function startMaxAuth(){
+    // Убрана проверка ensureConsent()
+    hapticFeedback();
+    document.getElementById('loginScreen').querySelector('.auth-container').style.display='none';
+    const w=document.getElementById('widgetContainer');
+    w.innerHTML='<div class="loader"></div>';
+    try{
+        const resp=await apiRequest('/api/auth/max-token');
+        if(!resp){document.getElementById('loginScreen').querySelector('.auth-container').style.display='block';w.innerHTML='';return;}
+        if(!resp.ok)throw new Error('Не удалось получить токен');
+        const data=await resp.json();
+        const token=data.token;
+        const botUsername=data.bot_username||'id772609477460_bot';
+        localStorage.setItem('max_auth_token',token);
+        startMaxWaiting(token);
+        window.open('https://max.ru/'+botUsername+'?start='+encodeURIComponent(token),'_blank');
+        w.innerHTML='<p style="color: var(--text-secondary);">Ожидаем подтверждения в MAX...</p>';
     }catch(err){alert('❌ Ошибка: '+err.message);document.getElementById('loginScreen').querySelector('.auth-container').style.display='block';w.innerHTML='';}
 }
 
@@ -1075,24 +1121,6 @@ function pollBotAuthStatus(token){
             document.getElementById('widgetContainer').innerHTML='';
         }
     },3000);
-}
-
-async function startMaxAuth(){ if(!ensureConsent())return; hapticFeedback();
-    document.getElementById('loginScreen').querySelector('.auth-container').style.display='none';
-    const w=document.getElementById('widgetContainer');
-    w.innerHTML='<div class="loader"></div>';
-    try{
-        const resp=await apiRequest('/api/auth/max-token');
-        if(!resp){document.getElementById('loginScreen').querySelector('.auth-container').style.display='block';w.innerHTML='';return;}
-        if(!resp.ok)throw new Error('Не удалось получить токен');
-        const data=await resp.json();
-        const token=data.token;
-        const botUsername=data.bot_username||'id772609477460_bot';
-        localStorage.setItem('max_auth_token',token);
-        startMaxWaiting(token);
-        window.open('https://max.ru/'+botUsername+'?start='+encodeURIComponent(token),'_blank');
-        w.innerHTML='<p style="color: var(--text-secondary);">Ожидаем подтверждения в MAX...</p>';
-    }catch(err){alert('❌ Ошибка: '+err.message);document.getElementById('loginScreen').querySelector('.auth-container').style.display='block';w.innerHTML='';}
 }
 
 function startMaxWaiting(token){
@@ -1227,6 +1255,53 @@ async function toggleDigest() {
     }
 }
 
+// ===== ВЫХОД ИЗ АККАУНТА =====
+function logout() {
+    const confirmLogout = () => {
+        // Очищаем все данные авторизации
+        localStorage.removeItem('auth_token');
+        localStorage.removeItem('bot_auth_token');
+        localStorage.removeItem('max_auth_token');
+        sessionStorage.removeItem('auth_token');
+        sessionStorage.removeItem('bot_auth_token');
+        sessionStorage.removeItem('max_auth_token');
+        authToken = null;
+        currentSources = [];
+        // Перезагружаем страницу, чтобы показать экран входа
+        window.location.reload();
+    };
+
+    // Проверяем наличие Telegram WebApp API
+    if (window.Telegram && window.Telegram.WebApp && window.Telegram.WebApp.showPopup) {
+        window.Telegram.WebApp.showPopup({
+            title: 'Выход',
+            message: 'Вы уверены, что хотите выйти?',
+            buttons: [
+                { id: 'cancel', type: 'cancel', text: 'Отмена' },
+                { id: 'logout', type: 'destructive', text: 'Выйти' }
+            ]
+        }, function (btnId) {
+            if (btnId === 'logout') confirmLogout();
+        });
+    } else if (window.WebApp && window.WebApp.showPopup) {
+        window.WebApp.showPopup({
+            title: 'Выход',
+            message: 'Вы уверены, что хотите выйти?',
+            buttons: [
+                { id: 'cancel', type: 'cancel', text: 'Отмена' },
+                { id: 'logout', type: 'destructive', text: 'Выйти' }
+            ]
+        }, function (btnId) {
+            if (btnId === 'logout') confirmLogout();
+        });
+    } else {
+        if (confirm('Вы уверены, что хотите выйти?')) {
+            confirmLogout();
+        }
+    }
+}
+// ===== КОНЕЦ ВЫХОДА =====
+
 window.suggestSource = function(){
     if (!ensureConsent()) return;
     hapticFeedback();
@@ -1287,6 +1362,7 @@ window.addRSSSource = addRSSSource;
 window.toggleDigest = toggleDigest;
 window.suggestSource = window.suggestSource;
 window.ensureConsent = ensureConsent;
+window.logout = logout; // Добавили экспорт функции
 </script>
 <script>if('serviceWorker' in navigator){navigator.serviceWorker.register('/sw.js').then(r=>console.log('✅ SW registered')).catch(e=>console.log('❌ SW registration failed:',e));}</script>
 </body>

@@ -167,6 +167,22 @@
             text-decoration: underline;
             opacity: 0.8;
         }
+
+        /* ===== ССЫЛКА "ВЫХОД" ===== */
+        #logoutContainer {
+            text-align: center;
+            margin-top: 12px;
+            font-size: 14px;
+            color: var(--text-secondary);
+            cursor: pointer;
+            text-decoration: none;
+            user-select: none;
+            transition: color 0.2s;
+        }
+        #logoutContainer:hover {
+            color: var(--text) !important;
+        }
+        /* ===== КОНЕЦ ===== */
     </style>
 </head>
 <body>
@@ -367,25 +383,29 @@
                 </div>
             </div>
 
+            <!-- ===== КНОПКА ВЫХОДА ===== -->
+            <div id="logoutContainer" onclick="logout()">Выход</div>
+            <!-- ======================== -->
+
         </div>
     </div>
 
     <div class="footer-wrapper">
-        <div class="footer-inner">
-            <span>© 2026 Мои AI Новости</span>
-            <span class="docs">
-                <a href="/privacy" target="_blank">Политика</a>
-                <a href="/offer" target="_blank">Оферта</a>
-                <a href="/consent" target="_blank">Согласие</a>
-            </span>
-            <span class="sep">|</span>
-            <span>Проект <a href="https://proid.studio" target="_blank" class="studio-link">proid.studio</a></span>
-            <span class="sep">|</span>
-            <a href="/landing" class="landing-link">О сервисе</a>
-            <span class="sep">|</span>
-            <span>ИП Ерыков А.А. (ИНН 772609477460)</span>
-            <a href="mailto:news@proid.studio" style="color: var(--accent2);">news@proid.studio</a>
-        </div>
+            <div class="footer-inner">
+        <span>© 2026 «Мои AI Новости»</span>
+        <span class="sep">|</span>
+        <a href="/privacy" target="_blank">Политика</a>
+        <span class="sep">|</span>
+        <a href="/offer" target="_blank">Оферта</a>
+        <span class="sep">|</span>
+        <a href="/consent" target="_blank">Согласие</a>
+        <span class="sep">|</span>
+        <a href="/offer#requisites" target="_blank">Реквизиты</a>
+        <span class="sep">|</span>
+        <a href="/support" target="_blank">Помощь</a>
+        <span class="sep">|</span>
+        <span>Создано: <a href="https://proid.studio" target="_blank" class="studio-link">proid.studio</a></span>
+    </div>
     </div>
 
     <script src="/webapp/categories.js?v=50"></script>
@@ -1120,6 +1140,42 @@
         }
         // ============================================================
 
+        // ===== ВЫХОД ИЗ АККАУНТА =====
+        function logout() {
+            const confirmLogout = () => {
+                localStorage.removeItem('auth_token');
+                localStorage.removeItem('max_auth_token');
+                localStorage.removeItem('bot_auth_token');
+                localStorage.removeItem('max_init_data');
+                sessionStorage.removeItem('auth_token');
+                sessionStorage.removeItem('max_auth_token');
+                sessionStorage.removeItem('bot_auth_token');
+                sessionStorage.removeItem('max_init_data');
+                // Сброс глобальных переменных (если есть)
+                currentSources = [];
+                // Перезагружаем страницу
+                window.location.reload();
+            };
+
+            if (window.WebApp && window.WebApp.showPopup) {
+                window.WebApp.showPopup({
+                    title: 'Выход',
+                    message: 'Вы уверены, что хотите выйти?',
+                    buttons: [
+                        { id: 'cancel', type: 'cancel', text: 'Отмена' },
+                        { id: 'logout', type: 'destructive', text: 'Выйти' }
+                    ]
+                }, function (btnId) {
+                    if (btnId === 'logout') confirmLogout();
+                });
+            } else {
+                if (confirm('Вы уверены, что хотите выйти?')) {
+                    confirmLogout();
+                }
+            }
+        }
+        // ===== КОНЕЦ ВЫХОДА =====
+
         (function(){
             const appContainer=document.getElementById('appContainer');
             if(typeof window.WebApp==='undefined'){document.body.innerHTML='<div style="text-align:center;padding:40px;color:#aaa;">❌ MAX Bridge не найден. Откройте страницу через MAX-бота.</div>';return;}
@@ -1184,6 +1240,7 @@
         window.sortItems=sortItems;
         window.shortenCategoryName=shortenCategoryName;
         window.toggleDigest = toggleDigest;
+        window.logout = logout;   // Добавлен экспорт функции выхода
     </script>
 </body>
 </html>

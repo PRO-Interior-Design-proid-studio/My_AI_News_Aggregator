@@ -15,8 +15,8 @@
     <div id="loginScreen">
       <div class="header"><h1>Мои AI Новости</h1></div>
       <div class="auth-container">
-        <button class="auth-btn telegram" id="botLoginBtn" onclick="startBotAuth()"><span class="icon">🚀</span> Войти через Telegram</button>
-        <button class="auth-btn max" id="maxLoginBtn" onclick="startMaxAuth()"><span class="icon">🚀</span> Войти через MAX</button>
+        <button class="auth-btn telegram" id="botLoginBtn"><span class="icon">🚀</span> Войти через Telegram</button>
+        <button class="auth-btn max" id="maxLoginBtn"><span class="icon">🚀</span> Войти через MAX</button>
         <p class="small-note">*аккаунт будет привязан к одному методу входа</p>
         <div class="widget-container" id="widgetContainer"></div>
       </div>
@@ -49,57 +49,57 @@
       <!-- Добавить -->
       <div class="section-header">Добавить</div>
       <div class="quick-buttons" id="quickButtons">
-        <button onclick="toggleCategoryForm('dzen')">Дзен</button>
-        <button onclick="toggleCategoryForm('rb')">RB.ru</button>
-        <button onclick="toggleCategoryForm('habr')">Хабр</button>
-        <button onclick="toggleCategoryForm('lifehacker')">Лайфхакер</button>
-        <button onclick="addForbesTelegram()">Forbes</button>
-        <button onclick="toggleCategoryForm('vc')">VC.ru</button>
-        <button onclick="toggleAddForm('rss')">RSS/HTML</button>
-        <button onclick="toggleAddForm('telegram')">Telegram</button>
-        <button onclick="toggleAddForm('vk')">VK</button>
-        <button onclick="toggleGitHubForm()">GitHub</button>
-        <button onclick="toggleYouTubeForm()">YouTube</button>
-        <button onclick="toggleRedditForm()">Reddit</button>
-        <button onclick="toggleCategoryForm('bbc')">BBC</button>
-        <button onclick="toggleGoogleNewsForm()">Google News</button>
-        <button onclick="toggleCategoryForm('cnn')">CNN</button>
+        <button id="btn-dzen">Дзен</button>
+        <button id="btn-rb">RB.ru</button>
+        <button id="btn-habr">Хабр</button>
+        <button id="btn-lifehacker">Лайфхакер</button>
+        <button id="btn-forbes">Forbes</button>
+        <button id="btn-vc">VC.ru</button>
+        <button id="btn-add-rss">RSS/HTML</button>
+        <button id="btn-add-telegram">Telegram</button>
+        <button id="btn-add-vk">VK</button>
+        <button id="btn-github">GitHub</button>
+        <button id="btn-youtube">YouTube</button>
+        <button id="btn-reddit">Reddit</button>
+        <button id="btn-bbc">BBC</button>
+        <button id="btn-google-news">Google News</button>
+        <button id="btn-cnn">CNN</button>
       </div>
 
       <!-- Формы добавления -->
       <div class="add-form" id="addForm">
         <div style="font-weight:600;margin-bottom:6px;" id="addFormTitle">Добавить RSS/HTML</div>
         <input id="sourceValue" type="text" placeholder="Введите URL...">
-        <button class="btn-primary" onclick="addSourceSubmit()">Добавить</button>
-        <button class="btn-secondary" onclick="closeAddForm()">Отмена</button>
+        <button class="btn-primary" id="addSourceSubmitBtn">Добавить</button>
+        <button class="btn-secondary" id="closeAddFormBtn">Отмена</button>
       </div>
 
       <div class="add-form" id="githubForm">
         <div style="font-weight:600;margin-bottom:6px;">GitHub — генератор RSS</div>
         <input id="githubInput" type="text" placeholder="owner/repo или username">
         <div class="github-grid" id="githubGrid">
-          <button data-type="releases" onclick="generateGitHubRSS('releases')">releases</button>
-          <button data-type="tags" onclick="generateGitHubRSS('tags')">tags</button>
-          <button data-type="commits" onclick="generateGitHubRSS('commits')">commits</button>
-          <button data-type="main" onclick="generateGitHubRSS('main')">main</button>
-          <button data-type="master" onclick="generateGitHubRSS('master')">master</button>
-          <button data-type="username" onclick="generateGitHubRSS('username')">username</button>
+          <button data-type="releases" id="github-releases">releases</button>
+          <button data-type="tags" id="github-tags">tags</button>
+          <button data-type="commits" id="github-commits">commits</button>
+          <button data-type="main" id="github-main">main</button>
+          <button data-type="master" id="github-master">master</button>
+          <button data-type="username" id="github-username">username</button>
         </div>
-        <button class="btn-secondary" onclick="closeGitHubForm()">Отмена</button>
+        <button class="btn-secondary" id="closeGitHubFormBtn">Отмена</button>
       </div>
 
       <div class="add-form" id="youtubeForm">
         <div style="font-weight:600;margin-bottom:6px;">YouTube — генератор RSS</div>
         <input id="youtubeInput" type="text" placeholder="логин канала или channelId">
-        <button class="btn-primary" onclick="generateYouTubeRSS()">Сгенерировать</button>
-        <button class="btn-secondary" onclick="closeYouTubeForm()">Отмена</button>
+        <button class="btn-primary" id="generateYouTubeBtn">Сгенерировать</button>
+        <button class="btn-secondary" id="closeYouTubeFormBtn">Отмена</button>
       </div>
 
       <div class="add-form" id="redditForm">
         <div style="font-weight:600;margin-bottom:6px;">Reddit — генератор RSS</div>
         <input id="redditInput" type="text" placeholder="название сабреддита">
-        <button class="btn-primary" onclick="generateRedditRSS()">Сгенерировать</button>
-        <button class="btn-secondary" onclick="closeRedditForm()">Отмена</button>
+        <button class="btn-primary" id="generateRedditBtn">Сгенерировать</button>
+        <button class="btn-secondary" id="closeRedditFormBtn">Отмена</button>
       </div>
 
       <div class="add-form" id="googleNewsForm">
@@ -113,8 +113,8 @@
           <div style="display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid var(--border);"><span style="color:var(--text-secondary);">intitle:слово</span><span style="color:var(--text-secondary);">поиск в заголовке</span></div>
           <div style="display:flex;justify-content:space-between;padding:4px 0;"><span style="color:var(--text-secondary);">allintext:текст</span><span style="color:var(--text-secondary);">поиск в тексте</span></div>
         </div>
-        <button class="btn-primary" onclick="generateGoogleNewsRSS()">Сгенерировать</button>
-        <button class="btn-secondary" onclick="closeGoogleNewsForm()">Отмена</button>
+        <button class="btn-primary" id="generateGoogleNewsBtn">Сгенерировать</button>
+        <button class="btn-secondary" id="closeGoogleNewsFormBtn">Отмена</button>
       </div>
 
       <!-- Категории -->
@@ -127,18 +127,18 @@
       <div class="category-form" id="vcForm"><div style="font-weight:600;margin-bottom:8px;">VC.ru — выберите категорию</div><div class="category-grid" id="vcGrid"></div></div>
 
       <div style="display:flex;gap:8px;margin-bottom:8px;margin-top:0px;">
-        <button class="suggest-btn" style="flex:1;color:var(--text);" onclick="toggleCategoryBrowser()">Категории</button>
-        <button class="suggest-btn" style="flex:1;color:var(--text-secondary);" onclick="suggestSource()">Предложить своё</button>
+        <button class="suggest-btn" id="categoryBrowserBtn" style="flex:1;color:var(--text);">Категории</button>
+        <button class="suggest-btn" id="suggestSourceBtn" style="flex:1;color:var(--text-secondary);">Предложить своё</button>
       </div>
 
       <div class="category-form" id="categoryBrowser" style="display:none;">
         <div class="category-form-header" style="font-weight:600;margin-bottom:8px;color:var(--text-secondary);text-align:center;" id="categoryBrowserHeader">Выберите категорию</div>
         <div class="category-grid" id="categoryGrid"></div>
-        <button class="btn-secondary" id="categoryBackBtn" style="display:none;margin-top:8px;width:100%;" onclick="goBackLevel()">← Назад</button>
+        <button class="btn-secondary" id="categoryBackBtn" style="display:none;margin-top:8px;width:100%;">← Назад</button>
       </div>
 
       <!-- Кнопка "Смотреть новости" -->
-      <button class="payment-toggle-btn" id="digestToggleBtn" onclick="toggleDigest()">📰 Смотреть новости</button>
+      <button class="payment-toggle-btn" id="digestToggleBtn">📰 Смотреть новости</button>
       <div id="digestContainer" style="display: none; margin-top: 0;">
         <div id="digestContent"></div>
       </div>
@@ -148,11 +148,11 @@
       <div id="sourceListContainer"></div>
 
       <!-- Тарифы -->
-      <button class="payment-toggle-btn" id="paymentToggleBtn" onclick="toggleTariffs()">💰 Оплатить тариф</button>
+      <button class="payment-toggle-btn" id="paymentToggleBtn">💰 Оплатить тариф</button>
       <div class="tariff-block" id="tariffBlock">
         <div class="tariff-grid">
-          <div class="tariff-card"><div class="title">Базовый</div><button class="price-btn" onclick="handlePayment('basic_month')">190 ₽ <span class="label">/ мес</span></button><button class="price-btn" onclick="handlePayment('basic_year')">1 900 ₽ <span class="label">/ год</span></button></div>
-          <div class="tariff-card"><div class="title">Расширенный</div><button class="price-btn" onclick="handlePayment('premium_month')">490 ₽ <span class="label">/ мес</span></button><button class="price-btn" onclick="handlePayment('premium_year')">4 900 ₽ <span class="label">/ год</span></button></div>
+          <div class="tariff-card"><div class="title">Базовый</div><button class="price-btn" id="basic_month">190 ₽ <span class="label">/ мес</span></button><button class="price-btn" id="basic_year">1 900 ₽ <span class="label">/ год</span></button></div>
+          <div class="tariff-card"><div class="title">Расширенный</div><button class="price-btn" id="premium_month">490 ₽ <span class="label">/ мес</span></button><button class="price-btn" id="premium_year">4 900 ₽ <span class="label">/ год</span></button></div>
         </div>
         <div class="tariff-link"><a href="https://news.proid.studio/#pricing" target="_blank">Описание тарифов</a></div>
       </div>
@@ -174,14 +174,17 @@
         <div class="status-row" style="border-bottom:none;padding-bottom:0;">
           <span>Текущее время:</span>
           <span id="currentTimeDisplay">—</span>
-          <button class="change-time-btn" id="changeTimeBtn" onclick="toggleTimePicker()">Изменить</button>
-          <span class="upgrade-hint" id="upgradeHint" style="display:none;">🔒 <a href="#" onclick="toggleTariffs(); return false;">Доступно в Расширенном тарифе</a></span>
+          <button class="change-time-btn" id="changeTimeBtn">Изменить</button>
+          <span class="upgrade-hint" id="upgradeHint" style="display:none;">🔒 <a href="#" id="upgradeLink">Доступно в Расширенном тарифе</a></span>
         </div>
         <div id="timePicker" style="display:none;margin-top:10px;">
           <div class="time-picker-grid" id="timePickerGrid"></div>
-          <button class="close-picker-btn" onclick="closeTimePicker()">Закрыть</button>
+          <button class="close-picker-btn" id="closeTimePickerBtn">Закрыть</button>
         </div>
       </div>
+
+      <!-- ===== КНОПКА ВЫХОДА ===== -->
+      <div id="logoutContainer">Выход</div>
 
     </div> <!-- /appScreen -->
   </div> <!-- /container -->
@@ -189,17 +192,21 @@
 
 <!-- Подвал -->
 <div class="footer-wrapper">
-  <div class="footer-inner">
-    <span>© 2026 Мои AI Новости</span>
-    <span class="docs"><a href="/privacy" target="_blank">Политика</a> <a href="/offer" target="_blank">Оферта</a> <a href="/consent" target="_blank">Согласие</a></span>
-    <span class="sep">|</span>
-    <span>Проект <a href="https://proid.studio" target="_blank" class="studio-link">proid.studio</a></span>
-    <span class="sep">|</span>
-    <a href="/landing" class="landing-link">О сервисе</a>
-    <span class="sep">|</span>
-    <span>ИП Ерыков А.А. (ИНН 772609477460)</span>
-    <a href="mailto:news@proid.studio" style="color:var(--accent2);">news@proid.studio</a>
-  </div>
+      <div class="footer-inner">
+        <span>© 2026 «Мои AI Новости»</span>
+        <span class="sep">|</span>
+        <a href="/privacy" target="_blank">Политика</a>
+        <span class="sep">|</span>
+        <a href="/offer" target="_blank">Оферта</a>
+        <span class="sep">|</span>
+        <a href="/consent" target="_blank">Согласие</a>
+        <span class="sep">|</span>
+        <a href="/offer#requisites" target="_blank">Реквизиты</a>
+        <span class="sep">|</span>
+        <a href="/support" target="_blank">Помощь</a>
+        <span class="sep">|</span>
+        <span>Создано: <a href="https://proid.studio" target="_blank" class="studio-link">proid.studio</a></span>
+    </div>
 </div>
 
 <script src="categories.js"></script>

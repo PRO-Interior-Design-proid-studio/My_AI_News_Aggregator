@@ -38,7 +38,7 @@
         body{font-family:-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "Fira Sans", "Droid Sans", "Helvetica Neue", Arial, sans-serif;background:var(--footer-bg) linear-gradient(180deg,#020e33 0%,var(--bg-color) 25%,var(--bg-color) 84%,var(--footer-bg) 100%);color:var(--text);line-height:1.6;padding:0;min-height:100vh;-webkit-font-smoothing:antialiased;font-variant-ligatures:none;display:flex;flex-direction:column;}
         .page-wrap{padding:0 20px;flex:1 0 auto;display:flex;flex-direction:column;width:100%;}
         .container{max-width:600px;margin:0 auto;flex:1 0 auto;display:flex;flex-direction:column;width:100%;padding:0 0 20px;}
-        .header{display:flex;align-items:center;justify-content:center;padding:20px 0 10px;border-bottom:1px solid var(--border);flex-shrink:0;}
+        .header{display:flex;align-items:center;justify-content:center;padding:100px 0 10px;border-bottom:1px solid var(--border);flex-shrink:0;}
         .header h1{font-size:28px;font-weight:700;background:linear-gradient(290deg,#d235ff 0%,#a062ff 30%,#3088ff 66%,#61d8ff 100%);-webkit-background-clip:text;background-clip:text;color:transparent;letter-spacing:-0.5px;}
         .section-header{text-align:center;font-size:18px;font-weight:600;color:var(--text);margin:20px 0 12px 0;}
         .quick-buttons{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:4px;}
@@ -165,6 +165,22 @@
             text-decoration: underline;
             opacity: 0.8;
         }
+
+        /* ===== ССЫЛКА "ВЫХОД" ===== */
+        #logoutContainer {
+            text-align: center;
+            margin-top: 12px;
+            font-size: 14px;
+            color: var(--text-secondary);
+            cursor: pointer;
+            text-decoration: none;
+            user-select: none;
+            transition: color 0.2s;
+        }
+        #logoutContainer:hover {
+            color: var(--text) !important;
+        }
+        /* ===== КОНЕЦ ===== */
     </style>
 </head>
 <body>
@@ -350,20 +366,28 @@
             </div>
         </div>
 
+        <!-- ===== КНОПКА ВЫХОДА ===== -->
+        <div id="logoutContainer" onclick="logout()">Выход</div>
+        <!-- ======================== -->
+
     </div>
 </div>
 
 <div class="footer-wrapper">
-    <div class="footer-inner">
-        <span>© 2026 Мои AI Новости</span>
-        <span class="docs"><a href="/privacy" target="_blank">Политика</a> <a href="/offer" target="_blank">Оферта</a> <a href="/consent" target="_blank">Согласие</a></span>
+        <div class="footer-inner">
+        <span>© 2026 «Мои AI Новости»</span>
         <span class="sep">|</span>
-        <span>Проект <a href="https://proid.studio" target="_blank" class="studio-link">proid.studio</a></span>
+        <a href="/privacy" target="_blank">Политика</a>
         <span class="sep">|</span>
-        <a href="/landing" class="landing-link">О сервисе</a>
+        <a href="/offer" target="_blank">Оферта</a>
         <span class="sep">|</span>
-        <span>ИП Ерыков А.А. (ИНН 772609477460)</span>
-        <a href="mailto:news@proid.studio" style="color: var(--accent2);">news@proid.studio</a>
+        <a href="/consent" target="_blank">Согласие</a>
+        <span class="sep">|</span>
+        <a href="/offer#requisites" target="_blank">Реквизиты</a>
+        <span class="sep">|</span>
+        <a href="/support" target="_blank">Помощь</a>
+        <span class="sep">|</span>
+        <span>Создано: <a href="https://proid.studio" target="_blank" class="studio-link">proid.studio</a></span>
     </div>
 </div>
 
@@ -1350,6 +1374,39 @@
         window.open(url + '?text=' + encodeURIComponent(text), '_blank');
     }
 
+    // ===== ВЫХОД ИЗ АККАУНТА =====
+    function logout() {
+        const confirmLogout = () => {
+            localStorage.removeItem('auth_token');
+            localStorage.removeItem('bot_auth_token');
+            localStorage.removeItem('max_auth_token');
+            sessionStorage.removeItem('auth_token');
+            sessionStorage.removeItem('bot_auth_token');
+            sessionStorage.removeItem('max_auth_token');
+            authToken = null;
+            currentSources = [];
+            window.location.reload();
+        };
+
+        if (tg && tg.showPopup) {
+            tg.showPopup({
+                title: 'Выход',
+                message: 'Вы уверены, что хотите выйти?',
+                buttons: [
+                    { id: 'cancel', type: 'cancel', text: 'Отмена' },
+                    { id: 'logout', type: 'destructive', text: 'Выйти' }
+                ]
+            }, function (btnId) {
+                if (btnId === 'logout') confirmLogout();
+            });
+        } else {
+            if (confirm('Вы уверены, что хотите выйти?')) {
+                confirmLogout();
+            }
+        }
+    }
+    // ===== КОНЕЦ ВЫХОДА =====
+
     // ===== ИНИЦИАЛИЗАЦИЯ =====
     (function init() {
         if (!tg) {
@@ -1403,6 +1460,7 @@
     window.suggestSource = suggestSource;
     window.loadSources = loadSources;
     window.authToken = authToken;
+    window.logout = logout;   // Добавлен экспорт функции выхода
 </script>
 </body>
 </html>

@@ -1,4 +1,3 @@
- 
 /* ============================================================
    app.css — полные стили для расширения (тёмная тема)
    Скопировано из pwa.html с сохранением всех стилей
@@ -868,6 +867,21 @@ body {
 #digestContent .status-block a:hover {
   text-decoration: underline;
   opacity: 0.8;
+}
+
+/* ===== КНОПКА ВЫХОДА ===== */
+#logoutContainer {
+  text-align: center;
+  margin-top: 12px;
+  font-size: 14px;
+  color: var(--text-secondary);
+  cursor: pointer;
+  text-decoration: none;
+  user-select: none;
+  transition: color 0.2s;
+}
+#logoutContainer:hover {
+  color: var(--text) !important;
 }
 
 /* ===== АДАПТИВ ===== */
