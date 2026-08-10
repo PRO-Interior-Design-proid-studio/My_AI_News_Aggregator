@@ -5,7 +5,6 @@
   "description": "Персонализированный AI-дайджест новостей в вашем браузере.",
   "permissions": [
     "storage",
-    "contextMenus",
     "activeTab",
     "tabs"
   ],

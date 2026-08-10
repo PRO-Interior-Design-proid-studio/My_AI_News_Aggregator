@@ -1,5 +1,63 @@
-// app.js — основная логика для расширения Chrome
-// Адаптировано из pwa.html с заменой localStorage на browser.storage
+// app.js — основная логика для расширения (универсальная)
+
+// ============================================================
+//  БАЗОВЫЙ URL ДЛЯ API
+// ============================================================
+const API_BASE = 'https://news.proid.studio';
+
+// ============================================================
+//  УНИВЕРСАЛЬНЫЙ ДОСТУП К API БРАУЗЕРА
+// ============================================================
+const isFirefox = typeof browser !== 'undefined' && browser.runtime;
+const isChrome = typeof chrome !== 'undefined' && chrome.runtime;
+
+function storageGet(keys) {
+  return new Promise((resolve) => {
+    if (isFirefox) {
+      browser.storage.sync.get(keys, resolve);
+    } else {
+      chrome.storage.sync.get(keys, resolve);
+    }
+  });
+}
+
+function storageSet(items) {
+  return new Promise((resolve) => {
+    if (isFirefox) {
+      browser.storage.sync.set(items, resolve);
+    } else {
+      chrome.storage.sync.set(items, resolve);
+    }
+  });
+}
+
+function storageLocalGet(keys) {
+  return new Promise((resolve) => {
+    if (isFirefox) {
+      browser.storage.local.get(keys, resolve);
+    } else {
+      chrome.storage.local.get(keys, resolve);
+    }
+  });
+}
+
+function storageLocalSet(items) {
+  return new Promise((resolve) => {
+    if (isFirefox) {
+      browser.storage.local.set(items, resolve);
+    } else {
+      chrome.storage.local.set(items, resolve);
+    }
+  });
+}
+
+function createTab(url) {
+  if (isFirefox) {
+    browser.tabs.create({ url });
+  } else {
+    chrome.tabs.create({ url });
+  }
+}
 
 // ============================================================
 //  ГЛОБАЛЬНЫЕ ПЕРЕМЕННЫЕ
@@ -13,33 +71,6 @@ let defaultSendHour = 18;
 let digestVisible = false;
 let categoryHistory = [];
 const CATEGORY_CACHE_TTL = 3600000;
-
-// ============================================================
-//  РАБОТА С ХРАНИЛИЩЕМ (browser.storage)
-// ============================================================
-function storageGet(keys) {
-  return new Promise((resolve) => {
-    browser.storage.sync.get(keys, resolve);
-  });
-}
-
-function storageSet(items) {
-  return new Promise((resolve) => {
-    browser.storage.sync.set(items, resolve);
-  });
-}
-
-function storageLocalGet(keys) {
-  return new Promise((resolve) => {
-    browser.storage.local.get(keys, resolve);
-  });
-}
-
-function storageLocalSet(items) {
-  return new Promise((resolve) => {
-    browser.storage.local.set(items, resolve);
-  });
-}
 
 // ============================================================
 //  ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ
@@ -66,8 +97,10 @@ function showAppScreen() {
 }
 
 async function apiRequest(url, options = {}) {
+  // Если URL относительный, добавляем API_BASE
+  const fullUrl = url.startsWith('http') ? url : API_BASE + url;
   try {
-    const resp = await fetch(url, options);
+    const resp = await fetch(fullUrl, options);
     if (resp.status === 503) {
       alert('⚠️ Сервер временно недоступен. Пожалуйста, обновите страницу через несколько секунд.');
       return null;
@@ -83,14 +116,16 @@ async function apiRequest(url, options = {}) {
 // ============================================================
 async function loadStoredData() {
   const result = await storageGet(['authToken', 'sources', 'limit', 'premium', 'sendTime', 'defaultSendHour', 'digestCache']);
-  authToken = result.authToken || null;
+  // Не перезаписываем authToken, если он уже установлен (например, из параметра URL)
+  if (authToken === null) {
+    authToken = result.authToken || null;
+  }
   currentSources = result.sources || [];
   currentLimit = result.limit || 5;
   isPremium = result.premium || false;
   currentSendTime = result.sendTime || null;
   defaultSendHour = result.defaultSendHour || 18;
 
-  // Если есть кеш дайджеста – показываем его при загрузке (офлайн-режим)
   if (result.digestCache) {
     showDigestFromCache(result.digestCache);
   }
@@ -111,7 +146,6 @@ async function loadSources() {
 
     if (!resp.ok) {
       if (resp.status === 401 || resp.status === 403) {
-        // Токен просрочен
         authToken = null;
         await storageSet({ authToken: null });
         showLoginScreen();
@@ -128,7 +162,6 @@ async function loadSources() {
     currentSendTime = data.send_time || null;
     defaultSendHour = data.default_send_hour || 18;
 
-    // Сохраняем в browser.storage
     await storageSet({
       sources: currentSources,
       limit: currentLimit,
@@ -142,14 +175,12 @@ async function loadSources() {
     document.getElementById('counter').textContent = currentSources.length;
     showAppScreen();
 
-    // ===== БЛОК СОГЛАСИЯ =====
     const consentBlock = document.getElementById('consentBlock');
     if (data.consent_given === false) {
       consentBlock.style.display = 'block';
     } else {
       consentBlock.style.display = 'none';
     }
-    // ========================
 
   } catch (err) {
     console.error('Ошибка загрузки источников:', err);
@@ -181,11 +212,8 @@ async function startBotAuth() {
     const token = data.token;
     const botUsername = data.bot_username || 'My_AI_News_Aggregator_bot';
 
-    // Сохраняем токен для опроса
     await storageSet({ botAuthToken: token });
-
-    // Открываем Telegram бота в новой вкладке
-    browser.tabs.create({ url: `https://t.me/${botUsername}?start=${encodeURIComponent(token)}` });
+    createTab(`https://t.me/${botUsername}?start=${encodeURIComponent(token)}`);
 
     pollBotAuthStatus(token);
   } catch (err) {
@@ -209,7 +237,7 @@ function pollBotAuthStatus(token) {
         clearInterval(interval);
         const id = result.telegram_id;
         if (id) {
-          const tr = await fetch(`/api/auth/get-token?telegram_id=${encodeURIComponent(id)}`, { headers: getHeaders() });
+          const tr = await fetch(`${API_BASE}/api/auth/get-token?telegram_id=${encodeURIComponent(id)}`, { headers: getHeaders() });
           if (tr.ok) {
             const td = await tr.json();
             if (td.token) {
@@ -264,7 +292,7 @@ async function startMaxAuth() {
 
     await storageSet({ maxAuthToken: token });
     startMaxWaiting(token);
-    browser.tabs.create({ url: `https://max.ru/${botUsername}?start=${encodeURIComponent(token)}` });
+    createTab(`https://max.ru/${botUsername}?start=${encodeURIComponent(token)}`);
     w.innerHTML = '<p style="color: var(--text-secondary);">Ожидаем подтверждения в MAX...</p>';
   } catch (err) {
     alert('❌ Ошибка: ' + err.message);
@@ -288,8 +316,8 @@ function startMaxWaiting(token) {
         authToken = data.auth_token;
         await storageSet({ authToken });
         alert('✅ Аккаунт привязан, перенаправляем...');
-        // Перезагружаем страницу, чтобы применить токен
-        window.location.href = browser.runtime.getURL('app.html') + '?auth_token=' + encodeURIComponent(authToken);
+        const url = isFirefox ? browser.runtime.getURL('app.html') : chrome.runtime.getURL('app.html');
+        window.location.href = url + '?auth_token=' + encodeURIComponent(authToken);
         return;
       }
       if (attempts >= maxAttempts) {
@@ -379,7 +407,7 @@ function renderGroupedSources(sources) {
       const g = getIconGradient(s.type);
       const item = document.createElement('div');
       item.className = 'source-item';
-      item.onclick = function () { askOpenLink(u); };
+      item.addEventListener('click', function() { askOpenLink(u); });
       const info = document.createElement('div');
       info.className = 'source-info';
       const icon = document.createElement('div');
@@ -394,7 +422,7 @@ function renderGroupedSources(sources) {
       const delBtn = document.createElement('button');
       delBtn.className = 'delete-btn';
       delBtn.textContent = '✕';
-      delBtn.onclick = function (e) { e.stopPropagation(); hapticFeedback(); confirmDelete(s.id); };
+      delBtn.addEventListener('click', function(e) { e.stopPropagation(); hapticFeedback(); confirmDelete(s.id); });
       item.appendChild(info);
       item.appendChild(delBtn);
       list.appendChild(item);
@@ -512,7 +540,7 @@ function toggleCategoryForm(type) {
         Object.entries(cats).sort((a, b) => a[0].localeCompare(b[0], 'ru')).forEach(([name, url]) => {
           const btn = document.createElement('button');
           btn.textContent = name;
-          btn.onclick = function () { addCategorySource('rss', url, name); };
+          btn.addEventListener('click', function() { addCategorySource('rss', url, name); });
           grid.appendChild(btn);
         });
       } else {
@@ -551,7 +579,7 @@ function toggleGitHubForm() {
     updateGitHubButtons('');
     const input = document.getElementById('githubInput');
     input.removeEventListener('input', window._githubInputHandler);
-    window._githubInputHandler = function () {
+    window._githubInputHandler = function() {
       updateGitHubButtons(this.value);
     };
     input.addEventListener('input', window._githubInputHandler);
@@ -666,7 +694,7 @@ function addRSSSource(u, n) {
   if (!u || !u.trim()) { alert('URL не может быть пустым.'); return; }
   let final = u.trim();
   if (!final.startsWith('http://') && !final.startsWith('https://')) final = 'https://' + final;
-  fetch('/api/webapp/add', {
+  fetch(API_BASE + '/api/webapp/add', {
     method: 'POST',
     headers: getHeaders(),
     body: JSON.stringify({ source_type: 'rss', source_value: final })
@@ -945,9 +973,9 @@ function showLevel(parentId) {
       const btn = document.createElement('button');
       btn.textContent = name;
       if (i.url) {
-        btn.onclick = function () { addSourceByType(i.source_type || 'rss', i.url, name); };
+        btn.addEventListener('click', function() { addSourceByType(i.source_type || 'rss', i.url, name); });
       } else {
-        btn.onclick = function () { openLevel(i.id, name); };
+        btn.addEventListener('click', function() { openLevel(i.id, name); });
       }
       grid.appendChild(btn);
     });
@@ -988,7 +1016,7 @@ function renderTimePicker() {
     const btn = document.createElement('button');
     btn.textContent = h.toString().padStart(2, '0') + ':00';
     if (h === cur) btn.classList.add('selected');
-    btn.onclick = function () { setTime(h); };
+    btn.addEventListener('click', function() { setTime(h); });
     grid.appendChild(btn);
   }
 }
@@ -1039,7 +1067,7 @@ async function handlePayment(tariffKey) {
 }
 
 // ============================================================
-//  КНОПКА "СМОТРЕТЬ НОВОСТИ" (ОБНОВЛЕНА С УДАЛЕНИЕМ ПУСТЫХ СТРОК)
+//  КНОПКА "СМОТРЕТЬ НОВОСТИ"
 // ============================================================
 async function toggleDigest() {
   const container = document.getElementById('digestContainer');
@@ -1069,13 +1097,10 @@ async function toggleDigest() {
       return;
     }
 
-    // Сохраняем в кеш (browser.storage.local)
     await storageLocalSet({ digestCache: digestHtml });
 
-    // Удаляем управляющие символы
     digestHtml = digestHtml.replace(/[\x00-\x1F\x7F-\x9F\u200B\u200C\u200D\uFEFF\u2028\u2029\r]/g, '');
 
-    // Разбиение на блоки
     let blocks = digestHtml.split(/(?=\n- <b>)/).filter(b => b.trim().length > 0);
     if (blocks.length <= 1) {
       blocks = digestHtml.split(/(?=\n-)/).filter(b => b.trim().length > 0);
@@ -1094,7 +1119,6 @@ async function toggleDigest() {
       while (lines.length > 0 && lines[lines.length - 1].trim() === '') lines.pop();
       let cleanedBlock = lines.join('\n');
 
-      // Принудительные переносы
       if (cleanedBlock.includes('</b>')) {
         cleanedBlock = cleanedBlock.replace(/(<\/b>)(?!\n)/, '$1\n');
       }
@@ -1103,7 +1127,6 @@ async function toggleDigest() {
       }
       cleanedBlock = cleanedBlock.replace(/\n{3,}/g, '\n\n');
 
-      // Обработка суммаризаций
       let summaryStart = cleanedBlock.indexOf('<b>Обсуждения в ');
       if (summaryStart !== -1) {
         let closeBpos = cleanedBlock.indexOf('</b>', summaryStart);
@@ -1142,10 +1165,7 @@ async function toggleDigest() {
 }
 
 function showDigestFromCache(cachedHtml) {
-  // Отображаем кеш, если нет других данных (используется при офлайн-загрузке)
-  const container = document.getElementById('digestContainer');
-  const content = document.getElementById('digestContent');
-  // Если контейнер скрыт, не показываем кеш принудительно
+  // можно использовать для офлайн-отображения
 }
 
 // ============================================================
@@ -1159,55 +1179,113 @@ function suggestSource() {
 }
 
 // ============================================================
-//  ОБРАБОТЧИКИ БЛОКА КОНФИДЕНЦИАЛЬНОСТИ
+//  ВЫХОД ИЗ АККАУНТА
+// ============================================================
+function logout() {
+  const confirmLogout = () => {
+    storageSet({ authToken: null, botAuthToken: null, maxAuthToken: null });
+    storageLocalSet({ digestCache: null });
+    authToken = null;
+    currentSources = [];
+    window.location.reload();
+  };
+
+  if (window.confirm('Вы уверены, что хотите выйти?')) {
+    confirmLogout();
+  }
+}
+
+// ============================================================
+//  ПРИВЯЗКА СОБЫТИЙ (вместо inline onclick)
 // ============================================================
 document.addEventListener('DOMContentLoaded', function() {
-  const check = document.getElementById('consentCheck');
-  const btn = document.getElementById('consentAcceptBtn');
+  // --- Авторизация ---
+  document.getElementById('botLoginBtn').addEventListener('click', startBotAuth);
+  document.getElementById('maxLoginBtn').addEventListener('click', startMaxAuth);
 
-  if (check && btn) {
-    check.addEventListener('change', function() {
-      if (this.checked) {
-        btn.disabled = false;
-        btn.style.opacity = '1';
-        btn.style.pointerEvents = 'auto';
-      } else {
-        btn.disabled = true;
-        btn.style.opacity = '0.5';
-        btn.style.pointerEvents = 'none';
-      }
-    });
+  // --- Добавление источников ---
+  document.getElementById('btn-dzen').addEventListener('click', function() { toggleCategoryForm('dzen'); });
+  document.getElementById('btn-rb').addEventListener('click', function() { toggleCategoryForm('rb'); });
+  document.getElementById('btn-habr').addEventListener('click', function() { toggleCategoryForm('habr'); });
+  document.getElementById('btn-lifehacker').addEventListener('click', function() { toggleCategoryForm('lifehacker'); });
+  document.getElementById('btn-forbes').addEventListener('click', addForbesTelegram);
+  document.getElementById('btn-vc').addEventListener('click', function() { toggleCategoryForm('vc'); });
+  document.getElementById('btn-add-rss').addEventListener('click', function() { toggleAddForm('rss'); });
+  document.getElementById('btn-add-telegram').addEventListener('click', function() { toggleAddForm('telegram'); });
+  document.getElementById('btn-add-vk').addEventListener('click', function() { toggleAddForm('vk'); });
+  document.getElementById('btn-github').addEventListener('click', toggleGitHubForm);
+  document.getElementById('btn-youtube').addEventListener('click', toggleYouTubeForm);
+  document.getElementById('btn-reddit').addEventListener('click', toggleRedditForm);
+  document.getElementById('btn-bbc').addEventListener('click', function() { toggleCategoryForm('bbc'); });
+  document.getElementById('btn-google-news').addEventListener('click', toggleGoogleNewsForm);
+  document.getElementById('btn-cnn').addEventListener('click', function() { toggleCategoryForm('cnn'); });
 
-    btn.addEventListener('click', async function() {
-      if (!check.checked) return;
-      try {
-        const resp = await fetch('/api/webapp/consent', {
-          method: 'POST',
-          headers: getHeaders()
-        });
-        if (resp.ok) {
-          document.getElementById('consentBlock').style.display = 'none';
-          // Обновляем данные, чтобы зафиксировать согласие
-          await loadSources();
-        } else {
-          const err = await resp.json();
-          alert('❌ Ошибка: ' + (err.detail || 'Не удалось сохранить согласие'));
-        }
-      } catch (e) {
-        alert('❌ Ошибка: ' + e.message);
-      }
-    });
-  }
+  // --- Формы ---
+  document.getElementById('addSourceSubmitBtn').addEventListener('click', addSourceSubmit);
+  document.getElementById('closeAddFormBtn').addEventListener('click', closeAddForm);
+  document.getElementById('closeGitHubFormBtn').addEventListener('click', closeGitHubForm);
+  document.getElementById('generateYouTubeBtn').addEventListener('click', generateYouTubeRSS);
+  document.getElementById('closeYouTubeFormBtn').addEventListener('click', closeYouTubeForm);
+  document.getElementById('generateRedditBtn').addEventListener('click', generateRedditRSS);
+  document.getElementById('closeRedditFormBtn').addEventListener('click', closeRedditForm);
+  document.getElementById('generateGoogleNewsBtn').addEventListener('click', generateGoogleNewsRSS);
+  document.getElementById('closeGoogleNewsFormBtn').addEventListener('click', closeGoogleNewsForm);
+
+  // --- GitHub кнопки ---
+  document.getElementById('github-releases').addEventListener('click', function() { generateGitHubRSS('releases'); });
+  document.getElementById('github-tags').addEventListener('click', function() { generateGitHubRSS('tags'); });
+  document.getElementById('github-commits').addEventListener('click', function() { generateGitHubRSS('commits'); });
+  document.getElementById('github-main').addEventListener('click', function() { generateGitHubRSS('main'); });
+  document.getElementById('github-master').addEventListener('click', function() { generateGitHubRSS('master'); });
+  document.getElementById('github-username').addEventListener('click', function() { generateGitHubRSS('username'); });
+
+  // --- Категории ---
+  document.getElementById('categoryBrowserBtn').addEventListener('click', toggleCategoryBrowser);
+  document.getElementById('categoryBackBtn').addEventListener('click', goBackLevel);
+  document.getElementById('suggestSourceBtn').addEventListener('click', suggestSource);
+
+  // --- Дайджест ---
+  document.getElementById('digestToggleBtn').addEventListener('click', toggleDigest);
+
+  // --- Тарифы и оплата ---
+  document.getElementById('paymentToggleBtn').addEventListener('click', toggleTariffs);
+  document.getElementById('basic_month').addEventListener('click', function() { handlePayment('basic_month'); });
+  document.getElementById('basic_year').addEventListener('click', function() { handlePayment('basic_year'); });
+  document.getElementById('premium_month').addEventListener('click', function() { handlePayment('premium_month'); });
+  document.getElementById('premium_year').addEventListener('click', function() { handlePayment('premium_year'); });
+
+  // --- Время ---
+  document.getElementById('changeTimeBtn').addEventListener('click', toggleTimePicker);
+  document.getElementById('closeTimePickerBtn').addEventListener('click', closeTimePicker);
+  document.getElementById('upgradeLink').addEventListener('click', function(e) { e.preventDefault(); toggleTariffs(); });
+
+  // --- Выход ---
+  document.getElementById('logoutContainer').addEventListener('click', logout);
 });
 
 // ============================================================
-//  ИНИЦИАЛИЗАЦИЯ
+//  ИНИЦИАЛИЗАЦИЯ (исправлена: сначала параметр URL, потом хранилище)
 // ============================================================
 (async function init() {
-  // Загружаем сохранённые данные
+  // 1. Проверяем параметр auth_token в URL (приоритет выше)
+  const params = new URLSearchParams(window.location.search);
+  const authParam = params.get('auth_token');
+
+  if (authParam) {
+    // Сохраняем токен сразу
+    authToken = authParam;
+    await storageSet({ authToken: authParam });
+    // Удаляем параметр из URL, чтобы не было повторной обработки
+    const newUrl = window.location.pathname + window.location.search.replace(/[?&]auth_token=[^&]+/, '');
+    window.history.replaceState({}, '', newUrl);
+    // Загружаем приложение
+    await loadSources();
+    return;
+  }
+
+  // 2. Если параметра нет – загружаем данные из хранилища
   await loadStoredData();
 
-  // Если есть токен – загружаем приложение
   if (authToken) {
     try {
       await loadSources();
@@ -1218,8 +1296,7 @@ document.addEventListener('DOMContentLoaded', function() {
     showLoginScreen();
   }
 
-  // Обработка параметров URL (например, ?action=addRSS&url=...)
-  const params = new URLSearchParams(window.location.search);
+  // 3. Обработка других параметров (addRSS, addTelegram)
   const action = params.get('action');
   if (action === 'addRSS') {
     const url = params.get('url');
@@ -1232,7 +1309,6 @@ document.addEventListener('DOMContentLoaded', function() {
   } else if (action === 'addTelegram') {
     const url = params.get('url');
     if (url && authToken) {
-      // Извлекаем username из ссылки
       let username = url;
       if (url.includes('t.me/')) {
         username = url.split('t.me/')[1].split('/')[0];
@@ -1242,23 +1318,12 @@ document.addEventListener('DOMContentLoaded', function() {
         toggleAddForm('telegram');
       }, 500);
     }
-  } else if (action === 'saveToDigest') {
-    // Просто открываем приложение
-  }
-
-  // Если в URL есть auth_token (после редиректа от MAX), сохраняем и удаляем параметр
-  const authParam = params.get('auth_token');
-  if (authParam) {
-    authToken = authParam;
-    await storageSet({ authToken });
-    // Удаляем параметр из URL
-    const newUrl = window.location.pathname + window.location.search.replace(/[?&]auth_token=[^&]+/, '');
-    window.history.replaceState({}, '', newUrl);
-    loadSources();
   }
 })();
 
-// Экспортируем функции в глобальную область для вызова из HTML
+// ============================================================
+//  ЭКСПОРТЫ (на случай, если где-то ещё используются)
+// ============================================================
 window.toggleTariffs = toggleTariffs;
 window.handlePayment = handlePayment;
 window.startPayment = handlePayment;
@@ -1299,3 +1364,4 @@ window.toggleDigest = toggleDigest;
 window.suggestSource = suggestSource;
 window.startBotAuth = startBotAuth;
 window.startMaxAuth = startMaxAuth;
+window.logout = logout;
