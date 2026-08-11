@@ -1,0 +1,42 @@
+{
+  "manifest_version": 3,
+  "name": "Мои AI Новости",
+  "version": "1.2.0",
+  "description": "Персонализированный AI-дайджест новостей в вашем браузере.",
+  "permissions": [
+    "storage",
+    "activeTab",
+    "tabs",
+    "alarms",
+    "contextMenus"
+  ],
+  "host_permissions": [
+    "https://news.proid.studio/*"
+  ],
+  "background": {
+    "service_worker": "background.js",
+    "scripts": ["background.js"]
+  },
+  "action": {
+    "default_icon": {
+      "16": "icon16.png",
+      "48": "icon48.png",
+      "128": "icon128.png"
+    },
+    "default_title": "Мои AI Новости — полноценный агрегатор"
+  },
+  "icons": {
+    "16": "icon16.png",
+    "48": "icon48.png",
+    "128": "icon128.png"
+  },
+  "browser_specific_settings": {
+    "gecko": {
+      "id": "my-ai-news@proid.studio",
+      "strict_min_version": "140.0",
+      "data_collection_permissions": {
+        "required": ["none"]
+      }
+    }
+  }
+}

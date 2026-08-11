@@ -1,16 +1,25 @@
-// app.js — основная логика для расширения (универсальная)
+// app.js — основная логика расширения (универсальная, с отладочными логами)
+
+console.log('🔍 [app.js] СКРИПТ ЗАГРУЖЕН');
 
 // ============================================================
 //  БАЗОВЫЙ URL ДЛЯ API
 // ============================================================
 const API_BASE = 'https://news.proid.studio';
+const TEST_TOKEN = 'vol7Js5SZnjPuaTfkk46zea3I-k_vsInqyqQPho_dF0';
 
 // ============================================================
 //  УНИВЕРСАЛЬНЫЙ ДОСТУП К API БРАУЗЕРА
 // ============================================================
 const isFirefox = typeof browser !== 'undefined' && browser.runtime;
 const isChrome = typeof chrome !== 'undefined' && chrome.runtime;
+console.log('🌐 [app.js] isFirefox:', isFirefox, 'isChrome:', isChrome);
 
+if (!isFirefox && !isChrome) {
+  console.error('❌ [app.js] Не удалось определить API браузера.');
+}
+
+// Универсальные обёртки для storage
 function storageGet(keys) {
   return new Promise((resolve) => {
     if (isFirefox) {
@@ -52,6 +61,7 @@ function storageLocalSet(items) {
 }
 
 function createTab(url) {
+  console.log('📂 [app.js] createTab:', url);
   if (isFirefox) {
     browser.tabs.create({ url });
   } else {
@@ -65,12 +75,17 @@ function createTab(url) {
 let authToken = null;
 let currentSources = [];
 let currentLimit = 5;
+let currentAddType = 'rss';
 let currentSendTime = null;
 let isPremium = false;
 let defaultSendHour = 18;
 let digestVisible = false;
 let categoryHistory = [];
 const CATEGORY_CACHE_TTL = 3600000;
+let isTestUser = false;
+let consentGiven = false;
+
+console.log('🔍 [app.js] Глобальные переменные инициализированы');
 
 // ============================================================
 //  ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ
@@ -87,47 +102,71 @@ function getHeaders() {
 }
 
 function showLoginScreen() {
-  document.getElementById('loginScreen').style.display = 'block';
-  document.getElementById('appScreen').classList.add('hidden');
+  console.log('🔐 [app.js] showLoginScreen');
+  const loginScreen = document.getElementById('loginScreen');
+  const appScreen = document.getElementById('appScreen');
+  if (loginScreen) loginScreen.style.display = 'block';
+  if (appScreen) appScreen.classList.add('hidden');
 }
 
 function showAppScreen() {
-  document.getElementById('loginScreen').style.display = 'none';
-  document.getElementById('appScreen').classList.remove('hidden');
+  console.log('🔐 [app.js] showAppScreen');
+  const loginScreen = document.getElementById('loginScreen');
+  const appScreen = document.getElementById('appScreen');
+  if (loginScreen) loginScreen.style.display = 'none';
+  if (appScreen) appScreen.classList.remove('hidden');
 }
 
 async function apiRequest(url, options = {}) {
-  // Если URL относительный, добавляем API_BASE
   const fullUrl = url.startsWith('http') ? url : API_BASE + url;
+  console.log(`🌐 [app.js] apiRequest: ${options.method || 'GET'} ${fullUrl}`);
   try {
     const resp = await fetch(fullUrl, options);
     if (resp.status === 503) {
       alert('⚠️ Сервер временно недоступен. Пожалуйста, обновите страницу через несколько секунд.');
       return null;
     }
+    console.log(`🌐 [app.js] apiRequest ответ: статус ${resp.status}`);
     return resp;
   } catch (err) {
+    console.error('❌ [app.js] apiRequest ошибка:', err);
     throw err;
   }
+}
+
+// ===== ПРОВЕРКА СОГЛАСИЯ =====
+function ensureConsent() {
+  if (!consentGiven && !isTestUser) {
+    alert('Сначала примите согласие на обработку данных.');
+    return false;
+  }
+  return true;
 }
 
 // ============================================================
 //  ЗАГРУЗКА ДАННЫХ ПРИ СТАРТЕ
 // ============================================================
 async function loadStoredData() {
-  const result = await storageGet(['authToken', 'sources', 'limit', 'premium', 'sendTime', 'defaultSendHour', 'digestCache']);
-  // Не перезаписываем authToken, если он уже установлен (например, из параметра URL)
-  if (authToken === null) {
-    authToken = result.authToken || null;
-  }
-  currentSources = result.sources || [];
-  currentLimit = result.limit || 5;
-  isPremium = result.premium || false;
-  currentSendTime = result.sendTime || null;
-  defaultSendHour = result.defaultSendHour || 18;
+  console.log('💾 [app.js] loadStoredData');
+  try {
+    const result = await storageGet(['authToken', 'sources', 'limit', 'premium', 'sendTime', 'defaultSendHour', 'digestCache', 'consentGiven']);
+    console.log('💾 [app.js] данные из storage:', Object.keys(result));
+    if (authToken === null) {
+      authToken = result.authToken || null;
+    }
+    currentSources = result.sources || [];
+    currentLimit = result.limit || 5;
+    isPremium = result.premium || false;
+    currentSendTime = result.sendTime || null;
+    defaultSendHour = result.defaultSendHour || 18;
+    consentGiven = result.consentGiven || false;
 
-  if (result.digestCache) {
-    showDigestFromCache(result.digestCache);
+    if (result.digestCache) {
+      showDigestFromCache(result.digestCache);
+    }
+    console.log('💾 [app.js] loadStoredData завершён, authToken:', !!authToken);
+  } catch (e) {
+    console.error('❌ [app.js] loadStoredData ошибка:', e);
   }
 }
 
@@ -135,6 +174,7 @@ async function loadStoredData() {
 //  ЗАГРУЗКА ИСТОЧНИКОВ (ОСНОВНАЯ) С ПРОВЕРКОЙ СОГЛАСИЯ
 // ============================================================
 async function loadSources() {
+  console.log('📡 [app.js] loadSources, authToken:', !!authToken);
   if (!authToken) {
     showLoginScreen();
     return;
@@ -145,7 +185,25 @@ async function loadSources() {
     if (!resp) return;
 
     if (!resp.ok) {
-      if (resp.status === 401 || resp.status === 403) {
+      if (resp.status === 403) {
+        console.warn('🔒 [app.js] 403 Forbidden — требуется согласие');
+        const consentBlock = document.getElementById('consentBlock');
+        const appScreen = document.getElementById('appScreen');
+        if (consentBlock) consentBlock.style.display = 'block';
+        if (appScreen) appScreen.classList.add('consent-pending');
+        consentGiven = false;
+        isTestUser = (authToken === TEST_TOKEN);
+        window.TEST_MODE = isTestUser;
+        showAppScreen();
+        const quickButtons = document.getElementById('quickButtons');
+        const paymentToggleBtn = document.getElementById('paymentToggleBtn');
+        if (quickButtons) quickButtons.style.display = 'none';
+        if (paymentToggleBtn) paymentToggleBtn.style.display = 'none';
+        await storageSet({ consentGiven: false });
+        return;
+      }
+      if (resp.status === 401) {
+        console.warn('🔒 [app.js] 401 Unauthorized — токен невалиден');
         authToken = null;
         await storageSet({ authToken: null });
         showLoginScreen();
@@ -156,54 +214,267 @@ async function loadSources() {
     }
 
     const data = await resp.json();
+    console.log('📡 [app.js] данные источников загружены, согласие:', data.consent_given);
     currentSources = data.sources || [];
     currentLimit = data.limit || 5;
     isPremium = data.is_premium || false;
     currentSendTime = data.send_time || null;
     defaultSendHour = data.default_send_hour || 18;
+    consentGiven = data.consent_given === true;
+    isTestUser = (authToken === TEST_TOKEN);
 
     await storageSet({
       sources: currentSources,
       limit: currentLimit,
       premium: isPremium,
       sendTime: currentSendTime,
-      defaultSendHour: defaultSendHour
+      defaultSendHour: defaultSendHour,
+      consentGiven: consentGiven
     });
 
     renderGroupedSources(currentSources);
     updateStatus(data);
-    document.getElementById('counter').textContent = currentSources.length;
+    const counter = document.getElementById('counter');
+    if (counter) counter.textContent = currentSources.length;
     showAppScreen();
 
     const consentBlock = document.getElementById('consentBlock');
-    if (data.consent_given === false) {
-      consentBlock.style.display = 'block';
+    const appScreen = document.getElementById('appScreen');
+    if (!consentGiven || isTestUser) {
+      if (consentBlock) consentBlock.style.display = 'block';
+      if (appScreen) appScreen.classList.add('consent-pending');
+      window.TEST_MODE = isTestUser;
     } else {
-      consentBlock.style.display = 'none';
+      if (consentBlock) consentBlock.style.display = 'none';
+      if (appScreen) appScreen.classList.remove('consent-pending');
+      window.TEST_MODE = false;
     }
 
+    const quickButtons = document.getElementById('quickButtons');
+    const paymentToggleBtn = document.getElementById('paymentToggleBtn');
+    if (quickButtons) quickButtons.style.display = 'flex';
+    if (paymentToggleBtn) paymentToggleBtn.style.display = 'block';
+
   } catch (err) {
-    console.error('Ошибка загрузки источников:', err);
-    document.getElementById('sourceListContainer').innerHTML =
-      `<div class="empty-state"><div class="empty-icon">⚠️</div><h3>Ошибка загрузки</h3><p>${err.message}</p></div>`;
+    console.error('❌ [app.js] loadSources ошибка:', err);
+    const container = document.getElementById('sourceListContainer');
+    if (container) {
+      container.innerHTML =
+        `<div class="empty-state"><div class="empty-icon">⚠️</div><h3>Ошибка загрузки</h3><p>${err.message}</p></div>`;
+    }
     showAppScreen();
   }
 }
 
 // ============================================================
+//  ОБРАБОТЧИК КНОПКИ "ПРИНИМАЮ"
+// ============================================================
+document.addEventListener('DOMContentLoaded', function() {
+  console.log('✅ [app.js] DOMContentLoaded');
+
+  const check = document.getElementById('consentCheck');
+  const btn = document.getElementById('consentAcceptBtn');
+  console.log('🔍 [app.js] consentCheck:', !!check, 'consentAcceptBtn:', !!btn);
+
+  if (check && btn) {
+    check.addEventListener('change', function() {
+      console.log('🔄 [app.js] чекбокс изменён:', this.checked);
+      if (this.checked) {
+        btn.disabled = false;
+        btn.style.opacity = '1';
+        btn.style.pointerEvents = 'auto';
+      } else {
+        btn.disabled = true;
+        btn.style.opacity = '0.5';
+        btn.style.pointerEvents = 'none';
+      }
+    });
+    btn.addEventListener('click', async function() {
+      console.log('🖱️ [app.js] клик по кнопке "Принимаю"');
+      if (!check.checked) {
+        console.warn('⚠️ [app.js] чекбокс не отмечен');
+        return;
+      }
+      const appScreen = document.getElementById('appScreen');
+      const consentBlock = document.getElementById('consentBlock');
+      if (window.TEST_MODE) {
+        console.log('🧪 [app.js] тестовый режим, согласие не отправляется');
+        if (consentBlock) consentBlock.style.display = 'none';
+        if (appScreen) appScreen.classList.remove('consent-pending');
+        return;
+      }
+      try {
+        console.log('📤 [app.js] отправка согласия на сервер');
+        const resp = await apiRequest('/api/webapp/consent', {
+          method: 'POST',
+          headers: getHeaders()
+        });
+        if (resp && resp.ok) {
+          console.log('✅ [app.js] согласие принято сервером');
+          if (consentBlock) consentBlock.style.display = 'none';
+          if (appScreen) appScreen.classList.remove('consent-pending');
+          consentGiven = true;
+          await storageSet({ consentGiven: true });
+          await loadSources();
+        } else {
+          const err = resp ? await resp.json() : { detail: 'Ошибка соединения' };
+          console.error('❌ [app.js] ошибка сохранения согласия:', err);
+          alert('❌ Ошибка: ' + (err.detail || 'Не удалось сохранить согласие'));
+        }
+      } catch (e) {
+        console.error('❌ [app.js] исключение при сохранении согласия:', e);
+        alert('❌ Ошибка: ' + e.message);
+      }
+    });
+  } else {
+    console.warn('⚠️ [app.js] элементы согласия не найдены');
+  }
+
+  // ===== ПРИВЯЗКА ОСНОВНЫХ КНОПОК =====
+  console.log('🔧 [app.js] привязка обработчиков к кнопкам');
+  try {
+    const botBtn = document.getElementById('botLoginBtn');
+    const maxBtn = document.getElementById('maxLoginBtn');
+    console.log('🔍 [app.js] botLoginBtn:', !!botBtn, 'maxLoginBtn:', !!maxBtn);
+
+    if (botBtn) {
+      botBtn.addEventListener('click', startBotAuth);
+      console.log('✅ [app.js] обработчик на botLoginBtn навешен');
+    } else {
+      console.warn('⚠️ [app.js] botLoginBtn не найден');
+    }
+    if (maxBtn) {
+      maxBtn.addEventListener('click', startMaxAuth);
+      console.log('✅ [app.js] обработчик на maxLoginBtn навешен');
+    } else {
+      console.warn('⚠️ [app.js] maxLoginBtn не найден');
+    }
+
+    // --- Добавление источников ---
+    const btnDzen = document.getElementById('btn-dzen');
+    if (btnDzen) btnDzen.addEventListener('click', function() { toggleCategoryForm('dzen'); });
+    const btnRb = document.getElementById('btn-rb');
+    if (btnRb) btnRb.addEventListener('click', function() { toggleCategoryForm('rb'); });
+    const btnHabr = document.getElementById('btn-habr');
+    if (btnHabr) btnHabr.addEventListener('click', function() { toggleCategoryForm('habr'); });
+    const btnLifehacker = document.getElementById('btn-lifehacker');
+    if (btnLifehacker) btnLifehacker.addEventListener('click', function() { toggleCategoryForm('lifehacker'); });
+    const btnForbes = document.getElementById('btn-forbes');
+    if (btnForbes) btnForbes.addEventListener('click', addForbesTelegram);
+    const btnVc = document.getElementById('btn-vc');
+    if (btnVc) btnVc.addEventListener('click', function() { toggleCategoryForm('vc'); });
+    const btnAddRss = document.getElementById('btn-add-rss');
+    if (btnAddRss) btnAddRss.addEventListener('click', function() { toggleAddForm('rss'); });
+    const btnAddTelegram = document.getElementById('btn-add-telegram');
+    if (btnAddTelegram) btnAddTelegram.addEventListener('click', function() { toggleAddForm('telegram'); });
+    const btnAddVk = document.getElementById('btn-add-vk');
+    if (btnAddVk) btnAddVk.addEventListener('click', function() { toggleAddForm('vk'); });
+    const btnGithub = document.getElementById('btn-github');
+    if (btnGithub) btnGithub.addEventListener('click', toggleGitHubForm);
+    const btnYoutube = document.getElementById('btn-youtube');
+    if (btnYoutube) btnYoutube.addEventListener('click', toggleYouTubeForm);
+    const btnReddit = document.getElementById('btn-reddit');
+    if (btnReddit) btnReddit.addEventListener('click', toggleRedditForm);
+    const btnBbc = document.getElementById('btn-bbc');
+    if (btnBbc) btnBbc.addEventListener('click', function() { toggleCategoryForm('bbc'); });
+    const btnGoogleNews = document.getElementById('btn-google-news');
+    if (btnGoogleNews) btnGoogleNews.addEventListener('click', toggleGoogleNewsForm);
+    const btnCnn = document.getElementById('btn-cnn');
+    if (btnCnn) btnCnn.addEventListener('click', function() { toggleCategoryForm('cnn'); });
+
+    // --- Формы ---
+    const addSourceSubmitBtn = document.getElementById('addSourceSubmitBtn');
+    if (addSourceSubmitBtn) addSourceSubmitBtn.addEventListener('click', addSourceSubmit);
+    const closeAddFormBtn = document.getElementById('closeAddFormBtn');
+    if (closeAddFormBtn) closeAddFormBtn.addEventListener('click', closeAddForm);
+    const closeGitHubFormBtn = document.getElementById('closeGitHubFormBtn');
+    if (closeGitHubFormBtn) closeGitHubFormBtn.addEventListener('click', closeGitHubForm);
+    const generateYouTubeBtn = document.getElementById('generateYouTubeBtn');
+    if (generateYouTubeBtn) generateYouTubeBtn.addEventListener('click', generateYouTubeRSS);
+    const closeYouTubeFormBtn = document.getElementById('closeYouTubeFormBtn');
+    if (closeYouTubeFormBtn) closeYouTubeFormBtn.addEventListener('click', closeYouTubeForm);
+    const generateRedditBtn = document.getElementById('generateRedditBtn');
+    if (generateRedditBtn) generateRedditBtn.addEventListener('click', generateRedditRSS);
+    const closeRedditFormBtn = document.getElementById('closeRedditFormBtn');
+    if (closeRedditFormBtn) closeRedditFormBtn.addEventListener('click', closeRedditForm);
+    const generateGoogleNewsBtn = document.getElementById('generateGoogleNewsBtn');
+    if (generateGoogleNewsBtn) generateGoogleNewsBtn.addEventListener('click', generateGoogleNewsRSS);
+    const closeGoogleNewsFormBtn = document.getElementById('closeGoogleNewsFormBtn');
+    if (closeGoogleNewsFormBtn) closeGoogleNewsFormBtn.addEventListener('click', closeGoogleNewsForm);
+
+    // --- GitHub кнопки ---
+    const githubReleases = document.getElementById('github-releases');
+    if (githubReleases) githubReleases.addEventListener('click', function() { generateGitHubRSS('releases'); });
+    const githubTags = document.getElementById('github-tags');
+    if (githubTags) githubTags.addEventListener('click', function() { generateGitHubRSS('tags'); });
+    const githubCommits = document.getElementById('github-commits');
+    if (githubCommits) githubCommits.addEventListener('click', function() { generateGitHubRSS('commits'); });
+    const githubMain = document.getElementById('github-main');
+    if (githubMain) githubMain.addEventListener('click', function() { generateGitHubRSS('main'); });
+    const githubMaster = document.getElementById('github-master');
+    if (githubMaster) githubMaster.addEventListener('click', function() { generateGitHubRSS('master'); });
+    const githubUsername = document.getElementById('github-username');
+    if (githubUsername) githubUsername.addEventListener('click', function() { generateGitHubRSS('username'); });
+
+    // --- Категории ---
+    const categoryBrowserBtn = document.getElementById('categoryBrowserBtn');
+    if (categoryBrowserBtn) categoryBrowserBtn.addEventListener('click', toggleCategoryBrowser);
+    const categoryBackBtn = document.getElementById('categoryBackBtn');
+    if (categoryBackBtn) categoryBackBtn.addEventListener('click', goBackLevel);
+    const suggestSourceBtn = document.getElementById('suggestSourceBtn');
+    if (suggestSourceBtn) suggestSourceBtn.addEventListener('click', suggestSource);
+
+    // --- Дайджест ---
+    const digestToggleBtn = document.getElementById('digestToggleBtn');
+    if (digestToggleBtn) digestToggleBtn.addEventListener('click', toggleDigest);
+
+    // --- Тарифы и оплата ---
+    const paymentToggleBtn = document.getElementById('paymentToggleBtn');
+    if (paymentToggleBtn) paymentToggleBtn.addEventListener('click', toggleTariffs);
+    const basicMonth = document.getElementById('basic_month');
+    if (basicMonth) basicMonth.addEventListener('click', function() { handlePayment('basic_month'); });
+    const basicYear = document.getElementById('basic_year');
+    if (basicYear) basicYear.addEventListener('click', function() { handlePayment('basic_year'); });
+    const premiumMonth = document.getElementById('premium_month');
+    if (premiumMonth) premiumMonth.addEventListener('click', function() { handlePayment('premium_month'); });
+    const premiumYear = document.getElementById('premium_year');
+    if (premiumYear) premiumYear.addEventListener('click', function() { handlePayment('premium_year'); });
+
+    // --- Время ---
+    const changeTimeBtn = document.getElementById('changeTimeBtn');
+    if (changeTimeBtn) changeTimeBtn.addEventListener('click', toggleTimePicker);
+    const closeTimePickerBtn = document.getElementById('closeTimePickerBtn');
+    if (closeTimePickerBtn) closeTimePickerBtn.addEventListener('click', closeTimePicker);
+    const upgradeLink = document.getElementById('upgradeLink');
+    if (upgradeLink) upgradeLink.addEventListener('click', function(e) { e.preventDefault(); toggleTariffs(); });
+
+    // --- Выход ---
+    const logoutContainer = document.getElementById('logoutContainer');
+    if (logoutContainer) logoutContainer.addEventListener('click', logout);
+
+    console.log('✅ [app.js] все обработчики навешены');
+  } catch (e) {
+    console.error('❌ [app.js] ошибка при привязке обработчиков:', e);
+  }
+});
+
+// ============================================================
 //  АВТОРИЗАЦИЯ ЧЕРЕЗ TELEGRAM
 // ============================================================
 async function startBotAuth() {
+  console.log('🚀 [app.js] startBotAuth вызвана');
   hapticFeedback();
-  document.getElementById('loginScreen').querySelector('.auth-container').style.display = 'none';
+  const container = document.querySelector('#loginScreen .auth-container');
+  if (container) container.style.display = 'none';
   const w = document.getElementById('widgetContainer');
-  w.innerHTML = '<div class="loader"></div>';
+  if (w) w.innerHTML = '<div class="loader"></div>';
 
   try {
+    console.log('📡 [app.js] запрос /api/auth/bot-token');
     const resp = await apiRequest('/api/auth/bot-token');
     if (!resp) {
-      document.getElementById('loginScreen').querySelector('.auth-container').style.display = 'block';
-      w.innerHTML = '';
+      if (container) container.style.display = 'block';
+      if (w) w.innerHTML = '';
       return;
     }
     if (!resp.ok) throw new Error('Не удалось получить токен');
@@ -211,19 +482,22 @@ async function startBotAuth() {
     const data = await resp.json();
     const token = data.token;
     const botUsername = data.bot_username || 'My_AI_News_Aggregator_bot';
+    console.log('🔑 [app.js] токен получен, бот:', botUsername);
 
     await storageSet({ botAuthToken: token });
     createTab(`https://t.me/${botUsername}?start=${encodeURIComponent(token)}`);
 
     pollBotAuthStatus(token);
   } catch (err) {
+    console.error('❌ [app.js] startBotAuth ошибка:', err);
     alert('❌ Ошибка: ' + err.message);
-    document.getElementById('loginScreen').querySelector('.auth-container').style.display = 'block';
-    w.innerHTML = '';
+    if (container) container.style.display = 'block';
+    if (w) w.innerHTML = '';
   }
 }
 
 function pollBotAuthStatus(token) {
+  console.log('⏳ [app.js] pollBotAuthStatus начат для токена:', token.substring(0, 8) + '...');
   let attempts = 0;
   const maxAttempts = 60;
   const interval = setInterval(async () => {
@@ -232,10 +506,12 @@ function pollBotAuthStatus(token) {
       const resp = await apiRequest(`/api/auth/bot-status?token=${encodeURIComponent(token)}`);
       if (!resp) return;
       const result = await resp.json();
+      console.log(`🔍 [app.js] poll #${attempts}, статус:`, result.status);
 
       if (result.status === 'success') {
         clearInterval(interval);
         const id = result.telegram_id;
+        console.log('✅ [app.js] авторизация успешна, telegram_id:', id);
         if (id) {
           const tr = await fetch(`${API_BASE}/api/auth/get-token?telegram_id=${encodeURIComponent(id)}`, { headers: getHeaders() });
           if (tr.ok) {
@@ -250,20 +526,28 @@ function pollBotAuthStatus(token) {
           }
         }
         alert('❌ Не удалось получить сессионный токен. Попробуйте снова.');
-        document.getElementById('loginScreen').querySelector('.auth-container').style.display = 'block';
-        document.getElementById('widgetContainer').innerHTML = '';
+        const container = document.querySelector('#loginScreen .auth-container');
+        if (container) container.style.display = 'block';
+        const w = document.getElementById('widgetContainer');
+        if (w) w.innerHTML = '';
       } else if (result.status === 'expired') {
         clearInterval(interval);
         alert('⏰ Время истекло. Попробуйте снова.');
-        document.getElementById('loginScreen').querySelector('.auth-container').style.display = 'block';
-        document.getElementById('widgetContainer').innerHTML = '';
+        const container = document.querySelector('#loginScreen .auth-container');
+        if (container) container.style.display = 'block';
+        const w = document.getElementById('widgetContainer');
+        if (w) w.innerHTML = '';
       }
-    } catch (e) {}
+    } catch (e) {
+      console.error('❌ [app.js] pollBotAuthStatus ошибка:', e);
+    }
     if (attempts >= maxAttempts) {
       clearInterval(interval);
       alert('⏰ Время истекло. Попробуйте снова.');
-      document.getElementById('loginScreen').querySelector('.auth-container').style.display = 'block';
-      document.getElementById('widgetContainer').innerHTML = '';
+      const container = document.querySelector('#loginScreen .auth-container');
+      if (container) container.style.display = 'block';
+      const w = document.getElementById('widgetContainer');
+      if (w) w.innerHTML = '';
     }
   }, 3000);
 }
@@ -272,16 +556,19 @@ function pollBotAuthStatus(token) {
 //  АВТОРИЗАЦИЯ ЧЕРЕЗ MAX
 // ============================================================
 async function startMaxAuth() {
+  console.log('🚀 [app.js] startMaxAuth вызвана');
   hapticFeedback();
-  document.getElementById('loginScreen').querySelector('.auth-container').style.display = 'none';
+  const container = document.querySelector('#loginScreen .auth-container');
+  if (container) container.style.display = 'none';
   const w = document.getElementById('widgetContainer');
-  w.innerHTML = '<div class="loader"></div>';
+  if (w) w.innerHTML = '<div class="loader"></div>';
 
   try {
+    console.log('📡 [app.js] запрос /api/auth/max-token');
     const resp = await apiRequest('/api/auth/max-token');
     if (!resp) {
-      document.getElementById('loginScreen').querySelector('.auth-container').style.display = 'block';
-      w.innerHTML = '';
+      if (container) container.style.display = 'block';
+      if (w) w.innerHTML = '';
       return;
     }
     if (!resp.ok) throw new Error('Не удалось получить токен');
@@ -289,19 +576,22 @@ async function startMaxAuth() {
     const data = await resp.json();
     const token = data.token;
     const botUsername = data.bot_username || 'id772609477460_bot';
+    console.log('🔑 [app.js] MAX токен получен, бот:', botUsername);
 
     await storageSet({ maxAuthToken: token });
     startMaxWaiting(token);
     createTab(`https://max.ru/${botUsername}?start=${encodeURIComponent(token)}`);
-    w.innerHTML = '<p style="color: var(--text-secondary);">Ожидаем подтверждения в MAX...</p>';
+    if (w) w.innerHTML = '<p style="color: var(--text-secondary);">Ожидаем подтверждения в MAX...</p>';
   } catch (err) {
+    console.error('❌ [app.js] startMaxAuth ошибка:', err);
     alert('❌ Ошибка: ' + err.message);
-    document.getElementById('loginScreen').querySelector('.auth-container').style.display = 'block';
-    w.innerHTML = '';
+    if (container) container.style.display = 'block';
+    if (w) w.innerHTML = '';
   }
 }
 
 function startMaxWaiting(token) {
+  console.log('⏳ [app.js] startMaxWaiting начат для токена:', token.substring(0, 8) + '...');
   let attempts = 0;
   const maxAttempts = 60;
   const timer = setInterval(async () => {
@@ -310,6 +600,7 @@ function startMaxWaiting(token) {
       const resp = await apiRequest(`/api/auth/max-status/${token}`);
       if (!resp) return;
       const data = await resp.json();
+      console.log(`🔍 [app.js] MAX poll #${attempts}, ready:`, data.ready);
 
       if (data.ready && data.auth_token) {
         clearInterval(timer);
@@ -323,10 +614,14 @@ function startMaxWaiting(token) {
       if (attempts >= maxAttempts) {
         clearInterval(timer);
         alert('⏰ Время истекло. Попробуйте снова.');
-        document.getElementById('loginScreen').querySelector('.auth-container').style.display = 'block';
-        document.getElementById('widgetContainer').innerHTML = '';
+        const container = document.querySelector('#loginScreen .auth-container');
+        if (container) container.style.display = 'block';
+        const w = document.getElementById('widgetContainer');
+        if (w) w.innerHTML = '';
       }
-    } catch (e) {}
+    } catch (e) {
+      console.error('❌ [app.js] startMaxWaiting ошибка:', e);
+    }
   }, 3000);
 }
 
@@ -380,6 +675,7 @@ function getIconGradient(t) {
 }
 
 function renderGroupedSources(sources) {
+  console.log('📋 [app.js] renderGroupedSources, count:', sources.length);
   const container = document.getElementById('sourceListContainer');
   if (!container) return;
   container.innerHTML = '';
@@ -432,27 +728,34 @@ function renderGroupedSources(sources) {
 }
 
 function updateStatus(data) {
-  document.getElementById('statusTariff').textContent = data.tariff_name || '—';
-  document.getElementById('statusSources').textContent = data.used || 0;
-  document.getElementById('statusLimit').textContent = data.limit || 5;
-  document.getElementById('statusAutoSend').textContent = '✅';
-  document.getElementById('statusLastSent').textContent = data.last_sent || '—';
-  document.getElementById('statusExpires').textContent = data.expires_at || '—';
+  console.log('📊 [app.js] updateStatus, данные:', data);
+  const tariff = document.getElementById('statusTariff');
+  const sources = document.getElementById('statusSources');
+  const limit = document.getElementById('statusLimit');
+  const autoSend = document.getElementById('statusAutoSend');
+  const lastSent = document.getElementById('statusLastSent');
+  const expires = document.getElementById('statusExpires');
+  if (tariff) tariff.textContent = data.tariff_name || '—';
+  if (sources) sources.textContent = data.used || 0;
+  if (limit) limit.textContent = data.limit || 5;
+  if (autoSend) autoSend.textContent = '✅';
+  if (lastSent) lastSent.textContent = data.last_sent || '—';
+  if (expires) expires.textContent = data.expires_at || '—';
   isPremium = data.is_premium || false;
   defaultSendHour = data.default_send_hour || 18;
   currentSendTime = data.send_time || null;
   const display = currentSendTime ? currentSendTime : (defaultSendHour.toString().padStart(2, '0') + ':00');
-  document.getElementById('currentTimeDisplay').textContent = display + ' MSK';
+  const timeDisplay = document.getElementById('currentTimeDisplay');
+  if (timeDisplay) timeDisplay.textContent = display + ' MSK';
   const btn = document.getElementById('changeTimeBtn');
   const hint = document.getElementById('upgradeHint');
   if (isPremium) {
-    btn.style.display = 'inline-block';
-    btn.disabled = false;
-    hint.style.display = 'none';
+    if (btn) { btn.style.display = 'inline-block'; btn.disabled = false; }
+    if (hint) hint.style.display = 'none';
   } else {
-    btn.style.display = 'none';
-    hint.style.display = 'inline-block';
-    if (document.getElementById('timePicker').style.display !== 'none') closeTimePicker();
+    if (btn) btn.style.display = 'none';
+    if (hint) hint.style.display = 'inline-block';
+    if (document.getElementById('timePicker') && document.getElementById('timePicker').style.display !== 'none') closeTimePicker();
   }
 }
 
@@ -468,6 +771,8 @@ function confirmDelete(id) {
 }
 
 async function deleteSource(id) {
+  if (!ensureConsent()) return;
+  console.log('🗑️ [app.js] deleteSource, id:', id);
   try {
     const resp = await apiRequest('/api/webapp/delete', {
       method: 'POST',
@@ -490,11 +795,11 @@ async function deleteSource(id) {
 // ============================================================
 //  ФОРМЫ ДОБАВЛЕНИЯ (TOGGLE)
 // ============================================================
-function closeAddForm() { document.getElementById('addForm').style.display = 'none'; }
-function closeGitHubForm() { document.getElementById('githubForm').style.display = 'none'; }
-function closeYouTubeForm() { document.getElementById('youtubeForm').style.display = 'none'; }
-function closeRedditForm() { document.getElementById('redditForm').style.display = 'none'; }
-function closeGoogleNewsForm() { document.getElementById('googleNewsForm').style.display = 'none'; }
+function closeAddForm() { const el = document.getElementById('addForm'); if (el) el.style.display = 'none'; }
+function closeGitHubForm() { const el = document.getElementById('githubForm'); if (el) el.style.display = 'none'; }
+function closeYouTubeForm() { const el = document.getElementById('youtubeForm'); if (el) el.style.display = 'none'; }
+function closeRedditForm() { const el = document.getElementById('redditForm'); if (el) el.style.display = 'none'; }
+function closeGoogleNewsForm() { const el = document.getElementById('googleNewsForm'); if (el) el.style.display = 'none'; }
 
 function toggleForm(formId) {
   const form = document.getElementById(formId);
@@ -511,6 +816,7 @@ function toggleForm(formId) {
 }
 
 function toggleCategoryForm(type) {
+  if (!ensureConsent()) return;
   hapticFeedback();
   const map = {
     'bbc': 'bbcForm', 'cnn': 'cnnForm', 'dzen': 'dzenForm',
@@ -551,18 +857,22 @@ function toggleCategoryForm(type) {
 }
 
 function toggleAddForm(type) {
+  if (!ensureConsent()) return;
   hapticFeedback();
   const form = document.getElementById('addForm');
+  if (!form) return;
   const isHidden = window.getComputedStyle(form).display === 'none';
   document.querySelectorAll('.category-form, .add-form').forEach(el => el.style.display = 'none');
   if (isHidden) {
     currentAddType = type;
     const title = document.getElementById('addFormTitle');
     const labels = { 'rss': 'RSS/HTML', 'telegram': 'Telegram', 'vk': 'VK' };
-    title.textContent = 'Добавить ' + labels[type];
+    if (title) title.textContent = 'Добавить ' + labels[type];
     const input = document.getElementById('sourceValue');
-    input.placeholder = type === 'rss' ? 'Введите URL...' : (type === 'telegram' ? 'Введите username (без @)...' : 'Введите username (без @)...');
-    input.value = '';
+    if (input) {
+      input.placeholder = type === 'rss' ? 'Введите URL...' : (type === 'telegram' ? 'Введите username (без @)...' : 'Введите username (без @)...');
+      input.value = '';
+    }
     form.style.display = 'block';
   } else {
     form.style.display = 'none';
@@ -570,93 +880,99 @@ function toggleAddForm(type) {
 }
 
 function toggleGitHubForm() {
+  if (!ensureConsent()) return;
   hapticFeedback();
   const form = document.getElementById('githubForm');
+  if (!form) return;
   const isHidden = window.getComputedStyle(form).display === 'none';
   document.querySelectorAll('.category-form, .add-form').forEach(el => el.style.display = 'none');
   if (isHidden) {
     form.style.display = 'block';
     updateGitHubButtons('');
     const input = document.getElementById('githubInput');
-    input.removeEventListener('input', window._githubInputHandler);
-    window._githubInputHandler = function() {
-      updateGitHubButtons(this.value);
-    };
-    input.addEventListener('input', window._githubInputHandler);
+    if (input) {
+      input.removeEventListener('input', window._githubInputHandler);
+      window._githubInputHandler = function() {
+        updateGitHubButtons(this.value);
+      };
+      input.addEventListener('input', window._githubInputHandler);
+    }
   } else {
     form.style.display = 'none';
   }
 }
 
 function toggleYouTubeForm() {
+  if (!ensureConsent()) return;
   hapticFeedback();
   const form = document.getElementById('youtubeForm');
+  if (!form) return;
   const isHidden = window.getComputedStyle(form).display === 'none';
   document.querySelectorAll('.category-form, .add-form').forEach(el => el.style.display = 'none');
-  if (isHidden) {
-    form.style.display = 'block';
-  } else {
-    form.style.display = 'none';
-  }
+  if (isHidden) form.style.display = 'block';
+  else form.style.display = 'none';
 }
 
 function toggleRedditForm() {
+  if (!ensureConsent()) return;
   hapticFeedback();
   const form = document.getElementById('redditForm');
+  if (!form) return;
   const isHidden = window.getComputedStyle(form).display === 'none';
   document.querySelectorAll('.category-form, .add-form').forEach(el => el.style.display = 'none');
-  if (isHidden) {
-    form.style.display = 'block';
-  } else {
-    form.style.display = 'none';
-  }
+  if (isHidden) form.style.display = 'block';
+  else form.style.display = 'none';
 }
 
 function toggleGoogleNewsForm() {
+  if (!ensureConsent()) return;
   hapticFeedback();
   const form = document.getElementById('googleNewsForm');
+  if (!form) return;
   const isHidden = window.getComputedStyle(form).display === 'none';
   document.querySelectorAll('.category-form, .add-form').forEach(el => el.style.display = 'none');
-  if (isHidden) {
-    form.style.display = 'block';
-  } else {
-    form.style.display = 'none';
-  }
+  if (isHidden) form.style.display = 'block';
+  else form.style.display = 'none';
 }
 
 // ============================================================
 //  ДОБАВЛЕНИЕ ИСТОЧНИКОВ
 // ============================================================
 function addForbesTelegram() {
+  if (!ensureConsent()) return;
   hapticFeedback();
   addCategorySource('telegram', 'forbesrussia', 'Forbes (Telegram)');
 }
 
-let currentAddType = 'rss';
-
 async function addSourceSubmit() {
+  if (!ensureConsent()) return;
   hapticFeedback();
-  const val = document.getElementById('sourceValue').value.trim();
-  if (!val) { alert('Введите значение'); return; }
-  if (!window.confirm('Добавить источник?\n\n' + val)) return;
+  const val = document.getElementById('sourceValue');
+  if (!val) return;
+  const value = val.value.trim();
+  if (!value) { alert('Введите значение'); return; }
+  if (!window.confirm('Добавить источник?\n\n' + value)) return;
+  console.log('📥 [app.js] addSourceSubmit, тип:', currentAddType, 'значение:', value);
   try {
     const resp = await apiRequest('/api/webapp/add', {
       method: 'POST',
       headers: getHeaders(),
-      body: JSON.stringify({ source_type: currentAddType, source_value: val })
+      body: JSON.stringify({ source_type: currentAddType, source_value: value })
     });
     if (!resp) return;
     if (!resp.ok) { const err = await resp.json(); alert('❌ Ошибка: ' + err.detail); return; }
     await loadSources();
     alert('✅ Источник добавлен');
-    document.getElementById('addForm').style.display = 'none';
-    document.getElementById('sourceValue').value = '';
+    const form = document.getElementById('addForm');
+    if (form) form.style.display = 'none';
+    if (val) val.value = '';
   } catch (err) {
     alert('❌ Ошибка добавления: ' + err.message);
   }
 }
 
 async function addCategorySource(t, u, n) {
+  if (!ensureConsent()) return;
   hapticFeedback();
   if (!u || !u.trim()) { alert('URL не может быть пустым'); return; }
   let final = u.trim();
@@ -673,6 +989,7 @@ async function addCategorySource(t, u, n) {
     if (type !== 'telegram' && type !== 'vk') final = 'https://' + final;
   }
   if (!window.confirm('Добавить источник?\n\n' + n + '\n' + final)) return;
+  console.log('📥 [app.js] addCategorySource, тип:', type, 'значение:', final);
   try {
     const resp = await apiRequest('/api/webapp/add', {
       method: 'POST',
@@ -690,6 +1007,7 @@ async function addCategorySource(t, u, n) {
 }
 
 function addRSSSource(u, n) {
+  if (!ensureConsent()) return;
   hapticFeedback();
   if (!u || !u.trim()) { alert('URL не может быть пустым.'); return; }
   let final = u.trim();
@@ -700,7 +1018,7 @@ function addRSSSource(u, n) {
     body: JSON.stringify({ source_type: 'rss', source_value: final })
   })
   .then(async resp => {
-    if (resp.status === 503) { alert('⚠️ Сервер временно недоступен. Пожалуйста, обновите страницу через несколько секунд.'); return; }
+    if (resp.status === 503) { alert('⚠️ Сервер временно недоступен.'); return; }
     if (!resp.ok) { const err = await resp.json(); alert('❌ Ошибка добавления: ' + err.detail); return; }
     await loadSources();
     alert('✅ Источник добавлен: ' + n);
@@ -710,6 +1028,7 @@ function addRSSSource(u, n) {
 }
 
 function addSourceByType(t, u, n) {
+  if (!ensureConsent()) return;
   hapticFeedback();
   let type = t;
   if (!['rss', 'telegram', 'vk', 'max'].includes(type)) type = 'rss';
@@ -721,6 +1040,7 @@ function addSourceByType(t, u, n) {
 // ============================================================
 function updateGitHubButtons(v) {
   const grid = document.getElementById('githubGrid');
+  if (!grid) return;
   const btns = grid.querySelectorAll('button');
   const hasSlash = v && v.includes('/');
   btns.forEach(btn => {
@@ -731,8 +1051,10 @@ function updateGitHubButtons(v) {
 }
 
 function generateGitHubRSS(t) {
+  if (!ensureConsent()) return;
   hapticFeedback();
   const input = document.getElementById('githubInput');
+  if (!input) return;
   let raw = input.value.trim();
   if (!raw) { alert('Введите owner/repo или username.'); return; }
   raw = raw.replace(/^https?:\/\/github\.com\//, '').replace(/\/+$/, '');
@@ -752,23 +1074,12 @@ function generateGitHubRSS(t) {
     if (!owner || !repo) { alert('Некорректный owner/repo.'); return; }
     let path = '';
     switch (t) {
-      case 'releases':
-        path = 'releases.atom';
-        break;
-      case 'tags':
-        path = 'tags.atom';
-        break;
-      case 'commits':
-        path = 'commits.atom';
-        break;
-      case 'main':
-        path = 'commits/main.atom';
-        break;
-      case 'master':
-        path = 'commits/master.atom';
-        break;
-      default:
-        path = 'releases.atom';
+      case 'releases': path = 'releases.atom'; break;
+      case 'tags': path = 'tags.atom'; break;
+      case 'commits': path = 'commits.atom'; break;
+      case 'main': path = 'commits/main.atom'; break;
+      case 'master': path = 'commits/master.atom'; break;
+      default: path = 'releases.atom';
     }
     url = 'https://github.com/' + owner + '/' + repo + '/' + path;
     display = 'GitHub (' + owner + '/' + repo + ')';
@@ -781,10 +1092,13 @@ function generateGitHubRSS(t) {
 //  YOUTUBE ГЕНЕРАТОР
 // ============================================================
 async function generateYouTubeRSS() {
+  if (!ensureConsent()) return;
   hapticFeedback();
   const input = document.getElementById('youtubeInput');
+  if (!input) return;
   let val = input.value.trim();
   if (!val) { alert('Введите имя канала или channelId.'); return; }
+  console.log('🎬 [app.js] generateYouTubeRSS, запрос:', val);
   try {
     const resp = await apiRequest('/api/youtube/resolve', {
       method: 'POST',
@@ -800,8 +1114,9 @@ async function generateYouTubeRSS() {
     const name = data.title || 'YouTube канал';
     if (!window.confirm('Добавить источник?\n' + name)) return;
     addRSSSource(url, name);
-    document.getElementById('youtubeForm').style.display = 'none';
-    document.getElementById('youtubeInput').value = '';
+    const form = document.getElementById('youtubeForm');
+    if (form) form.style.display = 'none';
+    if (input) input.value = '';
   } catch (err) {
     alert('Ошибка: ' + err.message);
   }
@@ -811,8 +1126,10 @@ async function generateYouTubeRSS() {
 //  REDDIT ГЕНЕРАТОР
 // ============================================================
 function generateRedditRSS() {
+  if (!ensureConsent()) return;
   hapticFeedback();
   const input = document.getElementById('redditInput');
+  if (!input) return;
   let sub = input.value.trim();
   if (!sub) { alert('Введите название сабреддита.'); return; }
   sub = sub.replace(/^https?:\/\/(?:www\.)?reddit\.com\/r\//, '').split('/')[0];
@@ -827,8 +1144,10 @@ function generateRedditRSS() {
 //  GOOGLE NEWS ГЕНЕРАТОР
 // ============================================================
 function generateGoogleNewsRSS() {
+  if (!ensureConsent()) return;
   hapticFeedback();
   const input = document.getElementById('googleNewsInput');
+  if (!input) return;
   let q = input.value.trim();
   if (!q) { alert('Введите ключевое слово или фразу для поиска.'); return; }
   q = q.replace(/\s+/g, ' ').trim();
@@ -947,8 +1266,10 @@ function sortItems(items) {
 }
 
 function toggleCategoryBrowser() {
+  if (!ensureConsent()) return;
   hapticFeedback();
   const b = document.getElementById('categoryBrowser');
+  if (!b) return;
   if (b.style.display === 'block') { b.style.display = 'none'; return; }
   document.querySelectorAll('.add-form,.category-form').forEach(f => f.style.display = 'none');
   b.style.display = 'block';
@@ -960,13 +1281,14 @@ function showLevel(parentId) {
   const header = document.getElementById('categoryBrowserHeader');
   const grid = document.getElementById('categoryGrid');
   const back = document.getElementById('categoryBackBtn');
+  if (!grid) return;
   grid.innerHTML = '<div style="text-align:center;padding:10px;color:var(--text-secondary);">Загрузка...</div>';
   loadCategoryLevel(parentId).then(items => {
     if (!items || items.length === 0) { grid.innerHTML = '<div style="text-align:center;padding:10px;color:var(--text-secondary);">Нет элементов</div>'; return; }
     const sorted = sortItems(items);
     const hasSources = sorted.some(i => i.url && i.url.trim() !== '');
     let hText = parentId === null ? 'Выберите категорию' : (categoryHistory[categoryHistory.length - 1]?.name || 'Категория') + (hasSources ? ' — выберите источник' : ' — выберите подкатегорию');
-    header.textContent = hText;
+    if (header) header.textContent = hText;
     grid.innerHTML = '';
     sorted.forEach(i => {
       const name = shortenCategoryName(i.name);
@@ -979,15 +1301,16 @@ function showLevel(parentId) {
       }
       grid.appendChild(btn);
     });
-    back.style.display = categoryHistory.length > 0 ? 'block' : 'none';
+    if (back) back.style.display = categoryHistory.length > 0 ? 'block' : 'none';
   }).catch(err => { grid.innerHTML = '<div style="text-align:center;padding:10px;color:red;">Ошибка: ' + err.message + '</div>'; });
 }
 
 function openLevel(id, name) { hapticFeedback(); categoryHistory.push({ id: id, name: name }); showLevel(id); }
 
 function goBackLevel() {
+  if (!ensureConsent()) return;
   hapticFeedback();
-  if (categoryHistory.length === 0) { document.getElementById('categoryBrowser').style.display = 'none'; return; }
+  if (categoryHistory.length === 0) { const b = document.getElementById('categoryBrowser'); if (b) b.style.display = 'none'; return; }
   categoryHistory.pop();
   if (categoryHistory.length === 0) showLevel(null);
   else showLevel(categoryHistory[categoryHistory.length - 1].id);
@@ -997,19 +1320,22 @@ function goBackLevel() {
 //  ВРЕМЯ ПОЛУЧЕНИЯ
 // ============================================================
 function toggleTimePicker() {
+  if (!ensureConsent()) return;
   hapticFeedback();
   if (!isPremium) { alert('⛔ Доступно только для Расширенного тарифа. Оформите подписку.'); return; }
   const p = document.getElementById('timePicker');
+  if (!p) return;
   if (p.style.display === 'none') openTimePicker();
   else closeTimePicker();
 }
 
-function openTimePicker() { if (!isPremium) return; document.getElementById('timePicker').style.display = 'block'; renderTimePicker(); }
+function openTimePicker() { if (!isPremium) return; const p = document.getElementById('timePicker'); if (p) p.style.display = 'block'; renderTimePicker(); }
 
-function closeTimePicker() { document.getElementById('timePicker').style.display = 'none'; }
+function closeTimePicker() { const p = document.getElementById('timePicker'); if (p) p.style.display = 'none'; }
 
 function renderTimePicker() {
   const grid = document.getElementById('timePickerGrid');
+  if (!grid) return;
   grid.innerHTML = '';
   const cur = currentSendTime ? parseInt(currentSendTime.split(':')[0]) : -1;
   for (let h = 0; h < 24; h++) {
@@ -1022,6 +1348,7 @@ function renderTimePicker() {
 }
 
 async function setTime(hour) {
+  if (!ensureConsent()) return;
   hapticFeedback();
   try {
     const resp = await apiRequest('/api/webapp/set_time', {
@@ -1033,7 +1360,8 @@ async function setTime(hour) {
     if (!resp.ok) { const err = await resp.json(); alert('❌ Ошибка: ' + err.detail); return; }
     const data = await resp.json();
     currentSendTime = data.send_time;
-    document.getElementById('currentTimeDisplay').textContent = currentSendTime + ' MSK';
+    const timeDisplay = document.getElementById('currentTimeDisplay');
+    if (timeDisplay) timeDisplay.textContent = currentSendTime + ' MSK';
     document.querySelectorAll('#timePickerGrid button').forEach((btn, idx) => { btn.classList.toggle('selected', idx === hour); });
     alert('✅ Время установлено на ' + currentSendTime);
     closeTimePicker();
@@ -1046,11 +1374,18 @@ async function setTime(hour) {
 // ============================================================
 //  ТАРИФЫ И ОПЛАТА
 // ============================================================
-function toggleTariffs() { hapticFeedback(); document.getElementById('tariffBlock').classList.toggle('visible'); }
+function toggleTariffs() {
+  if (!ensureConsent()) return;
+  hapticFeedback();
+  const block = document.getElementById('tariffBlock');
+  if (block) block.classList.toggle('visible');
+}
 
 async function handlePayment(tariffKey) {
+  if (!ensureConsent()) return;
   hapticFeedback();
   if (!authToken) { alert('❌ Вы не авторизованы. Пожалуйста, войдите через Telegram.'); return; }
+  console.log('💳 [app.js] handlePayment, тариф:', tariffKey);
   try {
     const resp = await apiRequest('/api/payment/create-invoice', {
       method: 'POST',
@@ -1067,11 +1402,13 @@ async function handlePayment(tariffKey) {
 }
 
 // ============================================================
-//  КНОПКА "СМОТРЕТЬ НОВОСТИ"
+//  КНОПКА "СМОТРЕТЬ НОВОСТИ" (ДАЙДЖЕСТ)
 // ============================================================
 async function toggleDigest() {
+  if (!ensureConsent()) return;
   const container = document.getElementById('digestContainer');
   const content = document.getElementById('digestContent');
+  if (!container || !content) return;
   if (digestVisible) {
     container.style.display = 'none';
     digestVisible = false;
@@ -1119,6 +1456,31 @@ async function toggleDigest() {
       while (lines.length > 0 && lines[lines.length - 1].trim() === '') lines.pop();
       let cleanedBlock = lines.join('\n');
 
+      let isSummary = cleanedBlock.indexOf('<b>Обсуждения в ') !== -1;
+      if (isSummary) {
+        let summaryStart = cleanedBlock.indexOf('<b>Обсуждения в ');
+        if (summaryStart !== -1) {
+          let closeBpos = cleanedBlock.indexOf('</b>', summaryStart);
+          if (closeBpos !== -1) {
+            let linkStart = cleanedBlock.indexOf('<a href', closeBpos);
+            if (linkStart === -1) linkStart = cleanedBlock.length;
+            let before = cleanedBlock.slice(0, closeBpos + 4);
+            let body = cleanedBlock.slice(closeBpos + 4, linkStart);
+            let after = cleanedBlock.slice(linkStart);
+            body = body.replace(/^\s*\n+/, '').replace(/\n+\s*$/, '');
+            after = after.replace(/^\s*\n+/, '');
+            let parts = body.split(/\s*-\s*/).filter(p => p.trim() !== '');
+            let newBody;
+            if (parts.length > 1) {
+              newBody = parts.map(p => '- ' + p.trim()).join('\n\n');
+            } else {
+              newBody = body.trim();
+            }
+            cleanedBlock = before + '\n\n' + newBody + '\n' + after;
+          }
+        }
+      }
+
       if (cleanedBlock.includes('</b>')) {
         cleanedBlock = cleanedBlock.replace(/(<\/b>)(?!\n)/, '$1\n');
       }
@@ -1126,25 +1488,6 @@ async function toggleDigest() {
         cleanedBlock = cleanedBlock.replace(/(?!\n)(<a href)/, '\n$1');
       }
       cleanedBlock = cleanedBlock.replace(/\n{3,}/g, '\n\n');
-
-      let summaryStart = cleanedBlock.indexOf('<b>Обсуждения в ');
-      if (summaryStart !== -1) {
-        let closeBpos = cleanedBlock.indexOf('</b>', summaryStart);
-        if (closeBpos !== -1) {
-          let linkStart = cleanedBlock.indexOf('<a href', closeBpos);
-          if (linkStart === -1) linkStart = cleanedBlock.length;
-          let before = cleanedBlock.slice(0, closeBpos + 4);
-          let body = cleanedBlock.slice(closeBpos + 4, linkStart);
-          let after = cleanedBlock.slice(linkStart);
-          let parts = body.split(/\s*-\s*/).filter(p => p.trim() !== '');
-          if (parts.length > 1) {
-            let first = parts[0].trim();
-            let rest = parts.slice(1).map(p => '- ' + p.trim()).join('\n\n- ');
-            let newBody = first + '\n\n' + rest;
-            cleanedBlock = before + newBody + after;
-          }
-        }
-      }
 
       if (cleanedBlock) {
         html += `<div class="status-block">${cleanedBlock}</div>`;
@@ -1172,6 +1515,7 @@ function showDigestFromCache(cachedHtml) {
 //  ПРЕДЛОЖИТЬ ИСТОЧНИК
 // ============================================================
 function suggestSource() {
+  if (!ensureConsent()) return;
   hapticFeedback();
   const url = 'https://t.me/professional_interior_design';
   const text = 'Добрый день. Хочу предложить источник:';
@@ -1196,133 +1540,72 @@ function logout() {
 }
 
 // ============================================================
-//  ПРИВЯЗКА СОБЫТИЙ (вместо inline onclick)
-// ============================================================
-document.addEventListener('DOMContentLoaded', function() {
-  // --- Авторизация ---
-  document.getElementById('botLoginBtn').addEventListener('click', startBotAuth);
-  document.getElementById('maxLoginBtn').addEventListener('click', startMaxAuth);
-
-  // --- Добавление источников ---
-  document.getElementById('btn-dzen').addEventListener('click', function() { toggleCategoryForm('dzen'); });
-  document.getElementById('btn-rb').addEventListener('click', function() { toggleCategoryForm('rb'); });
-  document.getElementById('btn-habr').addEventListener('click', function() { toggleCategoryForm('habr'); });
-  document.getElementById('btn-lifehacker').addEventListener('click', function() { toggleCategoryForm('lifehacker'); });
-  document.getElementById('btn-forbes').addEventListener('click', addForbesTelegram);
-  document.getElementById('btn-vc').addEventListener('click', function() { toggleCategoryForm('vc'); });
-  document.getElementById('btn-add-rss').addEventListener('click', function() { toggleAddForm('rss'); });
-  document.getElementById('btn-add-telegram').addEventListener('click', function() { toggleAddForm('telegram'); });
-  document.getElementById('btn-add-vk').addEventListener('click', function() { toggleAddForm('vk'); });
-  document.getElementById('btn-github').addEventListener('click', toggleGitHubForm);
-  document.getElementById('btn-youtube').addEventListener('click', toggleYouTubeForm);
-  document.getElementById('btn-reddit').addEventListener('click', toggleRedditForm);
-  document.getElementById('btn-bbc').addEventListener('click', function() { toggleCategoryForm('bbc'); });
-  document.getElementById('btn-google-news').addEventListener('click', toggleGoogleNewsForm);
-  document.getElementById('btn-cnn').addEventListener('click', function() { toggleCategoryForm('cnn'); });
-
-  // --- Формы ---
-  document.getElementById('addSourceSubmitBtn').addEventListener('click', addSourceSubmit);
-  document.getElementById('closeAddFormBtn').addEventListener('click', closeAddForm);
-  document.getElementById('closeGitHubFormBtn').addEventListener('click', closeGitHubForm);
-  document.getElementById('generateYouTubeBtn').addEventListener('click', generateYouTubeRSS);
-  document.getElementById('closeYouTubeFormBtn').addEventListener('click', closeYouTubeForm);
-  document.getElementById('generateRedditBtn').addEventListener('click', generateRedditRSS);
-  document.getElementById('closeRedditFormBtn').addEventListener('click', closeRedditForm);
-  document.getElementById('generateGoogleNewsBtn').addEventListener('click', generateGoogleNewsRSS);
-  document.getElementById('closeGoogleNewsFormBtn').addEventListener('click', closeGoogleNewsForm);
-
-  // --- GitHub кнопки ---
-  document.getElementById('github-releases').addEventListener('click', function() { generateGitHubRSS('releases'); });
-  document.getElementById('github-tags').addEventListener('click', function() { generateGitHubRSS('tags'); });
-  document.getElementById('github-commits').addEventListener('click', function() { generateGitHubRSS('commits'); });
-  document.getElementById('github-main').addEventListener('click', function() { generateGitHubRSS('main'); });
-  document.getElementById('github-master').addEventListener('click', function() { generateGitHubRSS('master'); });
-  document.getElementById('github-username').addEventListener('click', function() { generateGitHubRSS('username'); });
-
-  // --- Категории ---
-  document.getElementById('categoryBrowserBtn').addEventListener('click', toggleCategoryBrowser);
-  document.getElementById('categoryBackBtn').addEventListener('click', goBackLevel);
-  document.getElementById('suggestSourceBtn').addEventListener('click', suggestSource);
-
-  // --- Дайджест ---
-  document.getElementById('digestToggleBtn').addEventListener('click', toggleDigest);
-
-  // --- Тарифы и оплата ---
-  document.getElementById('paymentToggleBtn').addEventListener('click', toggleTariffs);
-  document.getElementById('basic_month').addEventListener('click', function() { handlePayment('basic_month'); });
-  document.getElementById('basic_year').addEventListener('click', function() { handlePayment('basic_year'); });
-  document.getElementById('premium_month').addEventListener('click', function() { handlePayment('premium_month'); });
-  document.getElementById('premium_year').addEventListener('click', function() { handlePayment('premium_year'); });
-
-  // --- Время ---
-  document.getElementById('changeTimeBtn').addEventListener('click', toggleTimePicker);
-  document.getElementById('closeTimePickerBtn').addEventListener('click', closeTimePicker);
-  document.getElementById('upgradeLink').addEventListener('click', function(e) { e.preventDefault(); toggleTariffs(); });
-
-  // --- Выход ---
-  document.getElementById('logoutContainer').addEventListener('click', logout);
-});
-
-// ============================================================
-//  ИНИЦИАЛИЗАЦИЯ (исправлена: сначала параметр URL, потом хранилище)
+//  ИНИЦИАЛИЗАЦИЯ
 // ============================================================
 (async function init() {
-  // 1. Проверяем параметр auth_token в URL (приоритет выше)
-  const params = new URLSearchParams(window.location.search);
-  const authParam = params.get('auth_token');
+  console.log('🚀 [app.js] init() запущена');
+  try {
+    const params = new URLSearchParams(window.location.search);
+    const authParam = params.get('auth_token');
 
-  if (authParam) {
-    // Сохраняем токен сразу
-    authToken = authParam;
-    await storageSet({ authToken: authParam });
-    // Удаляем параметр из URL, чтобы не было повторной обработки
-    const newUrl = window.location.pathname + window.location.search.replace(/[?&]auth_token=[^&]+/, '');
-    window.history.replaceState({}, '', newUrl);
-    // Загружаем приложение
-    await loadSources();
-    return;
-  }
-
-  // 2. Если параметра нет – загружаем данные из хранилища
-  await loadStoredData();
-
-  if (authToken) {
-    try {
+    if (authParam) {
+      console.log('🔑 [app.js] найден auth_token в URL');
+      authToken = authParam;
+      await storageSet({ authToken: authParam });
+      const newUrl = window.location.pathname + window.location.search.replace(/[?&]auth_token=[^&]+/, '');
+      window.history.replaceState({}, '', newUrl);
       await loadSources();
-    } catch (e) {
+      return;
+    }
+
+    await loadStoredData();
+
+    if (authToken) {
+      console.log('🔑 [app.js] токен из хранилища:', !!authToken);
+      try {
+        await loadSources();
+      } catch (e) {
+        console.error('❌ [app.js] loadSources из init ошибка:', e);
+        showLoginScreen();
+      }
+    } else {
+      console.log('🔑 [app.js] токен отсутствует, показываем экран входа');
       showLoginScreen();
     }
-  } else {
-    showLoginScreen();
-  }
 
-  // 3. Обработка других параметров (addRSS, addTelegram)
-  const action = params.get('action');
-  if (action === 'addRSS') {
-    const url = params.get('url');
-    if (url && authToken) {
-      setTimeout(() => {
-        document.getElementById('sourceValue').value = url;
-        toggleAddForm('rss');
-      }, 500);
-    }
-  } else if (action === 'addTelegram') {
-    const url = params.get('url');
-    if (url && authToken) {
-      let username = url;
-      if (url.includes('t.me/')) {
-        username = url.split('t.me/')[1].split('/')[0];
+    const action = params.get('action');
+    if (action === 'addRSS') {
+      const url = params.get('url');
+      if (url && authToken) {
+        setTimeout(() => {
+          const input = document.getElementById('sourceValue');
+          if (input) input.value = url;
+          toggleAddForm('rss');
+        }, 500);
       }
-      setTimeout(() => {
-        document.getElementById('sourceValue').value = username;
-        toggleAddForm('telegram');
-      }, 500);
+    } else if (action === 'addTelegram') {
+      const url = params.get('url');
+      if (url && authToken) {
+        let username = url;
+        if (url.includes('t.me/')) {
+          username = url.split('t.me/')[1].split('/')[0];
+        }
+        setTimeout(() => {
+          const input = document.getElementById('sourceValue');
+          if (input) input.value = username;
+          toggleAddForm('telegram');
+        }, 500);
+      }
     }
+  } catch (e) {
+    console.error('❌ [app.js] Критическая ошибка в init():', e);
+    alert('Ошибка загрузки расширения. Пожалуйста, перезагрузите страницу.');
   }
+  console.log('🏁 [app.js] init() завершена');
 })();
 
 // ============================================================
-//  ЭКСПОРТЫ (на случай, если где-то ещё используются)
+//  ЭКСПОРТЫ
 // ============================================================
 window.toggleTariffs = toggleTariffs;
 window.handlePayment = handlePayment;

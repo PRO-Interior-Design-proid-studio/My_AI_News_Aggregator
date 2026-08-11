@@ -436,9 +436,27 @@ async function loadApp(){
         const resp=await apiRequest('/api/webapp/sources',{headers});
         if(!resp)return;
         if(!resp.ok){
-            if(resp.status===401||resp.status===403){
+            // ===== НОВАЯ ОБРАБОТКА 403: ПОКАЗЫВАЕМ БЛОК КОНФИДЕНЦИАЛЬНОСТИ =====
+            if(resp.status === 403){
+                const consentBlock = document.getElementById('consentBlock');
+                const appScreen = document.getElementById('appScreen');
+                consentBlock.style.display = 'block';
+                appScreen.classList.add('consent-pending');
+                consentGiven = false;
+                isTestUser = (authToken === TEST_TOKEN);
+                window.TEST_MODE = isTestUser;
+                // Показываем экран приложения, но с заблокированным интерфейсом
+                showAppScreen();
+                // Скрываем кнопки быстрого доступа и оплаты, чтобы не было видно
+                document.getElementById('quickButtons').style.display = 'none';
+                document.getElementById('paymentToggleBtn').style.display = 'none';
+                return;
+            }
+            if(resp.status === 401){
+                // Обработка неавторизованного доступа
                 document.getElementById('sourceListContainer').innerHTML='<div class="empty-state"><div class="empty-icon">🔒</div><h3>Ошибка авторизации</h3><p>Попробуйте обновить страницу или перелогиниться.</p></div>';
-                showAppScreen();return;
+                showAppScreen();
+                return;
             }
             const err=await resp.json();throw new Error(err.detail||'Ошибка загрузки');
         }
@@ -1179,10 +1197,9 @@ async function toggleDigest() {
             return;
         }
 
-        // Удаляем управляющие символы
         digestHtml = digestHtml.replace(/[\x00-\x1F\x7F-\x9F\u200B\u200C\u200D\uFEFF\u2028\u2029\r]/g, '');
 
-        // ---- РАЗБИЕНИЕ НА БЛОКИ ПО МАРКЕРУ "- <b>" ----
+        // Разбиваем на блоки
         let blocks = digestHtml.split(/(?=\n- <b>)/).filter(b => b.trim().length > 0);
         if (blocks.length <= 1) {
             blocks = digestHtml.split(/(?=\n-)/).filter(b => b.trim().length > 0);
@@ -1201,18 +1218,8 @@ async function toggleDigest() {
             while (lines.length > 0 && lines[lines.length - 1].trim() === '') lines.pop();
             let cleanedBlock = lines.join('\n');
 
-            // Определяем, является ли блок суммаризацией
+            // ===== ОБРАБОТКА СУММАРИЗАЦИЙ =====
             let isSummary = cleanedBlock.indexOf('<b>Обсуждения в ') !== -1;
-
-            // Добавляем принудительные переносы (для всех)
-            if (cleanedBlock.includes('</b>')) {
-                cleanedBlock = cleanedBlock.replace(/(<\/b>)(?!\n)/, '$1\n');
-            }
-            if (cleanedBlock.includes('<a href')) {
-                cleanedBlock = cleanedBlock.replace(/(?!\n)(<a href)/, '\n$1');
-            }
-
-            // Обработка суммаризаций: расставляем пустые строки между пунктами
             if (isSummary) {
                 let summaryStart = cleanedBlock.indexOf('<b>Обсуждения в ');
                 if (summaryStart !== -1) {
@@ -1220,22 +1227,40 @@ async function toggleDigest() {
                     if (closeBpos !== -1) {
                         let linkStart = cleanedBlock.indexOf('<a href', closeBpos);
                         if (linkStart === -1) linkStart = cleanedBlock.length;
-                        let before = cleanedBlock.slice(0, closeBpos + 4);
+                        let before = cleanedBlock.slice(0, closeBpos + 4); // до </b> включительно
                         let body = cleanedBlock.slice(closeBpos + 4, linkStart);
                         let after = cleanedBlock.slice(linkStart);
+
+                        // Убираем лишние переносы в начале и конце тела
+                        body = body.replace(/^\s*\n+/, '').replace(/\n+\s*$/, '');
+                        // Убираем ведущие переносы перед ссылкой
+                        after = after.replace(/^\s*\n+/, '');
+
+                        // Разбиваем тело на пункты по "- " с учётом возможных пробелов и переносов
                         let parts = body.split(/\s*-\s*/).filter(p => p.trim() !== '');
+                        let newBody;
                         if (parts.length > 1) {
-                            let first = parts[0].trim();
-                            let rest = parts.slice(1).map(p => '- ' + p.trim()).join('\n\n- ');
-                            let newBody = first + '\n\n' + rest;
-                            cleanedBlock = before + newBody + after;
+                            // Соединяем через две пустые строки (один перенос между)
+                            newBody = parts.map(p => '- ' + p.trim()).join('\n\n');
+                        } else {
+                            newBody = body.trim();
                         }
+
+                        // Собираем блок: заголовок + две пустые строки + тело + перенос + ссылка
+                        cleanedBlock = before + '\n\n' + newBody + '\n' + after;
                     }
                 }
-            } else {
-                // Для обычных новостей удаляем все лишние пустые строки (два и более переноса подряд)
-                cleanedBlock = cleanedBlock.replace(/\n{2,}/g, '\n');
             }
+
+            // Добавляем принудительные переносы (если их нет)
+            if (cleanedBlock.includes('</b>')) {
+                cleanedBlock = cleanedBlock.replace(/(<\/b>)(?!\n)/, '$1\n');
+            }
+            if (cleanedBlock.includes('<a href')) {
+                cleanedBlock = cleanedBlock.replace(/(?!\n)(<a href)/, '\n$1');
+            }
+            // Убираем три и более переноса подряд, заменяя на два
+            cleanedBlock = cleanedBlock.replace(/\n{3,}/g, '\n\n');
 
             if (cleanedBlock) {
                 html += `<div class="status-block">${cleanedBlock}</div>`;
@@ -1254,6 +1279,7 @@ async function toggleDigest() {
         content.innerHTML = `<div style="color: #ff6b6b; text-align:center; padding:20px;">❌ Ошибка: ${e.message}</div>`;
     }
 }
+
 
 // ===== ВЫХОД ИЗ АККАУНТА =====
 function logout() {
@@ -1364,6 +1390,29 @@ window.suggestSource = window.suggestSource;
 window.ensureConsent = ensureConsent;
 window.logout = logout; // Добавили экспорт функции
 </script>
-<script>if('serviceWorker' in navigator){navigator.serviceWorker.register('/sw.js').then(r=>console.log('✅ SW registered')).catch(e=>console.log('❌ SW registration failed:',e));}</script>
+
+<!-- Обновлённая регистрация Service Worker с уведомлением об обновлении -->
+<script>
+if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('/sw.js').then(reg => {
+        console.log('✅ SW registered');
+
+        reg.addEventListener('updatefound', () => {
+            const newWorker = reg.installing;
+            if (newWorker) {
+                newWorker.addEventListener('statechange', () => {
+                    if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                        // Показываем диалог с предложением обновить страницу
+                        if (confirm('Новая версия доступна. Обновить страницу?')) {
+                            window.location.reload();
+                        }
+                    }
+                });
+            }
+        });
+    }).catch(err => console.log('❌ SW registration failed:', err));
+}
+</script>
+
 </body>
 </html>
