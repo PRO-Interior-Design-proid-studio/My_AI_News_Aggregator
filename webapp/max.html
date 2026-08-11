@@ -182,7 +182,21 @@
         #logoutContainer:hover {
             color: var(--text) !important;
         }
-        /* ===== КОНЕЦ ===== */
+
+        /* ===== БЛОКИРОВКА ИНТЕРФЕЙСА ДО ПРИНЯТИЯ СОГЛАСИЯ ===== */
+        .consent-pending #appContent,
+        .consent-pending #appContent * {
+            pointer-events: none !important;
+            opacity: 0.5 !important;
+            user-select: none !important;
+        }
+        .consent-pending #consentBlock,
+        .consent-pending #consentBlock * {
+            pointer-events: auto !important;
+            opacity: 1 !important;
+            user-select: auto !important;
+        }
+        /* ===== КОНЕЦ БЛОКИРОВКИ ===== */
     </style>
 </head>
 <body>
@@ -190,203 +204,226 @@
         <div class="container" id="appContainer">
             <div class="header"><h1>Мои AI Новости</h1></div>
 
-            <div class="section-header">Добавить</div>
-            <div class="quick-buttons" id="quickButtons">
-                <button onclick="toggleCategoryForm('dzen')">Дзен</button>
-                <button onclick="toggleCategoryForm('rb')">RB.ru</button>
-                <button onclick="toggleCategoryForm('habr')">Хабр</button>
-                <button onclick="toggleCategoryForm('lifehacker')">Лайфхакер</button>
-                <button onclick="addForbesTelegram()">Forbes</button>
-                <button onclick="toggleCategoryForm('vc')">VC.ru</button>
-                <button onclick="openAddForm('rss')">RSS/HTML</button>
-                <button onclick="openAddForm('telegram')">Telegram</button>
-                <button onclick="openAddForm('vk')">VK</button>
-                <button onclick="toggleGitHubForm()">GitHub</button>
-                <button onclick="toggleYouTubeForm()">YouTube</button>
-                <button onclick="toggleRedditForm()">Reddit</button>
-                <button onclick="toggleCategoryForm('bbc')">BBC</button>
-                <button onclick="toggleGoogleNewsForm()">Google News</button>
-                <button onclick="toggleCategoryForm('cnn')">CNN</button>
-            </div>
-
-            <div class="add-form" id="addForm">
-                <div style="font-weight:600; margin-bottom:6px;" id="addFormTitle">Добавить RSS/HTML</div>
-                <input id="sourceValue" type="text" placeholder="Введите URL..." />
-                <button class="btn-primary" onclick="addSourceSubmit()">Добавить</button>
-                <button class="btn-secondary" onclick="closeAddForm()">Отмена</button>
-            </div>
-
-            <div class="add-form" id="githubForm">
-                <div style="font-weight:600; margin-bottom:6px;">GitHub — генератор RSS</div>
-                <input id="githubInput" type="text" placeholder="owner/repo или username" />
-                <div class="github-grid" id="githubGrid">
-                    <button data-type="releases" onclick="generateGitHubRSS('releases')">releases</button>
-                    <button data-type="tags" onclick="generateGitHubRSS('tags')">tags</button>
-                    <button data-type="commits" onclick="generateGitHubRSS('commits')">commits</button>
-                    <button data-type="main" onclick="generateGitHubRSS('main')">main</button>
-                    <button data-type="master" onclick="generateGitHubRSS('master')">master</button>
-                    <button data-type="username" onclick="generateGitHubRSS('username')">username</button>
+            <!-- ===== БЛОК КОНФИДЕНЦИАЛЬНОСТИ ===== -->
+            <div class="status-block" id="consentBlock" style="display: none;">
+                <div class="status-title">Конфиденциальность</div>
+                <p style="color: var(--text-secondary); font-size: 14px; margin-bottom: 12px; line-height: 1.6;">
+                    Для работы приложения необходимо ваше согласие на обработку персональных данных.
+                    Мы собираем минимальный набор данных (идентификатор в MAX, IP-адрес, технические параметры) для предоставления сервиса.
+                    Ваши данные не передаются третьим лицам и не используются для рекламы.
+                    Подробнее в <a href="/privacy" target="_blank" style="color: var(--accent2);">Политике обработки персональных данных</a>.
+                </p>
+                <div style="display: flex; align-items: flex-start; gap: 12px; margin: 12px 0;">
+                    <input type="checkbox" id="consentCheck" style="width: 20px; height: 20px; margin-top: 2px; flex-shrink: 0; accent-color: var(--accent2); cursor: pointer;">
+                    <label for="consentCheck" style="color: var(--text-secondary); font-size: 14px; line-height: 1.5; cursor: pointer;">
+                        Я ознакомлен(а) и согласен(на) с условиями обработки персональных данных
+                    </label>
                 </div>
-                <button class="btn-secondary" onclick="closeGitHubForm()">Отмена</button>
+                <button id="consentAcceptBtn" disabled style="width: 100%; padding: 12px; background: linear-gradient(290deg, #d235ff 0%, #a062ff 30%, #3088ff 66%, #61d8ff 100%); border: none; border-radius: 12px; color: #fff; font-weight: 600; font-size: 16px; cursor: pointer; transition: opacity .2s; opacity: 0.5; pointer-events: none;">
+                    Принимаю
+                </button>
             </div>
+            <!-- ===== КОНЕЦ БЛОКА ===== -->
 
-            <div class="add-form" id="youtubeForm">
-                <div style="font-weight:600; margin-bottom:6px;">YouTube — генератор RSS</div>
-                <input id="youtubeInput" type="text" placeholder="логин канала или channelId" />
-                <button class="btn-primary" onclick="generateYouTubeRSS()">Сгенерировать</button>
-                <button class="btn-secondary" onclick="closeYouTubeForm()">Отмена</button>
-            </div>
+            <!-- Остальной контент (будет заблокирован, если consent-pending) -->
+            <div id="appContent">
+                <div class="section-header">Добавить</div>
+                <div class="quick-buttons" id="quickButtons">
+                    <button onclick="toggleCategoryForm('dzen')">Дзен</button>
+                    <button onclick="toggleCategoryForm('rb')">RB.ru</button>
+                    <button onclick="toggleCategoryForm('habr')">Хабр</button>
+                    <button onclick="toggleCategoryForm('lifehacker')">Лайфхакер</button>
+                    <button onclick="addForbesTelegram()">Forbes</button>
+                    <button onclick="toggleCategoryForm('vc')">VC.ru</button>
+                    <button onclick="openAddForm('rss')">RSS/HTML</button>
+                    <button onclick="openAddForm('telegram')">Telegram</button>
+                    <button onclick="openAddForm('vk')">VK</button>
+                    <button onclick="toggleGitHubForm()">GitHub</button>
+                    <button onclick="toggleYouTubeForm()">YouTube</button>
+                    <button onclick="toggleRedditForm()">Reddit</button>
+                    <button onclick="toggleCategoryForm('bbc')">BBC</button>
+                    <button onclick="toggleGoogleNewsForm()">Google News</button>
+                    <button onclick="toggleCategoryForm('cnn')">CNN</button>
+                </div>
 
-            <div class="add-form" id="redditForm">
-                <div style="font-weight:600; margin-bottom:6px;">Reddit — генератор RSS</div>
-                <input id="redditInput" type="text" placeholder="название сабреддита" />
-                <button class="btn-primary" onclick="generateRedditRSS()">Сгенерировать</button>
-                <button class="btn-secondary" onclick="closeRedditForm()">Отмена</button>
-            </div>
+                <div class="add-form" id="addForm">
+                    <div style="font-weight:600; margin-bottom:6px;" id="addFormTitle">Добавить RSS/HTML</div>
+                    <input id="sourceValue" type="text" placeholder="Введите URL..." />
+                    <button class="btn-primary" onclick="addSourceSubmit()">Добавить</button>
+                    <button class="btn-secondary" onclick="closeAddForm()">Отмена</button>
+                </div>
 
-            <div class="add-form" id="googleNewsForm">
-                <div style="font-weight:600; margin-bottom:6px;">Google News — генератор RSS</div>
-                <input id="googleNewsInput" type="text" placeholder="ключевое слово или фраза" />
-                <div style="margin: 8px 0 10px; font-size: 13px; color: var(--text-secondary);">
-                    <div style="display: flex; justify-content: space-between; padding: 4px 0; border-bottom: 1px solid var(--border); font-weight: 600; color: var(--text);">
-                        <span>пример</span>
-                        <span>значение</span>
+                <div class="add-form" id="githubForm">
+                    <div style="font-weight:600; margin-bottom:6px;">GitHub — генератор RSS</div>
+                    <input id="githubInput" type="text" placeholder="owner/repo или username" />
+                    <div class="github-grid" id="githubGrid">
+                        <button data-type="releases" onclick="generateGitHubRSS('releases')">releases</button>
+                        <button data-type="tags" onclick="generateGitHubRSS('tags')">tags</button>
+                        <button data-type="commits" onclick="generateGitHubRSS('commits')">commits</button>
+                        <button data-type="main" onclick="generateGitHubRSS('main')">main</button>
+                        <button data-type="master" onclick="generateGitHubRSS('master')">master</button>
+                        <button data-type="username" onclick="generateGitHubRSS('username')">username</button>
                     </div>
-                    <div style="display: flex; justify-content: space-between; padding: 4px 0; border-bottom: 1px solid var(--border);">
-                        <span style="color: var(--text-secondary);">Forbes технологии</span>
-                        <span style="color: var(--text-secondary);">поиск нескольких слов</span>
+                    <button class="btn-secondary" onclick="closeGitHubForm()">Отмена</button>
+                </div>
+
+                <div class="add-form" id="youtubeForm">
+                    <div style="font-weight:600; margin-bottom:6px;">YouTube — генератор RSS</div>
+                    <input id="youtubeInput" type="text" placeholder="логин канала или channelId" />
+                    <button class="btn-primary" onclick="generateYouTubeRSS()">Сгенерировать</button>
+                    <button class="btn-secondary" onclick="closeYouTubeForm()">Отмена</button>
+                </div>
+
+                <div class="add-form" id="redditForm">
+                    <div style="font-weight:600; margin-bottom:6px;">Reddit — генератор RSS</div>
+                    <input id="redditInput" type="text" placeholder="название сабреддита" />
+                    <button class="btn-primary" onclick="generateRedditRSS()">Сгенерировать</button>
+                    <button class="btn-secondary" onclick="closeRedditForm()">Отмена</button>
+                </div>
+
+                <div class="add-form" id="googleNewsForm">
+                    <div style="font-weight:600; margin-bottom:6px;">Google News — генератор RSS</div>
+                    <input id="googleNewsInput" type="text" placeholder="ключевое слово или фраза" />
+                    <div style="margin: 8px 0 10px; font-size: 13px; color: var(--text-secondary);">
+                        <div style="display: flex; justify-content: space-between; padding: 4px 0; border-bottom: 1px solid var(--border); font-weight: 600; color: var(--text);">
+                            <span>пример</span>
+                            <span>значение</span>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; padding: 4px 0; border-bottom: 1px solid var(--border);">
+                            <span style="color: var(--text-secondary);">Forbes технологии</span>
+                            <span style="color: var(--text-secondary);">поиск нескольких слов</span>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; padding: 4px 0; border-bottom: 1px solid var(--border);">
+                            <span style="color: var(--text-secondary);">"точная фраза"</span>
+                            <span style="color: var(--text-secondary);">точное совпадение</span>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; padding: 4px 0; border-bottom: 1px solid var(--border);">
+                            <span style="color: var(--text-secondary);">технологии OR роботы</span>
+                            <span style="color: var(--text-secondary);">одно из слов</span>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; padding: 4px 0; border-bottom: 1px solid var(--border);">
+                            <span style="color: var(--text-secondary);">intitle:слово</span>
+                            <span style="color: var(--text-secondary);">поиск в заголовке</span>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; padding: 4px 0;">
+                            <span style="color: var(--text-secondary);">allintext:текст</span>
+                            <span style="color: var(--text-secondary);">поиск в тексте</span>
+                        </div>
                     </div>
-                    <div style="display: flex; justify-content: space-between; padding: 4px 0; border-bottom: 1px solid var(--border);">
-                        <span style="color: var(--text-secondary);">"точная фраза"</span>
-                        <span style="color: var(--text-secondary);">точное совпадение</span>
+                    <button class="btn-primary" onclick="generateGoogleNewsRSS()">Сгенерировать</button>
+                    <button class="btn-secondary" onclick="closeGoogleNewsForm()">Отмена</button>
+                </div>
+
+                <div class="category-form" id="bbcForm">
+                    <div style="font-weight:600; margin-bottom:8px;">BBC — выберите категорию</div>
+                    <div class="category-grid" id="bbcGrid"></div>
+                </div>
+
+                <div class="category-form" id="cnnForm">
+                    <div style="font-weight:600; margin-bottom:8px;">CNN — выберите категорию</div>
+                    <div class="category-grid" id="cnnGrid"></div>
+                </div>
+
+                <div class="category-form" id="dzenForm">
+                    <div style="font-weight:600; margin-bottom:8px;">Дзен — выберите категорию</div>
+                    <div class="category-grid" id="dzenGrid"></div>
+                </div>
+                <div class="category-form" id="rbForm">
+                    <div style="font-weight:600; margin-bottom:8px;">Russian Business — выберите категорию</div>
+                    <div class="category-grid" id="rbGrid"></div>
+                </div>
+                <div class="category-form" id="habrForm">
+                    <div style="font-weight:600; margin-bottom:8px;">Хабр — выберите хаб</div>
+                    <div class="category-grid" id="habrGrid"></div>
+                </div>
+                <div class="category-form" id="lifehackerForm">
+                    <div style="font-weight:600; margin-bottom:8px;">Лайфхакер — выберите категорию</div>
+                    <div class="category-grid" id="lifehackerGrid"></div>
+                </div>
+                <div class="category-form" id="vcForm">
+                    <div style="font-weight:600; margin-bottom:8px;">VC.ru — выберите категорию</div>
+                    <div class="category-grid" id="vcGrid"></div>
+                </div>
+
+                <div style="display: flex; gap: 8px; margin-top: 0px;">
+                    <button class="suggest-btn" style="flex: 1; color: var(--text);" onclick="toggleCategoryBrowser()">Категории</button>
+                    <button class="suggest-btn" style="flex: 1; color: var(--text-secondary);" onclick="suggestSource()">Предложить своё</button>
+                </div>
+
+                <div class="category-form" id="categoryBrowser" style="display: none;">
+                    <div class="category-form-header" id="categoryBrowserHeader">Выберите категорию</div>
+                    <div class="category-grid" id="categoryGrid"></div>
+                    <button class="btn-secondary" id="categoryBackBtn" style="display: none; margin-top: 8px; width: 100%;" onclick="goBackLevel()">← Назад</button>
+                </div>
+
+                <!-- === НОВАЯ КНОПКА И БЛОК ДЛЯ ДАЙДЖЕСТА === -->
+                <button class="payment-toggle-btn" id="digestToggleBtn" onclick="toggleDigest()">📰 Смотреть новости</button>
+                <div id="digestContainer" style="display: none; margin-top: 0;">
+                    <div id="digestContent"></div>
+                </div>
+                <!-- ============================================ -->
+
+                <div class="section-header">Мои источники (<span id="counter">0</span>)</div>
+                <div id="sourceListContainer"></div>
+
+                <button class="payment-toggle-btn" id="paymentToggleBtn" onclick="toggleTariffs()">💰 Оплатить тариф</button>
+
+                <div class="tariff-block" id="tariffBlock">
+                    <div class="tariff-grid">
+                        <div class="tariff-card">
+                            <div class="title">Базовый</div>
+                            <button class="price-btn" onclick="handlePayment('basic_month')">
+                                190 ₽ <span class="label">/ мес</span>
+                            </button>
+                            <button class="price-btn" onclick="handlePayment('basic_year')">
+                                1 900 ₽ <span class="label">/ год</span>
+                            </button>
+                        </div>
+                        <div class="tariff-card">
+                            <div class="title">Расширенный</div>
+                            <button class="price-btn" onclick="handlePayment('premium_month')">
+                                490 ₽ <span class="label">/ мес</span>
+                            </button>
+                            <button class="price-btn" onclick="handlePayment('premium_year')">
+                                4 900 ₽ <span class="label">/ год</span>
+                            </button>
+                        </div>
                     </div>
-                    <div style="display: flex; justify-content: space-between; padding: 4px 0; border-bottom: 1px solid var(--border);">
-                        <span style="color: var(--text-secondary);">технологии OR роботы</span>
-                        <span style="color: var(--text-secondary);">одно из слов</span>
-                    </div>
-                    <div style="display: flex; justify-content: space-between; padding: 4px 0; border-bottom: 1px solid var(--border);">
-                        <span style="color: var(--text-secondary);">intitle:слово</span>
-                        <span style="color: var(--text-secondary);">поиск в заголовке</span>
-                    </div>
-                    <div style="display: flex; justify-content: space-between; padding: 4px 0;">
-                        <span style="color: var(--text-secondary);">allintext:текст</span>
-                        <span style="color: var(--text-secondary);">поиск в тексте</span>
+                    <div class="tariff-link">
+                        <a href="https://news.proid.studio/#pricing" target="_blank">Описание тарифов</a>
                     </div>
                 </div>
-                <button class="btn-primary" onclick="generateGoogleNewsRSS()">Сгенерировать</button>
-                <button class="btn-secondary" onclick="closeGoogleNewsForm()">Отмена</button>
-            </div>
 
-            <div class="category-form" id="bbcForm">
-                <div style="font-weight:600; margin-bottom:8px;">BBC — выберите категорию</div>
-                <div class="category-grid" id="bbcGrid"></div>
-            </div>
+                <div class="status-block" id="userStatus">
+                    <div class="status-title">Текущий статус</div>
+                    <div class="status-row"><span>Тариф:</span> <span id="statusTariff">—</span></div>
+                    <div class="status-row"><span>Мои источники:</span> <span id="statusSources">0</span></div>
+                    <div class="status-row"><span>Лимит источников:</span> <span id="statusLimit">5</span></div>
+                    <div class="status-row"><span>Автополучение:</span> <span id="statusAutoSend">✅</span></div>
+                    <div class="status-row"><span>Получили:</span> <span id="statusLastSent">—</span></div>
+                    <div class="status-row"><span>Оплачено до:</span> <span id="statusExpires">—</span></div>
+                </div>
 
-            <div class="category-form" id="cnnForm">
-                <div style="font-weight:600; margin-bottom:8px;">CNN — выберите категорию</div>
-                <div class="category-grid" id="cnnGrid"></div>
-            </div>
-
-            <div class="category-form" id="dzenForm">
-                <div style="font-weight:600; margin-bottom:8px;">Дзен — выберите категорию</div>
-                <div class="category-grid" id="dzenGrid"></div>
-            </div>
-            <div class="category-form" id="rbForm">
-                <div style="font-weight:600; margin-bottom:8px;">Russian Business — выберите категорию</div>
-                <div class="category-grid" id="rbGrid"></div>
-            </div>
-            <div class="category-form" id="habrForm">
-                <div style="font-weight:600; margin-bottom:8px;">Хабр — выберите хаб</div>
-                <div class="category-grid" id="habrGrid"></div>
-            </div>
-            <div class="category-form" id="lifehackerForm">
-                <div style="font-weight:600; margin-bottom:8px;">Лайфхакер — выберите категорию</div>
-                <div class="category-grid" id="lifehackerGrid"></div>
-            </div>
-            <div class="category-form" id="vcForm">
-                <div style="font-weight:600; margin-bottom:8px;">VC.ru — выберите категорию</div>
-                <div class="category-grid" id="vcGrid"></div>
-            </div>
-
-            <div style="display: flex; gap: 8px; margin-top: 0px;">
-                <button class="suggest-btn" style="flex: 1; color: var(--text);" onclick="toggleCategoryBrowser()">Категории</button>
-                <button class="suggest-btn" style="flex: 1; color: var(--text-secondary);" onclick="suggestSource()">Предложить своё</button>
-            </div>
-
-            <div class="category-form" id="categoryBrowser" style="display: none;">
-                <div class="category-form-header" id="categoryBrowserHeader">Выберите категорию</div>
-                <div class="category-grid" id="categoryGrid"></div>
-                <button class="btn-secondary" id="categoryBackBtn" style="display: none; margin-top: 8px; width: 100%;" onclick="goBackLevel()">← Назад</button>
-            </div>
-
-            <!-- === НОВАЯ КНОПКА И БЛОК ДЛЯ ДАЙДЖЕСТА === -->
-            <button class="payment-toggle-btn" id="digestToggleBtn" onclick="toggleDigest()">📰 Смотреть новости</button>
-            <div id="digestContainer" style="display: none; margin-top: 0;">
-                <div id="digestContent"></div>
-            </div>
-            <!-- ============================================ -->
-
-            <div class="section-header">Мои источники (<span id="counter">0</span>)</div>
-            <div id="sourceListContainer"></div>
-
-            <button class="payment-toggle-btn" id="paymentToggleBtn" onclick="toggleTariffs()">💰 Оплатить тариф</button>
-
-            <div class="tariff-block" id="tariffBlock">
-                <div class="tariff-grid">
-                    <div class="tariff-card">
-                        <div class="title">Базовый</div>
-                        <button class="price-btn" onclick="handlePayment('basic_month')">
-                            190 ₽ <span class="label">/ мес</span>
-                        </button>
-                        <button class="price-btn" onclick="handlePayment('basic_year')">
-                            1 900 ₽ <span class="label">/ год</span>
-                        </button>
+                <div class="status-block" id="timeBlock">
+                    <div class="status-title">Время получения</div>
+                    <div class="status-row" style="border-bottom: none; padding-bottom: 0;">
+                        <span>Текущее время:</span>
+                        <span id="currentTimeDisplay">—</span>
+                        <button class="change-time-btn" id="changeTimeBtn" onclick="toggleTimePicker()">Изменить</button>
+                        <span class="upgrade-hint" id="upgradeHint" style="display:none;">
+                            🔒 <a href="#" onclick="toggleTariffs(); return false;">Доступно в Расширенном тарифе</a>
+                        </span>
                     </div>
-                    <div class="tariff-card">
-                        <div class="title">Расширенный</div>
-                        <button class="price-btn" onclick="handlePayment('premium_month')">
-                            490 ₽ <span class="label">/ мес</span>
-                        </button>
-                        <button class="price-btn" onclick="handlePayment('premium_year')">
-                            4 900 ₽ <span class="label">/ год</span>
-                        </button>
+                    <div id="timePicker" style="display: none; margin-top: 10px;">
+                        <div class="time-picker-grid" id="timePickerGrid"></div>
+                        <button class="close-picker-btn" onclick="closeTimePicker()">Закрыть</button>
                     </div>
                 </div>
-                <div class="tariff-link">
-                    <a href="https://news.proid.studio/#pricing" target="_blank">Описание тарифов</a>
-                </div>
-            </div>
 
-            <div class="status-block" id="userStatus">
-                <div class="status-title">Текущий статус</div>
-                <div class="status-row"><span>Тариф:</span> <span id="statusTariff">—</span></div>
-                <div class="status-row"><span>Мои источники:</span> <span id="statusSources">0</span></div>
-                <div class="status-row"><span>Лимит источников:</span> <span id="statusLimit">5</span></div>
-                <div class="status-row"><span>Автополучение:</span> <span id="statusAutoSend">✅</span></div>
-                <div class="status-row"><span>Получили:</span> <span id="statusLastSent">—</span></div>
-                <div class="status-row"><span>Оплачено до:</span> <span id="statusExpires">—</span></div>
-            </div>
-
-            <div class="status-block" id="timeBlock">
-                <div class="status-title">Время получения</div>
-                <div class="status-row" style="border-bottom: none; padding-bottom: 0;">
-                    <span>Текущее время:</span>
-                    <span id="currentTimeDisplay">—</span>
-                    <button class="change-time-btn" id="changeTimeBtn" onclick="toggleTimePicker()">Изменить</button>
-                    <span class="upgrade-hint" id="upgradeHint" style="display:none;">
-                        🔒 <a href="#" onclick="toggleTariffs(); return false;">Доступно в Расширенном тарифе</a>
-                    </span>
-                </div>
-                <div id="timePicker" style="display: none; margin-top: 10px;">
-                    <div class="time-picker-grid" id="timePickerGrid"></div>
-                    <button class="close-picker-btn" onclick="closeTimePicker()">Закрыть</button>
-                </div>
-            </div>
-
-            <!-- ===== КНОПКА ВЫХОДА ===== -->
-            <div id="logoutContainer" onclick="logout()">Выход</div>
-            <!-- ======================== -->
-
+                <!-- ===== КНОПКА ВЫХОДА ===== -->
+                <div id="logoutContainer" onclick="logout()">Выход</div>
+                <!-- ======================== -->
+            </div> <!-- /appContent -->
         </div>
     </div>
 
@@ -410,9 +447,21 @@
 
     <script src="/webapp/categories.js?v=50"></script>
     <script>
-        let currentSources=[],currentLimit=5,currentAddType='rss',currentSendTime=null,isPremium=false,defaultSendHour=18;
+        // ===== КОНСТАНТЫ =====
+        const TEST_TOKEN = 'vol7Js5SZnjPuaTfkk46zea3I-k_vsInqyqQPho_dF0';
+
+        // ===== ГЛОБАЛЬНЫЕ ПЕРЕМЕННЫЕ =====
+        let currentSources = [];
+        let currentLimit = 5;
+        let currentAddType = 'rss';
+        let currentSendTime = null;
+        let isPremium = false;
+        let defaultSendHour = 18;
         let digestVisible = false;
-        const CATEGORY_CACHE_TTL=3600000;
+        let categoryHistory = [];
+        const CATEGORY_CACHE_TTL = 3600000;
+        let isTestUser = false;
+        let consentGiven = false;
 
         function hapticFeedback(){if(navigator.vibrate)navigator.vibrate(10);if(window.WebApp&&window.WebApp.HapticFeedback)window.WebApp.HapticFeedback.impactOccurred('light');}
 
@@ -438,6 +487,15 @@
                 'Content-Type':'application/json',
                 ...(token ? { 'X-Auth-Token': token } : {})
             };
+        }
+
+        // ===== ПРОВЕРКА СОГЛАСИЯ =====
+        function ensureConsent() {
+            if (!consentGiven && !isTestUser) {
+                alert('Сначала примите согласие на обработку данных.');
+                return false;
+            }
+            return true;
         }
 
         function getIconGradient(type){
@@ -497,75 +555,26 @@
             else{btn.style.display='none';hint.style.display='inline-block';if(document.getElementById('timePicker').style.display!=='none')closeTimePicker();}
         }
 
-        function toggleTimePicker(){
-            hapticFeedback();
-            if(!isPremium){
-                if(window.WebApp&&window.WebApp.showPopup){
-                    window.WebApp.showPopup({
-                        title:'Доступно только в Расширенном тарифе',
-                        message:'Управление временем получения доступно только для Расширенного тарифа. Оформите подписку, чтобы пользоваться этой функцией.',
-                        buttons:[{id:'upgrade',type:'default',text:'Перейти к тарифам'},{id:'cancel',type:'cancel',text:'Закрыть'}]
-                    },function(btnId){if(btnId==='upgrade')toggleTariffs();});
-                }else alert('Доступно только для Расширенного тарифа. Оформите подписку.');
-                return;
-            }
-            const picker=document.getElementById('timePicker');
-            if(picker.style.display==='none')openTimePicker();else closeTimePicker();
-        }
-        function openTimePicker(){if(!isPremium)return;document.getElementById('timePicker').style.display='block';renderTimePicker();}
-        function closeTimePicker(){document.getElementById('timePicker').style.display='none';}
-        function renderTimePicker(){
-            const grid=document.getElementById('timePickerGrid');
-            grid.innerHTML='';
-            const cur=currentSendTime?parseInt(currentSendTime.split(':')[0]):-1;
-            for(let h=0;h<24;h++){
-                const btn=document.createElement('button');
-                btn.textContent=h.toString().padStart(2,'0')+':00';
-                if(h===cur)btn.classList.add('selected');
-                btn.onclick=function(){setTime(h);};
-                grid.appendChild(btn);
-            }
-        }
-        async function setTime(hour){
-            hapticFeedback();
-            const initData=localStorage.getItem('max_init_data');
-            if(!initData){alert('Нет авторизации');return;}
-            try{
-                const resp=await apiRequest('/api/webapp/max/set_time',{
-                    method:'POST',
-                    headers:{'Content-Type':'application/json','X-MAX-Init-Data':initData},
-                    body:JSON.stringify({hour:hour})
-                });
-                if(!resp)return;
-                if(!resp.ok){const err=await resp.json();throw new Error(err.detail||'Ошибка установки времени');}
-                const data=await resp.json();
-                currentSendTime=data.send_time;
-                document.getElementById('currentTimeDisplay').textContent=currentSendTime+' MSK';
-                document.querySelectorAll('#timePickerGrid button').forEach((btn,idx)=>{btn.classList.toggle('selected',idx===hour);});
-                if(window.WebApp&&window.WebApp.showPopup)window.WebApp.showPopup({title:'Успешно',message:'Время получения установлено на '+currentSendTime+' MSK',buttons:[{type:'ok'}]});
-                else alert('Время установлено');
-                closeTimePicker();
-                loadSources();
-            }catch(err){
-                if(window.WebApp&&window.WebApp.showPopup)window.WebApp.showPopup({title:'Ошибка',message:err.message,buttons:[{type:'ok'}]});
-                else alert('Ошибка: '+err.message);
-            }
-        }
-
+        // ===== ЗАГРУЗКА ИСТОЧНИКОВ (ОСНОВНАЯ) С ПРОВЕРКОЙ СОГЛАСИЯ =====
         function loadSources(){
             const headers=getAuthHeaders();
             apiRequest('/api/webapp/max/sources',{headers:headers})
             .then(resp=>{
                 if(!resp)return;
                 if(!resp.ok){
+                    // ===== НОВАЯ ОБРАБОТКА 403: ПОКАЗЫВАЕМ БЛОК КОНФИДЕНЦИАЛЬНОСТИ =====
                     if(resp.status===403){
-                        return resp.json().then(err=>{
-                            document.getElementById('sourceListContainer').innerHTML='<div class="empty-state"><div class="empty-icon">🔒</div><h3>Требуется согласие</h3><p>'+(err.detail||'Для использования приложения необходимо принять Согласие на обработку персональных данных. Откройте бота и нажмите /start.')+'</p></div>';
-                            document.getElementById('appContainer').classList.add('disabled-overlay');
-                            document.getElementById('quickButtons').style.display='none';
-                            document.getElementById('paymentToggleBtn').style.display='none';
-                            return;
-                        });
+                        const consentBlock = document.getElementById('consentBlock');
+                        const appContainer = document.getElementById('appContainer');
+                        consentBlock.style.display = 'block';
+                        appContainer.classList.add('consent-pending');
+                        consentGiven = false;
+                        isTestUser = (localStorage.getItem('max_init_data') === TEST_TOKEN);
+                        window.TEST_MODE = isTestUser;
+                        // Скрываем кнопки быстрого доступа и оплаты
+                        document.getElementById('quickButtons').style.display = 'none';
+                        document.getElementById('paymentToggleBtn').style.display = 'none';
+                        return;
                     }
                     if(resp.status===401)throw new Error('Сессия истекла, перезагрузите страницу');
                     return resp.json().then(err=>{throw new Error(err.detail||'Ошибка загрузки');});
@@ -579,15 +588,96 @@
                 renderGroupedSources(currentSources);
                 document.getElementById('counter').textContent=currentSources.length;
                 updateStatus(data);
-                document.getElementById('appContainer').classList.remove('disabled-overlay');
-                document.getElementById('quickButtons').style.display='flex';
-                document.getElementById('paymentToggleBtn').style.display='block';
+
+                // === УПРАВЛЕНИЕ СОГЛАСИЕМ ===
+                const consentBlock = document.getElementById('consentBlock');
+                const appContainer = document.getElementById('appContainer');
+                isTestUser = (localStorage.getItem('max_init_data') === TEST_TOKEN);
+                consentGiven = data.consent_given === true;
+
+                if (!consentGiven || isTestUser) {
+                    consentBlock.style.display = 'block';
+                    appContainer.classList.add('consent-pending');
+                    window.TEST_MODE = isTestUser;
+                    document.getElementById('quickButtons').style.display = 'none';
+                    document.getElementById('paymentToggleBtn').style.display = 'none';
+                } else {
+                    consentBlock.style.display = 'none';
+                    appContainer.classList.remove('consent-pending');
+                    window.TEST_MODE = false;
+                    document.getElementById('quickButtons').style.display = 'flex';
+                    document.getElementById('paymentToggleBtn').style.display = 'block';
+                }
             })
             .catch(err=>{
                 console.error(err);
                 document.getElementById('sourceListContainer').innerHTML='<div class="empty-state"><div class="empty-icon">⚠️</div><h3>Ошибка загрузки</h3><p>'+err.message+'</p></div>';
+                // Если произошла ошибка, но согласие ещё не дано, показываем блок как запасной вариант
+                const consentBlock = document.getElementById('consentBlock');
+                const appContainer = document.getElementById('appContainer');
+                if (consentBlock.style.display === 'none' && !consentGiven) {
+                    consentBlock.style.display = 'block';
+                    appContainer.classList.add('consent-pending');
+                    document.getElementById('quickButtons').style.display = 'none';
+                    document.getElementById('paymentToggleBtn').style.display = 'none';
+                }
             });
         }
+
+        // ===== ОБРАБОТЧИК КНОПКИ "ПРИНИМАЮ" =====
+        document.addEventListener('DOMContentLoaded', function() {
+            const check = document.getElementById('consentCheck');
+            const btn = document.getElementById('consentAcceptBtn');
+            if (check && btn) {
+                check.addEventListener('change', function() {
+                    if (this.checked) {
+                        btn.disabled = false;
+                        btn.style.opacity = '1';
+                        btn.style.pointerEvents = 'auto';
+                    } else {
+                        btn.disabled = true;
+                        btn.style.opacity = '0.5';
+                        btn.style.pointerEvents = 'none';
+                    }
+                });
+                btn.addEventListener('click', async function() {
+                    if (!check.checked) return;
+                    const appContainer = document.getElementById('appContainer');
+                    const consentBlock = document.getElementById('consentBlock');
+                    // Тестовый режим: просто скрываем блок и разблокируем
+                    if (window.TEST_MODE) {
+                        consentBlock.style.display = 'none';
+                        appContainer.classList.remove('consent-pending');
+                        document.getElementById('quickButtons').style.display = 'flex';
+                        document.getElementById('paymentToggleBtn').style.display = 'block';
+                        return;
+                    }
+                    // Обычный пользователь: отправляем запрос
+                    try {
+                        const initData = localStorage.getItem('max_init_data');
+                        if (!initData) { alert('Нет авторизации'); return; }
+                        const resp = await apiRequest('/api/webapp/max/consent', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json', 'X-MAX-Init-Data': initData }
+                        });
+                        if (resp && resp.ok) {
+                            consentBlock.style.display = 'none';
+                            appContainer.classList.remove('consent-pending');
+                            consentGiven = true;
+                            document.getElementById('quickButtons').style.display = 'flex';
+                            document.getElementById('paymentToggleBtn').style.display = 'block';
+                            // Перезагружаем данные
+                            loadSources();
+                        } else {
+                            const err = resp ? await resp.json() : { detail: 'Ошибка соединения' };
+                            alert('❌ Ошибка: ' + (err.detail || 'Не удалось сохранить согласие'));
+                        }
+                    } catch (e) {
+                        alert('❌ Ошибка: ' + e.message);
+                    }
+                });
+            }
+        });
 
         function renderGroupedSources(sources){
             const container=document.getElementById('sourceListContainer');
@@ -630,6 +720,7 @@
         }
 
         function deleteSource(id){
+            if (!ensureConsent()) return;
             const headers=getAuthHeaders();
             apiRequest('/api/webapp/max/delete',{
                 method:'POST',
@@ -646,6 +737,7 @@
         }
 
         function addRSSSource(url,name){
+            if (!ensureConsent()) return;
             hapticFeedback();
             if(!url||!url.trim()){alert('URL не может быть пустым.');return;}
             let finalUrl=url.trim();
@@ -671,6 +763,7 @@
         }
 
         function confirmAddSource(url,name){
+            if (!ensureConsent()) return;
             hapticFeedback();
             if(window.WebApp&&window.WebApp.showPopup){
                 window.WebApp.showPopup({
@@ -689,6 +782,7 @@
         }
 
         function addSourceSubmit(){
+            if (!ensureConsent()) return;
             hapticFeedback();
             const value=document.getElementById('sourceValue').value.trim();
             if(!value){alert('Введите значение');return;}
@@ -709,6 +803,7 @@
         }
 
         function addCategorySource(type,url,name){
+            if (!ensureConsent()) return;
             hapticFeedback();
             let sourceType=type;
             let sourceValue=url;
@@ -724,6 +819,7 @@
         }
 
         function doAddCategorySource(type,url,name){
+            if (!ensureConsent()) return;
             const headers=getAuthHeaders();
             apiRequest('/api/webapp/max/add',{
                 method:'POST',
@@ -745,11 +841,13 @@
         }
 
         function addForbesTelegram() {
+            if (!ensureConsent()) return;
             hapticFeedback();
             addCategorySource("telegram", "forbesrussia", "Forbes (Telegram)");
         }
 
         function openAddForm(type){
+            if (!ensureConsent()) return;
             hapticFeedback();
             const form = document.getElementById('addForm');
             const isVisible = form.style.display === 'block';
@@ -771,6 +869,7 @@
         function closeAddForm(){document.getElementById('addForm').style.display='none';}
 
         function toggleGitHubForm() {
+            if (!ensureConsent()) return;
             hapticFeedback();
             const form = document.getElementById('githubForm');
             const isHidden = window.getComputedStyle(form).display === 'none';
@@ -791,6 +890,7 @@
         function closeGitHubForm(){document.getElementById('githubForm').style.display='none';}
         function updateGitHubButtons(v){const grid=document.getElementById('githubGrid');const btns=grid.querySelectorAll('button');const hasSlash=v&&v.includes('/');btns.forEach(btn=>{const type=btn.dataset.type;if(type==='username')btn.disabled=!v||!v.trim();else btn.disabled=!(hasSlash&&v.trim());});}
         function generateGitHubRSS(type){
+            if (!ensureConsent()) return;
             hapticFeedback();
             const input=document.getElementById('githubInput');
             let raw=input.value.trim();
@@ -803,6 +903,7 @@
         }
 
         function toggleYouTubeForm() {
+            if (!ensureConsent()) return;
             hapticFeedback();
             const form = document.getElementById('youtubeForm');
             const isHidden = window.getComputedStyle(form).display === 'none';
@@ -815,6 +916,7 @@
         }
         function closeYouTubeForm(){document.getElementById('youtubeForm').style.display='none';}
         async function generateYouTubeRSS(){
+            if (!ensureConsent()) return;
             hapticFeedback();
             const input=document.getElementById('youtubeInput');
             let value=input.value.trim();
@@ -839,6 +941,7 @@
         }
 
         function toggleRedditForm() {
+            if (!ensureConsent()) return;
             hapticFeedback();
             const form = document.getElementById('redditForm');
             const isHidden = window.getComputedStyle(form).display === 'none';
@@ -851,6 +954,7 @@
         }
         function closeRedditForm(){document.getElementById('redditForm').style.display='none';}
         function generateRedditRSS(){
+            if (!ensureConsent()) return;
             hapticFeedback();
             const input=document.getElementById('redditInput');
             let subreddit=input.value.trim();
@@ -863,6 +967,7 @@
         }
 
         function toggleGoogleNewsForm() {
+            if (!ensureConsent()) return;
             hapticFeedback();
             const form = document.getElementById('googleNewsForm');
             const isHidden = window.getComputedStyle(form).display === 'none';
@@ -875,6 +980,7 @@
         }
         function closeGoogleNewsForm(){document.getElementById('googleNewsForm').style.display='none';}
         function generateGoogleNewsRSS(){
+            if (!ensureConsent()) return;
             hapticFeedback();
             const input=document.getElementById('googleNewsInput');
             let query=input.value.trim();
@@ -892,6 +998,7 @@
         }
 
         function toggleCategoryForm(type){
+            if (!ensureConsent()) return;
             hapticFeedback();
             const map={'bbc':'bbcForm','cnn':'cnnForm','dzen':'dzenForm','rb':'rbForm','habr':'habrForm','lifehacker':'lifehackerForm','vc':'vcForm'};
             const id=map[type];
@@ -925,6 +1032,7 @@
         }
 
         function suggestSource(){
+            if (!ensureConsent()) return;
             hapticFeedback();
             const url='https://t.me/professional_interior_design';
             const text='Добрый день. Хочу предложить источник:';
@@ -933,9 +1041,18 @@
             else window.open(fullUrl,'_blank');
         }
 
-        function toggleTariffs(){hapticFeedback();document.getElementById('tariffBlock').classList.toggle('visible');}
-        function handlePayment(tariffKey){hapticFeedback();startPayment(tariffKey);}
+        function toggleTariffs(){
+            if (!ensureConsent()) return;
+            hapticFeedback();
+            document.getElementById('tariffBlock').classList.toggle('visible');
+        }
+        function handlePayment(tariffKey){
+            if (!ensureConsent()) return;
+            hapticFeedback();
+            startPayment(tariffKey);
+        }
         function startPayment(tariffKey){
+            if (!ensureConsent()) return;
             const initData=localStorage.getItem('max_init_data');
             if(!initData){alert('Нет авторизации');return;}
             apiRequest('/api/payment/max/create-invoice',{
@@ -957,8 +1074,9 @@
             .catch(err=>alert('Ошибка: '+err.message));
         }
 
-        let categoryHistory=[];
+        // ===== КАТЕГОРИИ (используем глобальную categoryHistory) =====
         async function loadCategoryLevel(parentId=null){
+            if (!ensureConsent()) return [];
             const key=parentId===null?'categories_root':'categories_'+parentId;
             const cached=localStorage.getItem(key);
             if(cached){
@@ -990,16 +1108,18 @@
         }
 
         function toggleCategoryBrowser(){
+            if (!ensureConsent()) return;
             hapticFeedback();
             const b=document.getElementById('categoryBrowser');
             if(b.style.display==='block'){b.style.display='none';return;}
             document.querySelectorAll('.add-form, .category-form').forEach(f=>f.style.display='none');
             b.style.display='block';
-            categoryHistory=[];
+            categoryHistory = []; // сброс истории при открытии
             showLevel(null);
         }
 
         function showLevel(parentId){
+            if (!ensureConsent()) return;
             const header=document.getElementById('categoryBrowserHeader');
             const grid=document.getElementById('categoryGrid');
             const back=document.getElementById('categoryBackBtn');
@@ -1017,8 +1137,14 @@
             }).catch(err=>{grid.innerHTML='<div style="text-align:center;padding:10px;color:red;">Ошибка: '+err.message+'</div>';});
         }
 
-        function openLevel(id,name){hapticFeedback();categoryHistory.push({id:id,name:name});showLevel(id);}
+        function openLevel(id,name){
+            hapticFeedback();
+            categoryHistory.push({id:id,name:name});
+            showLevel(id);
+        }
+
         function goBackLevel(){
+            if (!ensureConsent()) return;
             hapticFeedback();
             if(categoryHistory.length===0){document.getElementById('categoryBrowser').style.display='none';return;}
             categoryHistory.pop();
@@ -1027,6 +1153,7 @@
         }
 
         function addSourceByType(type,url,name){
+            if (!ensureConsent()) return;
             hapticFeedback();
             let sourceType=type;
             if(!['rss','telegram','vk','max'].includes(type))sourceType='rss';
@@ -1034,110 +1161,184 @@
             else{console.warn('Добавление источника типа '+type+' пока не реализовано, добавляем как RSS');addRSSSource(url,name);}
         }
 
-        // ===== НОВАЯ ФУНКЦИЯ "СМОТРЕТЬ НОВОСТИ" (с удалением лишних пустых строк) =====
-        async function toggleDigest() {
-            const container = document.getElementById('digestContainer');
-            const content = document.getElementById('digestContent');
-            if (digestVisible) {
-                container.style.display = 'none';
-                digestVisible = false;
+        function toggleTimePicker(){
+            if (!ensureConsent()) return;
+            hapticFeedback();
+            if(!isPremium){
+                if(window.WebApp&&window.WebApp.showPopup){
+                    window.WebApp.showPopup({
+                        title:'Доступно только в Расширенном тарифе',
+                        message:'Управление временем получения доступно только для Расширенного тарифа. Оформите подписку, чтобы пользоваться этой функцией.',
+                        buttons:[{id:'upgrade',type:'default',text:'Перейти к тарифам'},{id:'cancel',type:'cancel',text:'Закрыть'}]
+                    },function(btnId){if(btnId==='upgrade')toggleTariffs();});
+                }else alert('Доступно только для Расширенного тарифа. Оформите подписку.');
                 return;
             }
-            container.style.display = 'block';
-            digestVisible = true;
-            content.innerHTML = '<div style="text-align:center; padding:20px; color: var(--text-secondary);">⏳ Загрузка...</div>';
-
-            try {
-                const headers = getAuthHeaders();
-                const resp = await apiRequest('/api/webapp/max/digest', { headers: headers });
-                if (!resp) return;
-                if (!resp.ok) {
-                    const err = await resp.json();
-                    content.innerHTML = `<div style="color: #ff6b6b; text-align:center; padding:20px;">❌ Ошибка: ${err.detail || 'Не удалось загрузить дайджест'}</div>`;
-                    return;
-                }
-                const data = await resp.json();
-                let digestHtml = data.digest;
-
-                if (!digestHtml || digestHtml.trim() === '' || digestHtml.includes('Дайджест ещё не формировался')) {
-                    content.innerHTML = `<div style="text-align:center; padding:20px; color: var(--text-secondary);">📭 Дайджест ещё не формировался. Запустите сбор вручную или дождитесь автоматического.</div>`;
-                    return;
-                }
-
-                digestHtml = digestHtml.replace(/[\x00-\x1F\x7F-\x9F\u200B\u200C\u200D\uFEFF\u2028\u2029\r]/g, '');
-
-                let blocks = digestHtml.split(/(?=\n- <b>)/).filter(b => b.trim().length > 0);
-                if (blocks.length <= 1) {
-                    blocks = digestHtml.split(/(?=\n-)/).filter(b => b.trim().length > 0);
-                }
-                if (blocks.length <= 1) {
-                    blocks = digestHtml.split(/(?=- <b>)/).filter(b => b.trim().length > 0);
-                    if (blocks[0] && blocks[0].trim() === '') blocks.shift();
-                }
-                blocks = blocks.map(b => b.startsWith('\n') ? b.slice(1) : b);
-
-                let html = '';
-                for (let block of blocks) {
-                    let lines = block.split('\n');
-                    lines = lines.map(line => line.replace(/^[\s\u00A0]+/, ''));
-                    while (lines.length > 0 && lines[0].trim() === '') lines.shift();
-                    while (lines.length > 0 && lines[lines.length - 1].trim() === '') lines.pop();
-
-                    let cleanedBlock = lines.join('\n');
-
-                    // Определяем, является ли блок суммаризацией
-                    let isSummary = cleanedBlock.indexOf('<b>Обсуждения в ') !== -1;
-
-                    // Добавляем принудительные переносы (для всех)
-                    if (cleanedBlock.includes('</b>')) {
-                        cleanedBlock = cleanedBlock.replace(/(<\/b>)(?!\n)/, '$1\n');
-                    }
-                    if (cleanedBlock.includes('<a href')) {
-                        cleanedBlock = cleanedBlock.replace(/(?!\n)(<a href)/, '\n$1');
-                    }
-
-                    // Обработка суммаризаций: расставляем пустые строки между пунктами
-                    if (isSummary) {
-                        let summaryStart = cleanedBlock.indexOf('<b>Обсуждения в ');
-                        if (summaryStart !== -1) {
-                            let closeBpos = cleanedBlock.indexOf('</b>', summaryStart);
-                            if (closeBpos !== -1) {
-                                let linkStart = cleanedBlock.indexOf('<a href', closeBpos);
-                                if (linkStart === -1) linkStart = cleanedBlock.length;
-                                let before = cleanedBlock.slice(0, closeBpos + 4);
-                                let body = cleanedBlock.slice(closeBpos + 4, linkStart);
-                                let after = cleanedBlock.slice(linkStart);
-                                let parts = body.split(/\s*-\s*/).filter(p => p.trim() !== '');
-                                if (parts.length > 1) {
-                                    let first = parts[0].trim();
-                                    let rest = parts.slice(1).map(p => '- ' + p.trim()).join('\n\n- ');
-                                    let newBody = first + '\n\n' + rest;
-                                    cleanedBlock = before + newBody + after;
-                                }
-                            }
-                        }
-                    } else {
-                        // Для обычных новостей удаляем все лишние пустые строки (два и более переноса подряд)
-                        cleanedBlock = cleanedBlock.replace(/\n{2,}/g, '\n');
-                    }
-
-                    if (cleanedBlock) {
-                        html += `<div class="status-block">${cleanedBlock}</div>`;
-                    }
-                }
-
-                if (html) {
-                    content.innerHTML = html;
-                    content.querySelectorAll('a').forEach(link => link.target = '_blank');
-                } else {
-                    content.innerHTML = `<div style="text-align:center; padding:20px; color: var(--text-secondary);">📭 Новости не найдены.</div>`;
-                }
-
-            } catch (e) {
-                console.error('Ошибка в toggleDigest:', e);
-                content.innerHTML = `<div style="color: #ff6b6b; text-align:center; padding:20px;">❌ Ошибка: ${e.message}</div>`;
+            const picker=document.getElementById('timePicker');
+            if(picker.style.display==='none')openTimePicker();else closeTimePicker();
+        }
+        function openTimePicker(){if(!isPremium)return;document.getElementById('timePicker').style.display='block';renderTimePicker();}
+        function closeTimePicker(){document.getElementById('timePicker').style.display='none';}
+        function renderTimePicker(){
+            const grid=document.getElementById('timePickerGrid');
+            grid.innerHTML='';
+            const cur=currentSendTime?parseInt(currentSendTime.split(':')[0]):-1;
+            for(let h=0;h<24;h++){
+                const btn=document.createElement('button');
+                btn.textContent=h.toString().padStart(2,'0')+':00';
+                if(h===cur)btn.classList.add('selected');
+                btn.onclick=function(){setTime(h);};
+                grid.appendChild(btn);
             }
         }
+        async function setTime(hour){
+            if (!ensureConsent()) return;
+            hapticFeedback();
+            const initData=localStorage.getItem('max_init_data');
+            if(!initData){alert('Нет авторизации');return;}
+            try{
+                const resp=await apiRequest('/api/webapp/max/set_time',{
+                    method:'POST',
+                    headers:{'Content-Type':'application/json','X-MAX-Init-Data':initData},
+                    body:JSON.stringify({hour:hour})
+                });
+                if(!resp)return;
+                if(!resp.ok){const err=await resp.json();throw new Error(err.detail||'Ошибка установки времени');}
+                const data=await resp.json();
+                currentSendTime=data.send_time;
+                document.getElementById('currentTimeDisplay').textContent=currentSendTime+' MSK';
+                document.querySelectorAll('#timePickerGrid button').forEach((btn,idx)=>{btn.classList.toggle('selected',idx===hour);});
+                if(window.WebApp&&window.WebApp.showPopup)window.WebApp.showPopup({title:'Успешно',message:'Время получения установлено на '+currentSendTime+' MSK',buttons:[{type:'ok'}]});
+                else alert('Время установлено');
+                closeTimePicker();
+                loadSources();
+            }catch(err){
+                if(window.WebApp&&window.WebApp.showPopup)window.WebApp.showPopup({title:'Ошибка',message:err.message,buttons:[{type:'ok'}]});
+                else alert('Ошибка: '+err.message);
+            }
+        }
+
+        // ===== НОВАЯ ФУНКЦИЯ "СМОТРЕТЬ НОВОСТИ" (с упрощённой обработкой) =====
+   async function toggleDigest() {
+    if (!ensureConsent()) return;
+    const container = document.getElementById('digestContainer');
+    const content = document.getElementById('digestContent');
+    if (digestVisible) {
+        container.style.display = 'none';
+        digestVisible = false;
+        return;
+    }
+    container.style.display = 'block';
+    digestVisible = true;
+    content.innerHTML = '<div style="text-align:center; padding:20px; color: var(--text-secondary);">⏳ Загрузка...</div>';
+
+    try {
+        const resp = await apiRequest('/api/webapp/digest', { headers: getHeaders() });
+        if (!resp) return;
+        if (!resp.ok) {
+            const err = await resp.json();
+            content.innerHTML = `<div style="color: #ff6b6b; text-align:center; padding:20px;">❌ Ошибка: ${err.detail || 'Не удалось загрузить дайджест'}</div>`;
+            return;
+        }
+        const data = await resp.json();
+        let digestHtml = data.digest;
+
+        if (!digestHtml || digestHtml.trim() === '' || digestHtml.includes('Дайджест ещё не формировался')) {
+            content.innerHTML = `<div style="text-align:center; padding:20px; color: var(--text-secondary);">📭 Дайджест ещё не формировался. Запустите сбор вручную или дождитесь автоматического.</div>`;
+            return;
+        }
+
+        digestHtml = digestHtml.replace(/[\x00-\x1F\x7F-\x9F\u200B\u200C\u200D\uFEFF\u2028\u2029\r]/g, '');
+
+        // Разбиваем на блоки
+        let blocks = digestHtml.split(/(?=\n- <b>)/).filter(b => b.trim().length > 0);
+        if (blocks.length <= 1) {
+            blocks = digestHtml.split(/(?=\n-)/).filter(b => b.trim().length > 0);
+        }
+        if (blocks.length <= 1) {
+            blocks = digestHtml.split(/(?=- <b>)/).filter(b => b.trim().length > 0);
+            if (blocks[0] && blocks[0].trim() === '') blocks.shift();
+        }
+        blocks = blocks.map(b => b.startsWith('\n') ? b.slice(1) : b);
+
+        let html = '';
+        for (let block of blocks) {
+            let lines = block.split('\n');
+            lines = lines.map(line => line.replace(/^[\s\u00A0]+/, ''));
+            while (lines.length > 0 && lines[0].trim() === '') lines.shift();
+            while (lines.length > 0 && lines[lines.length - 1].trim() === '') lines.pop();
+            let cleanedBlock = lines.join('\n');
+
+            // ===== ОБРАБОТКА СУММАРИЗАЦИЙ =====
+            let isSummary = cleanedBlock.indexOf('<b>Обсуждения в ') !== -1;
+            if (isSummary) {
+                let summaryStart = cleanedBlock.indexOf('<b>Обсуждения в ');
+                if (summaryStart !== -1) {
+                    let closeBpos = cleanedBlock.indexOf('</b>', summaryStart);
+                    if (closeBpos !== -1) {
+                        let linkStart = cleanedBlock.indexOf('<a href', closeBpos);
+                        if (linkStart === -1) linkStart = cleanedBlock.length;
+                        let before = cleanedBlock.slice(0, closeBpos + 4); // до </b> включительно
+                        let body = cleanedBlock.slice(closeBpos + 4, linkStart);
+                        let after = cleanedBlock.slice(linkStart);
+
+                        // Убираем лишние переносы в начале и конце тела
+                        body = body.replace(/^\s*\n+/, '').replace(/\n+\s*$/, '');
+                        // Убираем ведущие переносы перед ссылкой
+                        after = after.replace(/^\s*\n+/, '');
+
+                        // Разбиваем тело на пункты по "- " с учётом возможных пробелов и переносов
+                        let parts = body.split(/\s*-\s*/).filter(p => p.trim() !== '');
+                        let newBody;
+                        if (parts.length > 1) {
+                            // Соединяем через две пустые строки (один перенос между)
+                            newBody = parts.map(p => '- ' + p.trim()).join('\n\n');
+                        } else {
+                            newBody = body.trim();
+                        }
+
+                        // Собираем блок: заголовок + две пустые строки + тело + перенос + ссылка
+                        cleanedBlock = before + '\n\n' + newBody + '\n' + after;
+                    }
+                }
+            }
+
+            // Добавляем принудительные переносы (если их нет)
+            if (cleanedBlock.includes('</b>')) {
+                cleanedBlock = cleanedBlock.replace(/(<\/b>)(?!\n)/, '$1\n');
+            }
+            if (cleanedBlock.includes('<a href')) {
+                cleanedBlock = cleanedBlock.replace(/(?!\n)(<a href)/, '\n$1');
+            }
+            // Убираем три и более переноса подряд, заменяя на два
+            cleanedBlock = cleanedBlock.replace(/\n{3,}/g, '\n\n');
+
+            if (cleanedBlock) {
+                html += `<div class="status-block">${cleanedBlock}</div>`;
+            }
+        }
+
+        if (html) {
+            content.innerHTML = html;
+            content.querySelectorAll('a').forEach(link => link.target = '_blank');
+        } else {
+            content.innerHTML = `<div style="text-align:center; padding:20px; color: var(--text-secondary);">📭 Новости не найдены.</div>`;
+        }
+
+    } catch (e) {
+        console.error('Ошибка в toggleDigest:', e);
+        content.innerHTML = `<div style="color: #ff6b6b; text-align:center; padding:20px;">❌ Ошибка: ${e.message}</div>`;
+    }
+}     
+
+
+
+
+
+
+
+
+
         // ============================================================
 
         // ===== ВЫХОД ИЗ АККАУНТА =====
@@ -1240,7 +1441,8 @@
         window.sortItems=sortItems;
         window.shortenCategoryName=shortenCategoryName;
         window.toggleDigest = toggleDigest;
-        window.logout = logout;   // Добавлен экспорт функции выхода
+        window.logout = logout;
+        window.ensureConsent = ensureConsent;
     </script>
 </body>
 </html>

@@ -292,6 +292,30 @@
             [data-reveal] { transform:translateY(20px); transition:opacity .8s ease-out, transform .8s ease-out; }
         }
         @media(max-width:640px){ .logo { text-align:center; } }
+
+        /* ===== НОВЫЕ СТИЛИ ДЛЯ #githubLink ===== */
+        #githubLink {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 8px;
+            margin-top: 8px;
+        }
+        @media (max-width: 640px) {
+            #githubLink {
+                flex-direction: column;
+                align-items: center;
+                gap: 12px;
+                width: 100%;
+            }
+            #githubLink .btn {
+                width: 100%;
+                max-width: 320px;
+                margin: 0 !important;
+                min-width: unset;
+                white-space: normal;
+            }
+        }
     </style>
 </head>
 <body>
@@ -599,7 +623,9 @@
                     <div style="margin-top:16px; text-align:center;">
                         <span style="color:var(--text-secondary); font-size:14px; cursor:pointer; text-decoration:underline; text-underline-offset:4px;" onclick="toggleGitHub()">Ещё</span>
                         <div id="githubLink" style="display:none; margin-top:8px;">
-                            <a href="https://github.com/PRO-Interior-Design-proid-studio/My_AI_News_Aggregator" class="btn btn-bot-secondary" target="_blank">🚀 GitHub</a><a href="https://www.rustore.ru/catalog/app/studio.proid.news.twa" class="btn btn-bot-secondary" target="_blank" style="margin-left:8px;">🚀 RuStore</a>
+                            <a href="https://github.com/PRO-Interior-Design-proid-studio/My_AI_News_Aggregator" class="btn btn-bot-secondary" target="_blank">🚀 GitHub</a>
+                            <a href="https://www.rustore.ru/catalog/app/studio.proid.news.twa" class="btn btn-bot-secondary" target="_blank">🚀 RuStore</a>
+                            <a href="https://microsoftedge.microsoft.com/addons/detail/caebikohjnlallmckhbhoondchpobfbm" class="btn btn-bot-secondary" target="_blank">🚀 Edge Add-ons</a>
                         </div>
                     </div>
                 </div>
@@ -686,8 +712,8 @@
         }
         function toggleGitHub() {
             var el = document.getElementById('githubLink');
-            if (el.style.display === 'none') {
-                el.style.display = 'block';
+            if (el.style.display === 'none' || el.style.display === '') {
+                el.style.display = 'flex';
             } else {
                 el.style.display = 'none';
             }
