@@ -475,18 +475,14 @@
             });
         }
 
+        // ===== ЕДИНАЯ ФУНКЦИЯ ЗАГОЛОВКОВ ДЛЯ MAX (только X-MAX-Init-Data) =====
         function getAuthHeaders(){
-            const initData=localStorage.getItem('max_init_data');
-            if(initData)return{'Content-Type':'application/json','X-MAX-Init-Data':initData};
-            return{'Content-Type':'application/json'};
-        }
-
-        function getHeaders(){
-            const token = localStorage.getItem('auth_token');
-            return {
-                'Content-Type':'application/json',
-                ...(token ? { 'X-Auth-Token': token } : {})
-            };
+            const initData = localStorage.getItem('max_init_data');
+            if (initData) {
+                return {'Content-Type':'application/json', 'X-MAX-Init-Data': initData};
+            }
+            // Если initData нет — вернём пустой объект (сервер вернёт 401)
+            return {'Content-Type':'application/json'};
         }
 
         // ===== ПРОВЕРКА СОГЛАСИЯ =====
@@ -1218,126 +1214,119 @@
             }
         }
 
-        // ===== НОВАЯ ФУНКЦИЯ "СМОТРЕТЬ НОВОСТИ" (с упрощённой обработкой) =====
-   async function toggleDigest() {
-    if (!ensureConsent()) return;
-    const container = document.getElementById('digestContainer');
-    const content = document.getElementById('digestContent');
-    if (digestVisible) {
-        container.style.display = 'none';
-        digestVisible = false;
-        return;
-    }
-    container.style.display = 'block';
-    digestVisible = true;
-    content.innerHTML = '<div style="text-align:center; padding:20px; color: var(--text-secondary);">⏳ Загрузка...</div>';
+        // ===== ФУНКЦИЯ "СМОТРЕТЬ НОВОСТИ" – ИСПРАВЛЕНА (используем /api/webapp/max/digest) =====
+        async function toggleDigest() {
+            if (!ensureConsent()) return;
+            const container = document.getElementById('digestContainer');
+            const content = document.getElementById('digestContent');
+            if (digestVisible) {
+                container.style.display = 'none';
+                digestVisible = false;
+                return;
+            }
+            container.style.display = 'block';
+            digestVisible = true;
+            content.innerHTML = '<div style="text-align:center; padding:20px; color: var(--text-secondary);">⏳ Загрузка...</div>';
 
-    try {
-        const resp = await apiRequest('/api/webapp/digest', { headers: getHeaders() });
-        if (!resp) return;
-        if (!resp.ok) {
-            const err = await resp.json();
-            content.innerHTML = `<div style="color: #ff6b6b; text-align:center; padding:20px;">❌ Ошибка: ${err.detail || 'Не удалось загрузить дайджест'}</div>`;
-            return;
-        }
-        const data = await resp.json();
-        let digestHtml = data.digest;
+            try {
+                // ИСПРАВЛЕНО: правильный эндпоинт для MAX и правильные заголовки
+                const resp = await apiRequest('/api/webapp/max/digest', { headers: getAuthHeaders() });
+                if (!resp) return;
+                if (!resp.ok) {
+                    const err = await resp.json();
+                    content.innerHTML = `<div style="color: #ff6b6b; text-align:center; padding:20px;">❌ Ошибка: ${err.detail || 'Не удалось загрузить дайджест'}</div>`;
+                    return;
+                }
+                const data = await resp.json();
+                let digestHtml = data.digest;
 
-        if (!digestHtml || digestHtml.trim() === '' || digestHtml.includes('Дайджест ещё не формировался')) {
-            content.innerHTML = `<div style="text-align:center; padding:20px; color: var(--text-secondary);">📭 Дайджест ещё не формировался. Запустите сбор вручную или дождитесь автоматического.</div>`;
-            return;
-        }
+                if (!digestHtml || digestHtml.trim() === '' || digestHtml.includes('Дайджест ещё не формировался')) {
+                    content.innerHTML = `<div style="text-align:center; padding:20px; color: var(--text-secondary);">📭 Дайджест ещё не формировался. Запустите сбор вручную или дождитесь автоматического.</div>`;
+                    return;
+                }
 
-        digestHtml = digestHtml.replace(/[\x00-\x1F\x7F-\x9F\u200B\u200C\u200D\uFEFF\u2028\u2029\r]/g, '');
+                digestHtml = digestHtml.replace(/[\x00-\x1F\x7F-\x9F\u200B\u200C\u200D\uFEFF\u2028\u2029\r]/g, '');
 
-        // Разбиваем на блоки
-        let blocks = digestHtml.split(/(?=\n- <b>)/).filter(b => b.trim().length > 0);
-        if (blocks.length <= 1) {
-            blocks = digestHtml.split(/(?=\n-)/).filter(b => b.trim().length > 0);
-        }
-        if (blocks.length <= 1) {
-            blocks = digestHtml.split(/(?=- <b>)/).filter(b => b.trim().length > 0);
-            if (blocks[0] && blocks[0].trim() === '') blocks.shift();
-        }
-        blocks = blocks.map(b => b.startsWith('\n') ? b.slice(1) : b);
+                // Разбиваем на блоки
+                let blocks = digestHtml.split(/(?=\n- <b>)/).filter(b => b.trim().length > 0);
+                if (blocks.length <= 1) {
+                    blocks = digestHtml.split(/(?=\n-)/).filter(b => b.trim().length > 0);
+                }
+                if (blocks.length <= 1) {
+                    blocks = digestHtml.split(/(?=- <b>)/).filter(b => b.trim().length > 0);
+                    if (blocks[0] && blocks[0].trim() === '') blocks.shift();
+                }
+                blocks = blocks.map(b => b.startsWith('\n') ? b.slice(1) : b);
 
-        let html = '';
-        for (let block of blocks) {
-            let lines = block.split('\n');
-            lines = lines.map(line => line.replace(/^[\s\u00A0]+/, ''));
-            while (lines.length > 0 && lines[0].trim() === '') lines.shift();
-            while (lines.length > 0 && lines[lines.length - 1].trim() === '') lines.pop();
-            let cleanedBlock = lines.join('\n');
+                let html = '';
+                for (let block of blocks) {
+                    let lines = block.split('\n');
+                    lines = lines.map(line => line.replace(/^[\s\u00A0]+/, ''));
+                    while (lines.length > 0 && lines[0].trim() === '') lines.shift();
+                    while (lines.length > 0 && lines[lines.length - 1].trim() === '') lines.pop();
+                    let cleanedBlock = lines.join('\n');
 
-            // ===== ОБРАБОТКА СУММАРИЗАЦИЙ =====
-            let isSummary = cleanedBlock.indexOf('<b>Обсуждения в ') !== -1;
-            if (isSummary) {
-                let summaryStart = cleanedBlock.indexOf('<b>Обсуждения в ');
-                if (summaryStart !== -1) {
-                    let closeBpos = cleanedBlock.indexOf('</b>', summaryStart);
-                    if (closeBpos !== -1) {
-                        let linkStart = cleanedBlock.indexOf('<a href', closeBpos);
-                        if (linkStart === -1) linkStart = cleanedBlock.length;
-                        let before = cleanedBlock.slice(0, closeBpos + 4); // до </b> включительно
-                        let body = cleanedBlock.slice(closeBpos + 4, linkStart);
-                        let after = cleanedBlock.slice(linkStart);
+                    // ===== ОБРАБОТКА СУММАРИЗАЦИЙ =====
+                    let isSummary = cleanedBlock.indexOf('<b>Обсуждения в ') !== -1;
+                    if (isSummary) {
+                        let summaryStart = cleanedBlock.indexOf('<b>Обсуждения в ');
+                        if (summaryStart !== -1) {
+                            let closeBpos = cleanedBlock.indexOf('</b>', summaryStart);
+                            if (closeBpos !== -1) {
+                                let linkStart = cleanedBlock.indexOf('<a href', closeBpos);
+                                if (linkStart === -1) linkStart = cleanedBlock.length;
+                                let before = cleanedBlock.slice(0, closeBpos + 4); // до </b> включительно
+                                let body = cleanedBlock.slice(closeBpos + 4, linkStart);
+                                let after = cleanedBlock.slice(linkStart);
 
-                        // Убираем лишние переносы в начале и конце тела
-                        body = body.replace(/^\s*\n+/, '').replace(/\n+\s*$/, '');
-                        // Убираем ведущие переносы перед ссылкой
-                        after = after.replace(/^\s*\n+/, '');
+                                // Убираем лишние переносы в начале и конце тела
+                                body = body.replace(/^\s*\n+/, '').replace(/\n+\s*$/, '');
+                                // Убираем ведущие переносы перед ссылкой
+                                after = after.replace(/^\s*\n+/, '');
 
-                        // Разбиваем тело на пункты по "- " с учётом возможных пробелов и переносов
-                        let parts = body.split(/\s*-\s*/).filter(p => p.trim() !== '');
-                        let newBody;
-                        if (parts.length > 1) {
-                            // Соединяем через две пустые строки (один перенос между)
-                            newBody = parts.map(p => '- ' + p.trim()).join('\n\n');
-                        } else {
-                            newBody = body.trim();
+                                // Разбиваем тело на пункты по "- " с учётом возможных пробелов и переносов
+                                let parts = body.split(/\s*-\s*/).filter(p => p.trim() !== '');
+                                let newBody;
+                                if (parts.length > 1) {
+                                    // Соединяем через две пустые строки (один перенос между)
+                                    newBody = parts.map(p => '- ' + p.trim()).join('\n\n');
+                                } else {
+                                    newBody = body.trim();
+                                }
+
+                                // Собираем блок: заголовок + две пустые строки + тело + перенос + ссылка
+                                cleanedBlock = before + '\n\n' + newBody + '\n' + after;
+                            }
                         }
+                    }
 
-                        // Собираем блок: заголовок + две пустые строки + тело + перенос + ссылка
-                        cleanedBlock = before + '\n\n' + newBody + '\n' + after;
+                    // Добавляем принудительные переносы (если их нет)
+                    if (cleanedBlock.includes('</b>')) {
+                        cleanedBlock = cleanedBlock.replace(/(<\/b>)(?!\n)/, '$1\n');
+                    }
+                    if (cleanedBlock.includes('<a href')) {
+                        cleanedBlock = cleanedBlock.replace(/(?!\n)(<a href)/, '\n$1');
+                    }
+                    // Убираем три и более переноса подряд, заменяя на два
+                    cleanedBlock = cleanedBlock.replace(/\n{3,}/g, '\n\n');
+
+                    if (cleanedBlock) {
+                        html += `<div class="status-block">${cleanedBlock}</div>`;
                     }
                 }
-            }
 
-            // Добавляем принудительные переносы (если их нет)
-            if (cleanedBlock.includes('</b>')) {
-                cleanedBlock = cleanedBlock.replace(/(<\/b>)(?!\n)/, '$1\n');
-            }
-            if (cleanedBlock.includes('<a href')) {
-                cleanedBlock = cleanedBlock.replace(/(?!\n)(<a href)/, '\n$1');
-            }
-            // Убираем три и более переноса подряд, заменяя на два
-            cleanedBlock = cleanedBlock.replace(/\n{3,}/g, '\n\n');
+                if (html) {
+                    content.innerHTML = html;
+                    content.querySelectorAll('a').forEach(link => link.target = '_blank');
+                } else {
+                    content.innerHTML = `<div style="text-align:center; padding:20px; color: var(--text-secondary);">📭 Новости не найдены.</div>`;
+                }
 
-            if (cleanedBlock) {
-                html += `<div class="status-block">${cleanedBlock}</div>`;
+            } catch (e) {
+                console.error('Ошибка в toggleDigest:', e);
+                content.innerHTML = `<div style="color: #ff6b6b; text-align:center; padding:20px;">❌ Ошибка: ${e.message}</div>`;
             }
         }
-
-        if (html) {
-            content.innerHTML = html;
-            content.querySelectorAll('a').forEach(link => link.target = '_blank');
-        } else {
-            content.innerHTML = `<div style="text-align:center; padding:20px; color: var(--text-secondary);">📭 Новости не найдены.</div>`;
-        }
-
-    } catch (e) {
-        console.error('Ошибка в toggleDigest:', e);
-        content.innerHTML = `<div style="color: #ff6b6b; text-align:center; padding:20px;">❌ Ошибка: ${e.message}</div>`;
-    }
-}     
-
-
-
-
-
-
-
-
 
         // ============================================================
 
