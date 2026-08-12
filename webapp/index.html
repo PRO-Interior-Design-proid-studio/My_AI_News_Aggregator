@@ -433,13 +433,12 @@
 <script>
     // ============================================================
     //  ПРАВИЛО ДЛЯ TELEGRAM WEBAPP:
-    //  НЕ ИСПОЛЬЗОВАТЬ localStorage ДЛЯ ХРАНЕНИЯ ТОКЕНА!
-    //  Всегда авторизоваться через initData.
-    //  Токен хранить ТОЛЬКО в памяти (переменная authToken).
-    //  При 401 — перезапрашивать токен через initData.
+    //  ИСПОЛЬЗОВАТЬ ТОЛЬКО initData (X-Telegram-Init-Data)
+    //  НИКАКИХ ДОПОЛНИТЕЛЬНЫХ ТОКЕНОВ!
     // ============================================================
 
     // ===== КОНСТАНТЫ =====
+    // Тестовый токен для отладки (если initData == этой строке)
     const TEST_TOKEN = 'vol7Js5SZnjPuaTfkk46zea3I-k_vsInqyqQPho_dF0';
 
     // ===== ГЛОБАЛЬНЫЕ ПЕРЕМЕННЫЕ =====
@@ -450,7 +449,6 @@
     let isPremium = false;
     let defaultSendHour = 18;
     let digestVisible = false;
-    let authToken = null;  // ← НЕ используем localStorage!
     let categoryHistory = [];
     const CATEGORY_CACHE_TTL = 3600000;
     const tg = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
@@ -464,11 +462,17 @@
         if (tg && tg.HapticFeedback) tg.HapticFeedback.impactOccurred('light');
     }
 
+    // ===== ЕДИНАЯ ФУНКЦИЯ ЗАГОЛОВКОВ (только initData) =====
     function getHeaders() {
-        return {
-            'Content-Type': 'application/json',
-            ...(authToken ? { 'X-Auth-Token': authToken } : {})
-        };
+        const id = tg ? tg.initData : null;
+        if (id) {
+            return {
+                'Content-Type': 'application/json',
+                'X-Telegram-Init-Data': id
+            };
+        }
+        // Если initData нет — сервер вернёт 401
+        return { 'Content-Type': 'application/json' };
     }
 
     // ===== ПРОВЕРКА СОГЛАСИЯ =====
@@ -480,109 +484,60 @@
         return true;
     }
 
-    // ===== ОБРАБОТКА 401: переавторизация через initData =====
+    // ===== API ЗАПРОС (без переавторизации, только initData) =====
     async function apiRequest(url, options = {}) {
-        let resp = await fetch(url, options);
-        if (resp.status === 503) {
-            alert('⚠️ Сервер временно недоступен. Пожалуйста, обновите страницу через несколько секунд.');
-            return null;
-        }
-        if (resp.status === 401) {
-            // Токен невалиден — пробуем переавторизоваться
-            console.warn('401 Unauthorized, re-authenticating...');
-            authToken = null;
-            // Пытаемся получить новый токен через initData
-            try {
-                const authResp = await fetch('/api/auth/get-token', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ init_data: initData })
-                });
-                if (authResp.ok) {
-                    const data = await authResp.json();
-                    if (data.token) {
-                        authToken = data.token;
-                        // Повторяем исходный запрос с новым токеном
-                        const newOptions = { ...options };
-                        newOptions.headers = { ...newOptions.headers, 'X-Auth-Token': authToken };
-                        resp = await fetch(url, newOptions);
-                        return resp;
-                    }
-                }
-            } catch (e) {
-                console.error('Re-auth failed:', e);
+        try {
+            const resp = await fetch(url, options);
+            if (resp.status === 503) {
+                alert('⚠️ Сервер временно недоступен. Пожалуйста, обновите страницу через несколько секунд.');
+                return null;
             }
-            // Если переавторизация не удалась — показываем ошибку и предлагаем перезагрузить
-            alert('🔒 Сессия истекла. Пожалуйста, нажмите «Выход» и войдите заново через бота.');
-            document.getElementById('sourceListContainer').innerHTML =
-                '<div class="empty-state"><div class="empty-icon">🔒</div><h3>Сессия истекла</h3><p>Нажмите «Выход» и войдите заново через бота.</p></div>';
-            return null;
+            if (resp.status === 401) {
+                // Просто показываем сообщение — сессия истекла, нужно перезапустить бота
+                alert('🔒 Сессия истекла. Пожалуйста, закройте приложение и откройте его заново через бота.');
+                document.getElementById('sourceListContainer').innerHTML =
+                    '<div class="empty-state"><div class="empty-icon">🔒</div><h3>Сессия истекла</h3><p>Закройте приложение и откройте заново через бота.</p></div>';
+                return null;
+            }
+            return resp;
+        } catch (e) {
+            console.error('API request error:', e);
+            throw e;
         }
-        return resp;
     }
 
-    // ===== АВТОРИЗАЦИЯ: всегда через initData =====
+    // ===== ИНИЦИАЛИЗАЦИЯ =====
     async function initTelegramAuth() {
-        if (!initData) {
-            document.getElementById('sourceListContainer').innerHTML = '<div class="empty-state"><div class="empty-icon">🔒</div><h3>Не удалось получить данные авторизации</h3><p>Попробуйте перезагрузить страницу или откройте через кнопку в боте.</p></div>';
+        const id = tg ? tg.initData : null;
+        if (!id) {
+            document.getElementById('sourceListContainer').innerHTML = '<div class="empty-state"><div class="empty-icon">🔒</div><h3>Не удалось получить данные авторизации</h3><p>Откройте страницу через кнопку в Telegram-боте.</p></div>';
             document.querySelector('.container').classList.add('disabled-overlay');
             document.getElementById('quickButtons').style.display = 'none';
             document.getElementById('paymentToggleBtn').style.display = 'none';
             return;
         }
-        // Всегда запрашиваем токен заново через initData (игнорируем старые токены)
-        try {
-            const resp = await fetch('/api/auth/get-token', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ init_data: initData })
-            });
-            if (!resp.ok) {
-                const err = await resp.json();
-                throw new Error(err.detail || 'Ошибка авторизации');
-            }
-            const data = await resp.json();
-            if (data.token) {
-                authToken = data.token;
-                isTestUser = (authToken === TEST_TOKEN);
-                // НЕ сохраняем в localStorage — только в памяти!
-                await loadSources();
-            } else {
-                throw new Error('Токен не получен');
-            }
-        } catch (e) {
-            console.error('Auth error:', e);
-            document.getElementById('sourceListContainer').innerHTML =
-                '<div class="empty-state"><div class="empty-icon">❌</div><h3>Ошибка авторизации</h3><p>' + e.message + '</p><p>Попробуйте нажать «Выход» и войти заново.</p></div>';
-        }
+        // Проверяем, не тестовый ли это пользователь
+        isTestUser = (id === TEST_TOKEN);
+        await loadSources();
     }
 
     // ===== ЗАГРУЗКА ИСТОЧНИКОВ =====
     async function loadSources() {
-        if (!authToken) {
-            await initTelegramAuth();
-            return;
-        }
         try {
             const resp = await apiRequest('/api/webapp/sources', { headers: getHeaders() });
             if (!resp) return;
             if (!resp.ok) {
-                // ===== НОВАЯ ОБРАБОТКА 403: ПОКАЗЫВАЕМ БЛОК КОНФИДЕНЦИАЛЬНОСТИ =====
+                // ===== ОБРАБОТКА 403: ПОКАЗЫВАЕМ БЛОК КОНФИДЕНЦИАЛЬНОСТИ =====
                 if (resp.status === 403) {
                     const consentBlock = document.getElementById('consentBlock');
                     const appContainer = document.getElementById('appContainer');
                     consentBlock.style.display = 'block';
                     appContainer.classList.add('consent-pending');
                     consentGiven = false;
-                    isTestUser = (authToken === TEST_TOKEN);
                     window.TEST_MODE = isTestUser;
-                    // Скрываем кнопки быстрого доступа и оплаты
                     document.getElementById('quickButtons').style.display = 'none';
                     document.getElementById('paymentToggleBtn').style.display = 'none';
                     return;
-                }
-                if (resp.status === 401) {
-                    throw new Error('Сессия истекла, попробуйте нажать «Выход» и войти заново.');
                 }
                 const err = await resp.json();
                 throw new Error(err.detail || 'Ошибка загрузки');
@@ -597,7 +552,6 @@
             // === УПРАВЛЕНИЕ СОГЛАСИЕМ ===
             const consentBlock = document.getElementById('consentBlock');
             const appContainer = document.getElementById('appContainer');
-            isTestUser = (authToken === TEST_TOKEN);
             consentGiven = data.consent_given === true;
 
             if (!consentGiven || isTestUser) {
@@ -629,7 +583,7 @@
         }
     }
 
-    // ===== ОБРАБОТЧИК КНОПКИ "ПРИНИМАЮ" (ИСПОЛЬЗУЕТ apiRequest) =====
+    // ===== ОБРАБОТЧИК КНОПКИ "ПРИНИМАЮ" =====
     document.addEventListener('DOMContentLoaded', function() {
         const check = document.getElementById('consentCheck');
         const btn = document.getElementById('consentAcceptBtn');
@@ -657,7 +611,7 @@
                     document.getElementById('paymentToggleBtn').style.display = 'block';
                     return;
                 }
-                // Обычный пользователь: отправляем запрос через apiRequest
+                // Обычный пользователь: отправляем запрос
                 try {
                     const resp = await apiRequest('/api/webapp/consent', {
                         method: 'POST',
@@ -682,7 +636,7 @@
         }
     });
 
-    // ===== ОСТАЛЬНЫЕ ФУНКЦИИ (с проверкой согласия) =====
+    // ===== ОСТАЛЬНЫЕ ФУНКЦИИ (без изменений, кроме вызовов getHeaders) =====
 
     function getTypeLabel(t) {
         const m = { 'rss': 'RSS/HTML', 'telegram': 'Telegram', 'vk': 'VK', 'max': 'MAX' };
@@ -1385,7 +1339,6 @@
     async function handlePayment(tariffKey) {
         if (!ensureConsent()) return;
         hapticFeedback();
-        if (!authToken) { alert('❌ Вы не авторизованы.'); return; }
         try {
             const resp = await apiRequest('/api/payment/create-invoice', {
                 method: 'POST',
@@ -1402,7 +1355,7 @@
         }
     }
 
-    // ===== ДАЙДЖЕСТ (ИСПРАВЛЕННАЯ ФУНКЦИЯ) =====
+    // ===== ДАЙДЖЕСТ =====
     async function toggleDigest() {
         if (!ensureConsent()) return;
         const container = document.getElementById('digestContainer');
@@ -1524,12 +1477,10 @@
         window.open(url + '?text=' + encodeURIComponent(text), '_blank');
     }
 
-    // ===== ВЫХОД (очищаем только память, не localStorage) =====
+    // ===== ВЫХОД (просто перезагружаем страницу) =====
     function logout() {
         const confirmLogout = () => {
-            authToken = null;
-            sessionStorage.removeItem('auth_token');
-            currentSources = [];
+            // В Telegram WebApp мы не храним токены, просто перезагружаем страницу
             window.location.reload();
         };
 
@@ -1555,7 +1506,11 @@
     (function init() {
         if (!tg) {
             console.warn('Telegram WebApp не найден, работа в обычном браузере');
+            document.body.innerHTML = '<div style="text-align:center;padding:40px;color:#aaa;">❌ Откройте страницу через кнопку в Telegram-боте.</div>';
+            return;
         }
+        // Сообщаем WebApp, что он готов
+        tg.ready();
         initTelegramAuth();
     })();
 
@@ -1599,7 +1554,6 @@
     window.toggleDigest = toggleDigest;
     window.suggestSource = suggestSource;
     window.loadSources = loadSources;
-    window.authToken = authToken;
     window.logout = logout;
     window.ensureConsent = ensureConsent;
 </script>
