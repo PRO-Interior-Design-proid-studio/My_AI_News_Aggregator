@@ -5,12 +5,12 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>Мои AI Новости — персонализированный дайджест с искусственным интеллектом</title>
-<meta name="description" content="Войдите в Мои AI Новости, чтобы получать ежедневные персонализированные дайджесты новостей из ваших любимых источников. Авторизация через Telegram или MAX.">
-<meta name="keywords" content="AI новости, дайджест, персонализированные новости, Telegram бот, MAX бот, агрегатор новостей">
+<meta name="description" content="Войдите в Мои AI Новости, чтобы получать ежедневные персонализированные дайджесты новостей из ваших любимых источников. Авторизация через Telegram, MAX или VK.">
+<meta name="keywords" content="AI новости, дайджест, персонализированные новости, Telegram бот, MAX бот, VK, агрегатор новостей">
 <meta name="robots" content="index, follow">
 <link rel="canonical" href="https://news.proid.studio/pwa">
 <meta property="og:title" content="Вход в Мои AI Новости">
-<meta property="og:description" content="Персонализированный AI-дайджест новостей. Войдите через Telegram или MAX.">
+<meta property="og:description" content="Персонализированный AI-дайджест новостей. Войдите через Telegram, MAX или VK.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://news.proid.studio/pwa">
 <meta property="og:image" content="https://news.proid.studio/picture/LOGO.jpg">
@@ -20,7 +20,7 @@
 <meta property="og:site_name" content="Мои AI Новости">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="Вход в Мои AI Новости">
-<meta name="twitter:description" content="Персонализированный AI-дайджест новостей. Войдите через Telegram или MAX.">
+<meta name="twitter:description" content="Персонализированный AI-дайджест новостей. Войдите через Telegram, MAX или VK.">
 <meta name="twitter:image" content="https://news.proid.studio/picture/LOGO.jpg">
 <script type="application/ld+json">
 {
@@ -147,6 +147,8 @@ body{font-family:-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, 
 .auth-btn{display:flex;align-items:center;justify-content:center;gap:12px;width:300px;margin:0 auto 12px auto;padding:16px 24px;border:1px solid transparent;border-radius:26px;font-size:17px;font-weight:700;line-height:20px;color:#fff;cursor:pointer;transition:transform .2s,box-shadow .2s,opacity .2s;text-decoration:none;background:var(--card-bg);backdrop-filter:blur(4px);}
 .auth-btn.telegram{--fill-colors:rgba(159,103,255,.22),rgba(197,66,255,.35);--border-colors:rgba(171,78,252,.82) 0%,rgba(108,31,198,.24) 53%,#7C45C2 100%;background:linear-gradient(180deg,var(--fill-colors)) padding-box,linear-gradient(var(--bg-color),var(--bg-color)) padding-box,linear-gradient(180deg,var(--border-colors)) border-box,linear-gradient(180deg,var(--fill-colors)) border-box;}
 .auth-btn.max{--fill-colors:rgba(31,89,198,.26),rgba(31,89,198,.26);--border-colors:rgba(78,173,252,.61) 0%,#1F59C6 53%,#20397F 100%;background:linear-gradient(180deg,var(--fill-colors)) padding-box,linear-gradient(var(--bg-color),var(--bg-color)) padding-box,linear-gradient(180deg,var(--border-colors)) border-box,linear-gradient(180deg,var(--fill-colors)) border-box;}
+/* Стили для кнопки VK */
+.auth-btn.vk{--fill-colors:rgba(13,71,161,.26),rgba(30,136,229,.35);--border-colors:rgba(13,71,161,.82) 0%,rgba(21,101,192,.24) 53%,#1e88e5 100%;background:linear-gradient(180deg,var(--fill-colors)) padding-box,linear-gradient(var(--bg-color),var(--bg-color)) padding-box,linear-gradient(180deg,var(--border-colors)) border-box,linear-gradient(180deg,var(--fill-colors)) border-box;}
 .auth-btn:hover{transform:scale(1.03);opacity:.9;}
 .auth-btn:active{transform:scale(.97);opacity:.8;}
 .small-note{font-size:12px;color:var(--text-secondary);margin-top:4px;line-height:1.4;}
@@ -214,7 +216,6 @@ body{font-family:-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, 
 #logoutContainer:hover {
     color: var(--text) !important;
 }
-
 </style>
 </head>
 <body>
@@ -225,6 +226,7 @@ body{font-family:-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, 
 <div class="auth-container">
     <button class="auth-btn telegram" id="botLoginBtn" onclick="startBotAuth()"><span class="icon">🚀</span> Войти через Telegram</button>
     <button class="auth-btn max" id="maxLoginBtn" onclick="startMaxAuth()"><span class="icon">🚀</span> Войти через MAX</button>
+    <button class="auth-btn vk" id="vkLoginBtn" onclick="startVkAuth()"><span class="icon">🚀</span> Войти через VK</button>
     <p class="small-note">*аккаунт будет привязан к одному методу входа</p>
     <div class="widget-container" id="widgetContainer"></div>
 </div>
@@ -237,7 +239,7 @@ body{font-family:-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, 
     <div class="status-title">Конфиденциальность</div>
     <p style="color: var(--text-secondary); font-size: 14px; margin-bottom: 12px; line-height: 1.6;">
         Для работы приложения необходимо ваше согласие на обработку персональных данных.
-        Мы собираем минимальный набор данных (идентификатор в Telegram/MAX, IP-адрес, технические параметры) для предоставления сервиса.
+        Мы собираем минимальный набор данных (идентификатор в Telegram/MAX/VK, IP-адрес, технические параметры) для предоставления сервиса.
         Ваши данные не передаются третьим лицам и не используются для рекламы.
         Подробнее в <a href="/privacy" target="_blank" style="color: var(--accent2);">Политике обработки персональных данных</a>.
     </p>
@@ -372,7 +374,7 @@ body{font-family:-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, 
 <button class="close-picker-btn" onclick="closeTimePicker()">Закрыть</button>
 </div>
 </div>
-<div id="logoutContainer" onclick="logout()">Выход</div>
+<div id="logoutContainer" onclick="logout()">Выход (сброс кэша)</div>
 </div> <!-- /appContent -->
 </div> <!-- /appScreen -->
 </div>
@@ -398,6 +400,33 @@ body{font-family:-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, 
 <script>
 // ===== КОНСТАНТЫ =====
 const TEST_TOKEN = 'vol7Js5SZnjPuaTfkk46zea3I-k_vsInqyqQPho_dF0';
+const VK_APP_ID = '54718264'; // ID приложения для VK OAuth
+
+// ===== PKCE ДЛЯ VK ID OAuth 2.1 =====
+function generateCodeVerifier() {
+    const array = new Uint8Array(32);
+    crypto.getRandomValues(array);
+    return base64UrlEncode(array);
+}
+
+function base64UrlEncode(buffer) {
+    return btoa(String.fromCharCode(...buffer))
+        .replace(/\+/g, '-')
+        .replace(/\//g, '_')
+        .replace(/=+$/, '');
+}
+
+async function sha256(plain) {
+    const encoder = new TextEncoder();
+    const data = encoder.encode(plain);
+    const hash = await crypto.subtle.digest('SHA-256', data);
+    return hash;
+}
+
+async function generateCodeChallenge(verifier) {
+    const hash = await sha256(verifier);
+    return base64UrlEncode(new Uint8Array(hash));
+}
 
 // ===== ГЛОБАЛЬНЫЕ ПЕРЕМЕННЫЕ =====
 let currentSources = [];
@@ -436,7 +465,7 @@ async function loadApp(){
         const resp=await apiRequest('/api/webapp/sources',{headers});
         if(!resp)return;
         if(!resp.ok){
-            // ===== НОВАЯ ОБРАБОТКА 403: ПОКАЗЫВАЕМ БЛОК КОНФИДЕНЦИАЛЬНОСТИ =====
+            // ===== ОБРАБОТКА 403: ПОКАЗЫВАЕМ БЛОК КОНФИДЕНЦИАЛЬНОСТИ =====
             if(resp.status === 403){
                 const consentBlock = document.getElementById('consentBlock');
                 const appScreen = document.getElementById('appScreen');
@@ -445,15 +474,12 @@ async function loadApp(){
                 consentGiven = false;
                 isTestUser = (authToken === TEST_TOKEN);
                 window.TEST_MODE = isTestUser;
-                // Показываем экран приложения, но с заблокированным интерфейсом
                 showAppScreen();
-                // Скрываем кнопки быстрого доступа и оплаты, чтобы не было видно
                 document.getElementById('quickButtons').style.display = 'none';
                 document.getElementById('paymentToggleBtn').style.display = 'none';
                 return;
             }
             if(resp.status === 401){
-                // Обработка неавторизованного доступа
                 document.getElementById('sourceListContainer').innerHTML='<div class="empty-state"><div class="empty-icon">🔒</div><h3>Ошибка авторизации</h3><p>Попробуйте обновить страницу или перелогиниться.</p></div>';
                 showAppScreen();
                 return;
@@ -468,15 +494,11 @@ async function loadApp(){
         document.getElementById('counter').textContent=currentSources.length;
         updateStatus(data);
 
-        // === УПРАВЛЕНИЕ СОГЛАСИЕМ ===
+        // Управление согласием
         const appScreen = document.getElementById('appScreen');
         const consentBlock = document.getElementById('consentBlock');
-
-        // Явно определяем тестового пользователя: по токену (или по id, но мы не используем id)
         isTestUser = (authToken === TEST_TOKEN);
         consentGiven = data.consent_given === true;
-
-        console.log('🔍 isTestUser:', isTestUser, 'consentGiven:', consentGiven, 'user_id:', data.user_id);
 
         if (!consentGiven || isTestUser) {
             consentBlock.style.display = 'block';
@@ -516,14 +538,11 @@ document.addEventListener('DOMContentLoaded', function() {
             if (!check.checked) return;
             const appScreen = document.getElementById('appScreen');
             const consentBlock = document.getElementById('consentBlock');
-            // Тестовый режим: просто скрываем блок и разблокируем
             if (window.TEST_MODE) {
                 consentBlock.style.display = 'none';
                 appScreen.classList.remove('consent-pending');
-                // consentGiven остаётся false, но isTestUser true, поэтому проверки будут пропускать
                 return;
             }
-            // Обычный пользователь: отправляем запрос
             try {
                 const resp = await fetch('/api/webapp/consent', {
                     method: 'POST',
@@ -533,7 +552,6 @@ document.addEventListener('DOMContentLoaded', function() {
                     consentBlock.style.display = 'none';
                     appScreen.classList.remove('consent-pending');
                     consentGiven = true;
-                    // Обновляем данные, чтобы обновить статус
                     await loadApp();
                 } else {
                     const err = await resp.json();
@@ -1054,9 +1072,8 @@ async function handlePayment(tariffKey){ if(!ensureConsent())return; hapticFeedb
     }catch(err){alert('❌ Ошибка: '+err.message);}
 }
 
-// ---- ФУНКЦИИ ВХОДА (без проверки согласия) ----
+// ===== ФУНКЦИИ ВХОДА =====
 async function startBotAuth(){
-    // Убрана проверка ensureConsent()
     hapticFeedback();
     document.getElementById('loginScreen').querySelector('.auth-container').style.display='none';
     const w=document.getElementById('widgetContainer');
@@ -1075,7 +1092,6 @@ async function startBotAuth(){
 }
 
 async function startMaxAuth(){
-    // Убрана проверка ensureConsent()
     hapticFeedback();
     document.getElementById('loginScreen').querySelector('.auth-container').style.display='none';
     const w=document.getElementById('widgetContainer');
@@ -1092,6 +1108,41 @@ async function startMaxAuth(){
         window.open('https://max.ru/'+botUsername+'?start='+encodeURIComponent(token),'_blank');
         w.innerHTML='<p style="color: var(--text-secondary);">Ожидаем подтверждения в MAX...</p>';
     }catch(err){alert('❌ Ошибка: '+err.message);document.getElementById('loginScreen').querySelector('.auth-container').style.display='block';w.innerHTML='';}
+}
+
+// ===== VK AUTH С ПОДДЕРЖКОЙ PKCE =====
+async function startVkAuth(){
+    hapticFeedback();
+    // Генерируем code_verifier и code_challenge
+    const verifier = generateCodeVerifier();
+    const challenge = await generateCodeChallenge(verifier);
+
+    // Сохраняем verifier в sessionStorage для последующего обмена
+    sessionStorage.setItem('vk_code_verifier', verifier);
+
+    const state = Math.random().toString(36).substring(2);
+    sessionStorage.setItem('vk_auth_state', state);
+
+    const redirectUri = window.location.origin + '/pwa';
+    const scope = 'vkid.personal_info';
+
+    const authUrl = `https://id.vk.ru/authorize?` +
+        `client_id=${VK_APP_ID}` +
+        `&redirect_uri=${encodeURIComponent(redirectUri)}` +
+        `&response_type=code` +
+        `&scope=${scope}` +
+        `&state=${state}` +
+        `&code_challenge=${challenge}` +
+        `&code_challenge_method=S256` +
+        `&v=5.199`;
+
+    // Закрываем виджет и перенаправляем
+    const container = document.getElementById('loginScreen').querySelector('.auth-container');
+    if (container) container.style.display = 'none';
+    const w = document.getElementById('widgetContainer');
+    if (w) w.innerHTML = '<p style="color: var(--text-secondary);">Перенаправление на авторизацию VK...</p>';
+
+    window.location.href = authUrl;
 }
 
 function pollBotAuthStatus(token){
@@ -1166,7 +1217,93 @@ function startMaxWaiting(token){
     },3000);
 }
 
-// ===== КНОПКА "СМОТРЕТЬ НОВОСТИ" (ГАРАНТИРОВАННОЕ РАЗБИЕНИЕ С УДАЛЕНИЕМ ПУСТЫХ СТРОК) =====
+// ===== ОБРАБОТКА ВОЗВРАТА ИЗ VK =====
+// ===== ОБРАБОТКА ВОЗВРАТА ИЗ VK =====
+(function handleVkCallback() {
+    const params = new URLSearchParams(window.location.search);
+    const code = params.get('code');
+    const state = params.get('state');
+    const device_id = params.get('device_id');  // ✅ добавить
+
+    if (code) {
+        const savedState = sessionStorage.getItem('vk_auth_state');
+        if (state && savedState && state !== savedState) {
+            alert('Ошибка: неверный state (защита от CSRF)');
+            sessionStorage.removeItem('vk_auth_state');
+            window.history.replaceState({}, '', '/pwa');
+            return;
+        }
+        sessionStorage.removeItem('vk_auth_state');
+
+        const verifier = sessionStorage.getItem('vk_code_verifier');
+        if (!verifier) {
+            alert('Ошибка: отсутствует code_verifier. Попробуйте снова.');
+            sessionStorage.removeItem('vk_code_verifier');
+            window.history.replaceState({}, '', '/pwa');
+            showLoginScreen();
+            document.getElementById('loginScreen').querySelector('.auth-container').style.display='block';
+            document.getElementById('widgetContainer').innerHTML='';
+            return;
+        }
+        sessionStorage.removeItem('vk_code_verifier');
+
+        fetch('/api/auth/vk/callback', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ 
+                code: code, 
+                device_id: device_id,      // ✅ добавить
+                code_verifier: verifier 
+            })
+        })
+        .then(r => {
+            if (!r.ok) return r.json().then(err => { throw new Error(err.detail || 'Ошибка авторизации') });
+            return r.json();
+        })
+.then(data => {
+    if (data.token) {
+        // Сохраняем токен
+        localStorage.setItem('auth_token', data.token);
+        authToken = data.token;
+        console.log('✅ VK токен сохранён:', authToken);
+        
+        // Очищаем URL от параметров
+        window.history.replaceState({}, '', '/pwa');
+
+        // Проверяем валидность токена
+        fetch('/api/health', {
+            headers: { 'X-Auth-Token': authToken }
+        })
+        .then(resp => {
+            if (resp.ok) {
+                console.log('✅ Токен валидный, загружаем приложение');
+                loadApp();  // вместо window.location.reload()
+            } else {
+                console.error('❌ Токен невалидный, статус:', resp.status);
+                alert('Ошибка авторизации. Попробуйте снова.');
+                showLoginScreen();
+            }
+        })
+        .catch(() => {
+            alert('Ошибка проверки токена');
+            showLoginScreen();
+        });
+    } else {
+        throw new Error('Токен не получен');
+    }
+})
+        .catch(err => {
+            alert('❌ Ошибка входа через VK: ' + err.message);
+            window.history.replaceState({}, '', '/pwa');
+            showLoginScreen();
+            document.getElementById('loginScreen').querySelector('.auth-container').style.display='block';
+            document.getElementById('widgetContainer').innerHTML='';
+        });
+    }
+})();
+
+
+// ===== КНОПКА "СМОТРЕТЬ НОВОСТИ" =====
 let digestVisible = false;
 async function toggleDigest() {
     if (!ensureConsent()) return;
@@ -1199,7 +1336,6 @@ async function toggleDigest() {
 
         digestHtml = digestHtml.replace(/[\x00-\x1F\x7F-\x9F\u200B\u200C\u200D\uFEFF\u2028\u2029\r]/g, '');
 
-        // Разбиваем на блоки
         let blocks = digestHtml.split(/(?=\n- <b>)/).filter(b => b.trim().length > 0);
         if (blocks.length <= 1) {
             blocks = digestHtml.split(/(?=\n-)/).filter(b => b.trim().length > 0);
@@ -1218,7 +1354,6 @@ async function toggleDigest() {
             while (lines.length > 0 && lines[lines.length - 1].trim() === '') lines.pop();
             let cleanedBlock = lines.join('\n');
 
-            // ===== ОБРАБОТКА СУММАРИЗАЦИЙ =====
             let isSummary = cleanedBlock.indexOf('<b>Обсуждения в ') !== -1;
             if (isSummary) {
                 let summaryStart = cleanedBlock.indexOf('<b>Обсуждения в ');
@@ -1227,39 +1362,29 @@ async function toggleDigest() {
                     if (closeBpos !== -1) {
                         let linkStart = cleanedBlock.indexOf('<a href', closeBpos);
                         if (linkStart === -1) linkStart = cleanedBlock.length;
-                        let before = cleanedBlock.slice(0, closeBpos + 4); // до </b> включительно
+                        let before = cleanedBlock.slice(0, closeBpos + 4);
                         let body = cleanedBlock.slice(closeBpos + 4, linkStart);
                         let after = cleanedBlock.slice(linkStart);
-
-                        // Убираем лишние переносы в начале и конце тела
                         body = body.replace(/^\s*\n+/, '').replace(/\n+\s*$/, '');
-                        // Убираем ведущие переносы перед ссылкой
                         after = after.replace(/^\s*\n+/, '');
-
-                        // Разбиваем тело на пункты по "- " с учётом возможных пробелов и переносов
                         let parts = body.split(/\s*-\s*/).filter(p => p.trim() !== '');
                         let newBody;
                         if (parts.length > 1) {
-                            // Соединяем через две пустые строки (один перенос между)
                             newBody = parts.map(p => '- ' + p.trim()).join('\n\n');
                         } else {
                             newBody = body.trim();
                         }
-
-                        // Собираем блок: заголовок + две пустые строки + тело + перенос + ссылка
                         cleanedBlock = before + '\n\n' + newBody + '\n' + after;
                     }
                 }
             }
 
-            // Добавляем принудительные переносы (если их нет)
             if (cleanedBlock.includes('</b>')) {
                 cleanedBlock = cleanedBlock.replace(/(<\/b>)(?!\n)/, '$1\n');
             }
             if (cleanedBlock.includes('<a href')) {
                 cleanedBlock = cleanedBlock.replace(/(?!\n)(<a href)/, '\n$1');
             }
-            // Убираем три и более переноса подряд, заменяя на два
             cleanedBlock = cleanedBlock.replace(/\n{3,}/g, '\n\n');
 
             if (cleanedBlock) {
@@ -1284,20 +1409,19 @@ async function toggleDigest() {
 // ===== ВЫХОД ИЗ АККАУНТА =====
 function logout() {
     const confirmLogout = () => {
-        // Очищаем все данные авторизации
         localStorage.removeItem('auth_token');
         localStorage.removeItem('bot_auth_token');
         localStorage.removeItem('max_auth_token');
         sessionStorage.removeItem('auth_token');
         sessionStorage.removeItem('bot_auth_token');
         sessionStorage.removeItem('max_auth_token');
+        sessionStorage.removeItem('vk_auth_state');
+        sessionStorage.removeItem('vk_code_verifier');
         authToken = null;
         currentSources = [];
-        // Перезагружаем страницу, чтобы показать экран входа
         window.location.reload();
     };
 
-    // Проверяем наличие Telegram WebApp API
     if (window.Telegram && window.Telegram.WebApp && window.Telegram.WebApp.showPopup) {
         window.Telegram.WebApp.showPopup({
             title: 'Выход',
@@ -1326,7 +1450,6 @@ function logout() {
         }
     }
 }
-// ===== КОНЕЦ ВЫХОДА =====
 
 window.suggestSource = function(){
     if (!ensureConsent()) return;
@@ -1343,9 +1466,10 @@ window.suggestSource = function(){
     } else showLoginScreen();
 })();
 
-// ---- ЯВНО ЭКСПОРТИРУЕМ ФУНКЦИИ В window (ГАРАНТИЯ) ----
+// ---- ЭКСПОРТЫ ----
 window.startBotAuth = startBotAuth;
 window.startMaxAuth = startMaxAuth;
+window.startVkAuth = startVkAuth;
 window.pollBotAuthStatus = pollBotAuthStatus;
 window.startMaxWaiting = startMaxWaiting;
 
@@ -1388,7 +1512,7 @@ window.addRSSSource = addRSSSource;
 window.toggleDigest = toggleDigest;
 window.suggestSource = window.suggestSource;
 window.ensureConsent = ensureConsent;
-window.logout = logout; // Добавили экспорт функции
+window.logout = logout;
 </script>
 
 <!-- Обновлённая регистрация Service Worker с уведомлением об обновлении -->
@@ -1402,7 +1526,6 @@ if ('serviceWorker' in navigator) {
             if (newWorker) {
                 newWorker.addEventListener('statechange', () => {
                     if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
-                        // Показываем диалог с предложением обновить страницу
                         if (confirm('Новая версия доступна. Обновить страницу?')) {
                             window.location.reload();
                         }

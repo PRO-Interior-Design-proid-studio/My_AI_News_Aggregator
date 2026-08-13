@@ -1,11 +1,231 @@
 <!DOCTYPE html>
 <html lang="ru">
-<head><meta charset="UTF-8"><title>Удаление аккаунта</title></head>
-<body style="background:#010715;color:#fff;font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "Fira Sans", "Droid Sans", "Helvetica Neue", Arial, sans-serif;padding:40px;text-align:center;">
-<h1>🗑️ Удаление аккаунта и данных</h1>
-<p>Чтобы удалить все свои данные и аккаунт, отправьте запрос на email:</p>
-<p><strong><a href="mailto:news@proid.studio" style="color:#3088ff;">news@proid.studio</a></strong></p>
-<p>Укажите в письме ваш Telegram ID или MAX ID.</p>
-<p>Данные будут удалены в течение 10 рабочих дней.</p>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Удаление аккаунта — Мои AI Новости</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "Fira Sans", "Droid Sans", "Helvetica Neue", Arial, sans-serif;
+            background: #010715;
+            color: #fff;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            text-align: center;
+        }
+        .container {
+            max-width: 500px;
+            width: 100%;
+            background: rgba(255,255,255,0.04);
+            border-radius: 20px;
+            padding: 40px 30px;
+            border: 1px solid rgba(255,255,255,0.06);
+            backdrop-filter: blur(4px);
+            box-shadow: 0 12px 48px rgba(0,0,0,0.6);
+        }
+        h1 {
+            font-size: 28px;
+            font-weight: 700;
+            margin-bottom: 16px;
+            background: linear-gradient(290deg, #d235ff 0%, #a062ff 30%, #3088ff 66%, #61d8ff 100%);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+        p {
+            color: #8a9bb5;
+            font-size: 16px;
+            line-height: 1.6;
+            margin-bottom: 12px;
+        }
+        .warning {
+            color: #ff6b6b;
+            font-weight: 500;
+            margin: 16px 0 8px;
+        }
+        .btn {
+            display: inline-block;
+            width: 100%;
+            padding: 14px 24px;
+            margin-top: 16px;
+            font-size: 18px;
+            font-weight: 700;
+            border: none;
+            border-radius: 40px;
+            cursor: pointer;
+            transition: transform 0.2s, opacity 0.2s;
+            color: #fff;
+            text-decoration: none;
+        }
+        .btn-danger {
+            background: #e74c3c;
+        }
+        .btn-danger:hover {
+            background: #c0392b;
+            transform: scale(1.02);
+        }
+        .btn-danger:active {
+            transform: scale(0.98);
+        }
+        .btn-secondary {
+            background: transparent;
+            border: 1px solid rgba(255,255,255,0.1);
+            color: #8a9bb5;
+        }
+        .btn-secondary:hover {
+            background: rgba(255,255,255,0.05);
+            color: #fff;
+        }
+        .status {
+            margin-top: 20px;
+            font-size: 15px;
+            min-height: 24px;
+        }
+        .status.error {
+            color: #ff6b6b;
+        }
+        .status.success {
+            color: #2ecc71;
+        }
+        .footer {
+            margin-top: 30px;
+            font-size: 13px;
+            color: #8a9bb5;
+            opacity: 0.6;
+        }
+        .footer a {
+            color: #3088ff;
+            text-decoration: none;
+        }
+        .footer a:hover {
+            text-decoration: underline;
+        }
+        .hidden {
+            display: none !important;
+        }
+        @media (max-width: 480px) {
+            .container {
+                padding: 30px 20px;
+            }
+            h1 {
+                font-size: 24px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container" id="app">
+        <h1>🗑️ Удаление аккаунта</h1>
+        <p>Это действие <strong>необратимо</strong>. Все ваши данные (источники, настройки, история) будут удалены навсегда.</p>
+        <p class="warning">Вы уверены, что хотите продолжить?</p>
+
+        <button class="btn btn-danger" id="deleteBtn">Удалить аккаунт</button>
+        <button class="btn btn-secondary" id="cancelBtn" style="margin-top: 12px;">Отмена</button>
+
+        <div class="status" id="status"></div>
+        <div class="footer">
+            <a href="/">Вернуться на главную</a>
+        </div>
+    </div>
+
+    <script>
+        (function() {
+            const deleteBtn = document.getElementById('deleteBtn');
+            const cancelBtn = document.getElementById('cancelBtn');
+            const statusDiv = document.getElementById('status');
+
+            function setStatus(message, type = '') {
+                statusDiv.textContent = message;
+                statusDiv.className = 'status ' + (type || '');
+            }
+
+            function getToken() {
+                try {
+                    return localStorage.getItem('auth_token');
+                } catch (e) {
+                    return null;
+                }
+            }
+
+            // Проверяем наличие токена
+            const token = getToken();
+            if (!token) {
+                setStatus('❌ Вы не авторизованы. Пожалуйста, войдите в приложение.', 'error');
+                deleteBtn.disabled = true;
+                deleteBtn.style.opacity = '0.5';
+                deleteBtn.style.cursor = 'not-allowed';
+            } else {
+                setStatus('✅ Токен найден. Нажмите "Удалить аккаунт", чтобы продолжить.', '');
+            }
+
+            deleteBtn.addEventListener('click', async function() {
+                const token = getToken();
+                if (!token) {
+                    setStatus('❌ Вы не авторизованы. Войдите в приложение.', 'error');
+                    return;
+                }
+
+                if (!confirm('Вы уверены? Это действие нельзя отменить.')) {
+                    return;
+                }
+
+                setStatus('⏳ Отправка запроса...', '');
+                deleteBtn.disabled = true;
+                deleteBtn.style.opacity = '0.5';
+                deleteBtn.style.cursor = 'not-allowed';
+
+                try {
+                    // ИСПОЛЬЗУЕМ POST (вместо DELETE)
+                    const resp = await fetch('/api/delete-account', {
+                        method: 'POST',
+                        headers: {
+                            'X-Auth-Token': token,
+                            'Content-Type': 'application/json'
+                        }
+                    });
+
+                    let data;
+                    try {
+                        data = await resp.json();
+                    } catch (e) {
+                        data = { detail: 'Не удалось разобрать ответ сервера' };
+                    }
+
+                    if (resp.ok) {
+                        setStatus('✅ Аккаунт успешно удалён. Перенаправление...', 'success');
+                        try {
+                            localStorage.clear();
+                        } catch (e) {}
+                        setTimeout(() => {
+                            window.location.href = '/';
+                        }, 2000);
+                    } else {
+                        const errorMsg = data.detail || data.message || 'Ошибка удаления';
+                        setStatus('❌ ' + errorMsg, 'error');
+                        deleteBtn.disabled = false;
+                        deleteBtn.style.opacity = '1';
+                        deleteBtn.style.cursor = 'pointer';
+                    }
+                } catch (e) {
+                    setStatus('❌ Ошибка соединения: ' + e.message, 'error');
+                    deleteBtn.disabled = false;
+                    deleteBtn.style.opacity = '1';
+                    deleteBtn.style.cursor = 'pointer';
+                }
+            });
+
+            cancelBtn.addEventListener('click', function() {
+                window.location.href = '/';
+            });
+        })();
+    </script>
 </body>
 </html>
