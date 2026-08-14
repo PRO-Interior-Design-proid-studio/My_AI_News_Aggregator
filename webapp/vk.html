@@ -126,7 +126,9 @@
         .hidden{display:none !important;}
         #digestContent .status-block {
             white-space: pre-wrap;
-            word-wrap: break-word;
+            word-wrap: normal;
+            overflow-wrap: normal;
+            hyphens: none;
             padding: 16px;
             margin-bottom: 12px;
             background: var(--card-bg);
@@ -783,6 +785,7 @@
                 while (lines.length > 0 && lines[lines.length - 1].trim() === '') lines.pop();
                 let cleanedBlock = lines.join('\n');
 
+                // ===== ЭТАЛОННАЯ ОБРАБОТКА СУММАРИЗАЦИЙ =====
                 let isSummary = cleanedBlock.indexOf('<b>Обсуждения в ') !== -1;
                 if (isSummary) {
                     let summaryStart = cleanedBlock.indexOf('<b>Обсуждения в ');
@@ -796,7 +799,12 @@
                             let after = cleanedBlock.slice(linkStart);
                             body = body.replace(/^\s*\n+/, '').replace(/\n+\s*$/, '');
                             after = after.replace(/^\s*\n+/, '');
-                            let parts = body.split(/\s*-\s*/).filter(p => p.trim() !== '');
+                            let parts = [];
+                            if (body.includes('\n')) {
+                                parts = body.split(/\n\s*-\s+/).filter(p => p.trim() !== '');
+                            } else {
+                                parts = body.split(/\s*-\s+/).filter(p => p.trim() !== '');
+                            }
                             let newBody;
                             if (parts.length > 1) {
                                 newBody = parts.map(p => '- ' + p.trim()).join('\n\n');
@@ -847,18 +855,18 @@
         }
     }
 
-// === УДАЛЕНИЕ АККАУНТА — ОТКРЫТИЕ СТРАНИЦЫ С ТОКЕНОМ В URL ===
-function deleteAccount() {
-    if (!authToken) {
-        alert('Вы не авторизованы.');
-        return;
+    // === УДАЛЕНИЕ АККАУНТА — ОТКРЫТИЕ СТРАНИЦЫ С ТОКЕНОМ В URL ===
+    function deleteAccount() {
+        if (!authToken) {
+            alert('Вы не авторизованы.');
+            return;
+        }
+        if (!confirm('Вы уверены, что хотите полностью удалить аккаунт и все данные? Это действие необратимо.')) {
+            return;
+        }
+        // Открываем страницу удаления с токеном в параметре
+        window.open('/delete-account?token=' + encodeURIComponent(authToken), '_blank');
     }
-    if (!confirm('Вы уверены, что хотите полностью удалить аккаунт и все данные? Это действие необратимо.')) {
-        return;
-    }
-    // Открываем страницу удаления с токеном в параметре
-    window.open('/delete-account?token=' + encodeURIComponent(authToken), '_blank');
-}
 
     // === ЭКСПОРТ ВСЕХ ФУНКЦИЙ В ГЛОБАЛЬНУЮ ОБЛАСТЬ ===
     console.log('🔄 Экспорт функций в window...');

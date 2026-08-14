@@ -137,10 +137,12 @@
         .category-grid button:hover{background:linear-gradient(180deg,rgba(159,103,255,.22),rgba(197,66,255,.35)) padding-box,linear-gradient(var(--bg-color),var(--bg-color)) padding-box,linear-gradient(180deg,rgba(171,78,252,.82) 0%,rgba(108,31,198,.24) 53%,#7C45C2 100%) border-box,linear-gradient(180deg,rgba(159,103,255,.22),rgba(197,66,255,.35)) border-box;border:1px solid transparent;color:#fff;}
         .category-grid button:active{background:linear-gradient(180deg,rgba(159,103,255,.22),rgba(197,66,255,.35)) padding-box,linear-gradient(var(--bg-color),var(--bg-color)) padding-box,linear-gradient(180deg,rgba(171,78,252,.82) 0%,rgba(108,31,198,.24) 53%,#7C45C2 100%) border-box,linear-gradient(180deg,rgba(159,103,255,.22),rgba(197,66,255,.35)) border-box;border:1px solid transparent;color:#fff;transform:scale(.97);}
 
-        /* Дополнительные стили для отображения дайджеста */
+        /* ===== ИСПРАВЛЕННЫЙ CSS ДЛЯ ДАЙДЖЕСТА (как в эталоне) ===== */
         #digestContent .status-block {
             white-space: pre-wrap;
-            word-wrap: break-word;
+            word-wrap: normal;
+            overflow-wrap: normal;
+            hyphens: none;
             padding: 16px;
             margin-bottom: 12px;
             background: var(--card-bg);
@@ -167,6 +169,7 @@
             text-decoration: underline;
             opacity: 0.8;
         }
+        /* ============================================================ */
 
         /* ===== ССЫЛКА "ВЫХОД" ===== */
         #logoutContainer {
@@ -1214,7 +1217,7 @@
             }
         }
 
-        // ===== ФУНКЦИЯ "СМОТРЕТЬ НОВОСТИ" – ИСПРАВЛЕНА (используем /api/webapp/max/digest) =====
+        // ===== ФУНКЦИЯ "СМОТРЕТЬ НОВОСТИ" – ИСПРАВЛЕНА (регулярка как в эталоне) =====
         async function toggleDigest() {
             if (!ensureConsent()) return;
             const container = document.getElementById('digestContainer');
@@ -1229,7 +1232,6 @@
             content.innerHTML = '<div style="text-align:center; padding:20px; color: var(--text-secondary);">⏳ Загрузка...</div>';
 
             try {
-                // ИСПРАВЛЕНО: правильный эндпоинт для MAX и правильные заголовки
                 const resp = await apiRequest('/api/webapp/max/digest', { headers: getAuthHeaders() });
                 if (!resp) return;
                 if (!resp.ok) {
@@ -1266,7 +1268,7 @@
                     while (lines.length > 0 && lines[lines.length - 1].trim() === '') lines.pop();
                     let cleanedBlock = lines.join('\n');
 
-                    // ===== ОБРАБОТКА СУММАРИЗАЦИЙ =====
+                    // ===== ОБРАБОТКА СУММАРИЗАЦИЙ (ЭТАЛОН) =====
                     let isSummary = cleanedBlock.indexOf('<b>Обсуждения в ') !== -1;
                     if (isSummary) {
                         let summaryStart = cleanedBlock.indexOf('<b>Обсуждения в ');
@@ -1275,39 +1277,38 @@
                             if (closeBpos !== -1) {
                                 let linkStart = cleanedBlock.indexOf('<a href', closeBpos);
                                 if (linkStart === -1) linkStart = cleanedBlock.length;
-                                let before = cleanedBlock.slice(0, closeBpos + 4); // до </b> включительно
+                                let before = cleanedBlock.slice(0, closeBpos + 4);
                                 let body = cleanedBlock.slice(closeBpos + 4, linkStart);
                                 let after = cleanedBlock.slice(linkStart);
 
-                                // Убираем лишние переносы в начале и конце тела
                                 body = body.replace(/^\s*\n+/, '').replace(/\n+\s*$/, '');
-                                // Убираем ведущие переносы перед ссылкой
                                 after = after.replace(/^\s*\n+/, '');
 
-                                // Разбиваем тело на пункты по "- " с учётом возможных пробелов и переносов
-                                let parts = body.split(/\s*-\s*/).filter(p => p.trim() !== '');
+                                let parts = [];
+                                if (body.includes('\n')) {
+                                    parts = body.split(/\n\s*-\s+/).filter(p => p.trim() !== '');
+                                } else {
+                                    parts = body.split(/\s*-\s+/).filter(p => p.trim() !== '');
+                                }
+
                                 let newBody;
                                 if (parts.length > 1) {
-                                    // Соединяем через две пустые строки (один перенос между)
                                     newBody = parts.map(p => '- ' + p.trim()).join('\n\n');
                                 } else {
                                     newBody = body.trim();
                                 }
 
-                                // Собираем блок: заголовок + две пустые строки + тело + перенос + ссылка
                                 cleanedBlock = before + '\n\n' + newBody + '\n' + after;
                             }
                         }
                     }
 
-                    // Добавляем принудительные переносы (если их нет)
                     if (cleanedBlock.includes('</b>')) {
                         cleanedBlock = cleanedBlock.replace(/(<\/b>)(?!\n)/, '$1\n');
                     }
                     if (cleanedBlock.includes('<a href')) {
                         cleanedBlock = cleanedBlock.replace(/(?!\n)(<a href)/, '\n$1');
                     }
-                    // Убираем три и более переноса подряд, заменяя на два
                     cleanedBlock = cleanedBlock.replace(/\n{3,}/g, '\n\n');
 
                     if (cleanedBlock) {

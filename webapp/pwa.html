@@ -5,12 +5,12 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>Мои AI Новости — персонализированный дайджест с искусственным интеллектом</title>
-<meta name="description" content="Войдите в Мои AI Новости, чтобы получать ежедневные персонализированные дайджесты новостей из ваших любимых источников. Авторизация через Telegram, MAX или VK.">
-<meta name="keywords" content="AI новости, дайджест, персонализированные новости, Telegram бот, MAX бот, VK, агрегатор новостей">
+<meta name="description" content="Войдите в Мои AI Новости, чтобы получать ежедневные персонализированные дайджесты новостей из ваших любимых источников. Авторизация через VK, MAX или Яндекс ID.">
+<meta name="keywords" content="AI новости, дайджест, персонализированные новости, VK, MAX, Яндекс ID, агрегатор новостей">
 <meta name="robots" content="index, follow">
 <link rel="canonical" href="https://news.proid.studio/pwa">
 <meta property="og:title" content="Вход в Мои AI Новости">
-<meta property="og:description" content="Персонализированный AI-дайджест новостей. Войдите через Telegram, MAX или VK.">
+<meta property="og:description" content="Персонализированный AI-дайджест новостей. Войдите через VK, MAX или Яндекс ID.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://news.proid.studio/pwa">
 <meta property="og:image" content="https://news.proid.studio/picture/LOGO.jpg">
@@ -20,7 +20,7 @@
 <meta property="og:site_name" content="Мои AI Новости">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="Вход в Мои AI Новости">
-<meta name="twitter:description" content="Персонализированный AI-дайджест новостей. Войдите через Telegram, MAX или VK.">
+<meta name="twitter:description" content="Персонализированный AI-дайджест новостей. Войдите через VK, MAX или Яндекс ID.">
 <meta name="twitter:image" content="https://news.proid.studio/picture/LOGO.jpg">
 <script type="application/ld+json">
 {
@@ -145,10 +145,12 @@ body{font-family:-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, 
 .upgrade-hint a:hover{text-decoration:underline;}
 .auth-container{max-width:420px;width:100%;background:transparent;border:none;box-shadow:none;padding:20px 0 0 0;margin:0 auto;text-align:center;}
 .auth-btn{display:flex;align-items:center;justify-content:center;gap:12px;width:300px;margin:0 auto 12px auto;padding:16px 24px;border:1px solid transparent;border-radius:26px;font-size:17px;font-weight:700;line-height:20px;color:#fff;cursor:pointer;transition:transform .2s,box-shadow .2s,opacity .2s;text-decoration:none;background:var(--card-bg);backdrop-filter:blur(4px);}
-.auth-btn.telegram{--fill-colors:rgba(159,103,255,.22),rgba(197,66,255,.35);--border-colors:rgba(171,78,252,.82) 0%,rgba(108,31,198,.24) 53%,#7C45C2 100%;background:linear-gradient(180deg,var(--fill-colors)) padding-box,linear-gradient(var(--bg-color),var(--bg-color)) padding-box,linear-gradient(180deg,var(--border-colors)) border-box,linear-gradient(180deg,var(--fill-colors)) border-box;}
-.auth-btn.max{--fill-colors:rgba(31,89,198,.26),rgba(31,89,198,.26);--border-colors:rgba(78,173,252,.61) 0%,#1F59C6 53%,#20397F 100%;background:linear-gradient(180deg,var(--fill-colors)) padding-box,linear-gradient(var(--bg-color),var(--bg-color)) padding-box,linear-gradient(180deg,var(--border-colors)) border-box,linear-gradient(180deg,var(--fill-colors)) border-box;}
-/* Стили для кнопки VK */
+/* VK — синий (без изменений) */
 .auth-btn.vk{--fill-colors:rgba(13,71,161,.26),rgba(30,136,229,.35);--border-colors:rgba(13,71,161,.82) 0%,rgba(21,101,192,.24) 53%,#1e88e5 100%;background:linear-gradient(180deg,var(--fill-colors)) padding-box,linear-gradient(var(--bg-color),var(--bg-color)) padding-box,linear-gradient(180deg,var(--border-colors)) border-box,linear-gradient(180deg,var(--fill-colors)) border-box;}
+/* MAX — фиолетовый (как был Telegram) */
+.auth-btn.max{--fill-colors:rgba(159,103,255,.22),rgba(197,66,255,.35);--border-colors:rgba(171,78,252,.82) 0%,rgba(108,31,198,.24) 53%,#7C45C2 100%;background:linear-gradient(180deg,var(--fill-colors)) padding-box,linear-gradient(var(--bg-color),var(--bg-color)) padding-box,linear-gradient(180deg,var(--border-colors)) border-box,linear-gradient(180deg,var(--fill-colors)) border-box;}
+/* Яндекс — оранжевый (как RSS) */
+.auth-btn.yandex{--fill-colors:rgba(216,67,21,.26),rgba(245,124,0,.35);--border-colors:rgba(216,67,21,.82) 0%,rgba(245,124,0,.24) 53%,#f57c00 100%;background:linear-gradient(180deg,var(--fill-colors)) padding-box,linear-gradient(var(--bg-color),var(--bg-color)) padding-box,linear-gradient(180deg,var(--border-colors)) border-box,linear-gradient(180deg,var(--fill-colors)) border-box;}
 .auth-btn:hover{transform:scale(1.03);opacity:.9;}
 .auth-btn:active{transform:scale(.97);opacity:.8;}
 .small-note{font-size:12px;color:var(--text-secondary);margin-top:4px;line-height:1.4;}
@@ -172,10 +174,12 @@ body{font-family:-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, 
 }
 /* ===== КОНЕЦ БЛОКИРОВКИ ===== */
 
-/* Стили для отображения дайджеста */
+/* Стили для отображения дайджеста – предотвращаем разрыв слов по дефису */
 #digestContent .status-block {
     white-space: pre-wrap;
-    word-wrap: break-word;
+    word-wrap: normal;
+    overflow-wrap: normal;
+    hyphens: none;
     padding: 16px;
     margin-bottom: 12px;
     background: var(--card-bg);
@@ -224,10 +228,13 @@ body{font-family:-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, 
 <div id="loginScreen">
 <div class="header"><h1>Мои AI Новости</h1></div>
 <div class="auth-container">
-    <button class="auth-btn telegram" id="botLoginBtn" onclick="startBotAuth()"><span class="icon">🚀</span> Войти через Telegram</button>
-    <button class="auth-btn max" id="maxLoginBtn" onclick="startMaxAuth()"><span class="icon">🚀</span> Войти через MAX</button>
-    <button class="auth-btn vk" id="vkLoginBtn" onclick="startVkAuth()"><span class="icon">🚀</span> Войти через VK</button>
-    <p class="small-note">*аккаунт будет привязан к одному методу входа</p>
+   <button class="auth-btn max" id="maxLoginBtn"><span class="icon">🚀</span> Войти через MAX</button> <button class="auth-btn vk" id="vkLoginBtn"><span class="icon">🚀</span> Войти через VK</button>
+    <button class="auth-btn yandex" id="yandexLoginBtn"><span class="icon">🚀</span> Войти через Yandex</button></br>
+<p class="small-note">Важно:</p>
+    <p class="small-note">- аккаунт будет привязан к одному методу входа </p>
+<p class="small-note">- Telegram доступен после входа через РФ аккаунт </p>
+    <p class="small-note">- зарубежные методы входа запрещены в РФ </p>
+<p class="small-note">- иногда VPN может мешать авторизации </p>
     <div class="widget-container" id="widgetContainer"></div>
 </div>
 </div>
@@ -239,7 +246,7 @@ body{font-family:-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, 
     <div class="status-title">Конфиденциальность</div>
     <p style="color: var(--text-secondary); font-size: 14px; margin-bottom: 12px; line-height: 1.6;">
         Для работы приложения необходимо ваше согласие на обработку персональных данных.
-        Мы собираем минимальный набор данных (идентификатор в Telegram/MAX/VK, IP-адрес, технические параметры) для предоставления сервиса.
+        Мы собираем минимальный набор данных (идентификатор в VK/MAX или Яндекс ID, IP-адрес, технические параметры) для предоставления сервиса.
         Ваши данные не передаются третьим лицам и не используются для рекламы.
         Подробнее в <a href="/privacy" target="_blank" style="color: var(--accent2);">Политике обработки персональных данных</a>.
     </p>
@@ -258,52 +265,52 @@ body{font-family:-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, 
 <div id="appContent">
 <div class="section-header">Добавить</div>
 <div class="quick-buttons" id="quickButtons">
-<button onclick="toggleCategoryForm('dzen')">Дзен</button>
-<button onclick="toggleCategoryForm('rb')">RB.ru</button>
-<button onclick="toggleCategoryForm('habr')">Хабр</button>
-<button onclick="toggleCategoryForm('lifehacker')">Лайфхакер</button>
-<button onclick="addForbesTelegram()">Forbes</button>
-<button onclick="toggleCategoryForm('vc')">VC.ru</button>
-<button onclick="toggleAddForm('rss')">RSS/HTML</button>
-<button onclick="toggleAddForm('telegram')">Telegram</button>
-<button onclick="toggleAddForm('vk')">VK</button>
-<button onclick="toggleGitHubForm()">GitHub</button>
-<button onclick="toggleYouTubeForm()">YouTube</button>
-<button onclick="toggleRedditForm()">Reddit</button>
-<button onclick="toggleCategoryForm('bbc')">BBC</button>
-<button onclick="toggleGoogleNewsForm()">Google News</button>
-<button onclick="toggleCategoryForm('cnn')">CNN</button>
+<button id="btn-dzen">Дзен</button>
+<button id="btn-rb">RB.ru</button>
+<button id="btn-habr">Хабр</button>
+<button id="btn-lifehacker">Лайфхакер</button>
+<button id="btn-forbes">Forbes</button>
+<button id="btn-vc">VC.ru</button>
+<button id="btn-add-rss">RSS/HTML</button>
+<button id="btn-add-telegram">Telegram</button>
+<button id="btn-add-vk">VK</button>
+<button id="btn-github">GitHub</button>
+<button id="btn-youtube">YouTube</button>
+<button id="btn-reddit">Reddit</button>
+<button id="btn-bbc">BBC</button>
+<button id="btn-google-news">Google News</button>
+<button id="btn-cnn">CNN</button>
 </div>
 <div class="add-form" id="addForm">
 <div style="font-weight:600;margin-bottom:6px;" id="addFormTitle">Добавить RSS/HTML</div>
 <input id="sourceValue" type="text" placeholder="Введите URL...">
-<button class="btn-primary" onclick="addSourceSubmit()">Добавить</button>
-<button class="btn-secondary" onclick="closeAddForm()">Отмена</button>
+<button class="btn-primary" id="addSourceSubmitBtn">Добавить</button>
+<button class="btn-secondary" id="closeAddFormBtn">Отмена</button>
 </div>
 <div class="add-form" id="githubForm">
 <div style="font-weight:600;margin-bottom:6px;">GitHub — генератор RSS</div>
 <input id="githubInput" type="text" placeholder="owner/repo или username">
 <div class="github-grid" id="githubGrid">
-<button data-type="releases" onclick="generateGitHubRSS('releases')">releases</button>
-<button data-type="tags" onclick="generateGitHubRSS('tags')">tags</button>
-<button data-type="commits" onclick="generateGitHubRSS('commits')">commits</button>
-<button data-type="main" onclick="generateGitHubRSS('main')">main</button>
-<button data-type="master" onclick="generateGitHubRSS('master')">master</button>
-<button data-type="username" onclick="generateGitHubRSS('username')">username</button>
+<button data-type="releases" id="github-releases">releases</button>
+<button data-type="tags" id="github-tags">tags</button>
+<button data-type="commits" id="github-commits">commits</button>
+<button data-type="main" id="github-main">main</button>
+<button data-type="master" id="github-master">master</button>
+<button data-type="username" id="github-username">username</button>
 </div>
-<button class="btn-secondary" onclick="closeGitHubForm()">Отмена</button>
+<button class="btn-secondary" id="closeGitHubFormBtn">Отмена</button>
 </div>
 <div class="add-form" id="youtubeForm">
 <div style="font-weight:600;margin-bottom:6px;">YouTube — генератор RSS</div>
 <input id="youtubeInput" type="text" placeholder="логин канала или channelId">
-<button class="btn-primary" onclick="generateYouTubeRSS()">Сгенерировать</button>
-<button class="btn-secondary" onclick="closeYouTubeForm()">Отмена</button>
+<button class="btn-primary" id="generateYouTubeBtn">Сгенерировать</button>
+<button class="btn-secondary" id="closeYouTubeFormBtn">Отмена</button>
 </div>
 <div class="add-form" id="redditForm">
 <div style="font-weight:600;margin-bottom:6px;">Reddit — генератор RSS</div>
 <input id="redditInput" type="text" placeholder="название сабреддита">
-<button class="btn-primary" onclick="generateRedditRSS()">Сгенерировать</button>
-<button class="btn-secondary" onclick="closeRedditForm()">Отмена</button>
+<button class="btn-primary" id="generateRedditBtn">Сгенерировать</button>
+<button class="btn-secondary" id="closeRedditFormBtn">Отмена</button>
 </div>
 <div class="add-form" id="googleNewsForm">
 <div style="font-weight:600;margin-bottom:6px;">Google News — генератор RSS</div>
@@ -316,8 +323,8 @@ body{font-family:-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, 
 <div style="display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid var(--border);"><span style="color:var(--text-secondary);">intitle:слово</span><span style="color:var(--text-secondary);">поиск в заголовке</span></div>
 <div style="display:flex;justify-content:space-between;padding:4px 0;"><span style="color:var(--text-secondary);">allintext:текст</span><span style="color:var(--text-secondary);">поиск в тексте</span></div>
 </div>
-<button class="btn-primary" onclick="generateGoogleNewsRSS()">Сгенерировать</button>
-<button class="btn-secondary" onclick="closeGoogleNewsForm()">Отмена</button>
+<button class="btn-primary" id="generateGoogleNewsBtn">Сгенерировать</button>
+<button class="btn-secondary" id="closeGoogleNewsFormBtn">Отмена</button>
 </div>
 <div class="category-form" id="bbcForm"><div style="font-weight:600;margin-bottom:8px;">BBC — выберите категорию</div><div class="category-grid" id="bbcGrid"></div></div>
 <div class="category-form" id="cnnForm"><div style="font-weight:600;margin-bottom:8px;">CNN — выберите категорию</div><div class="category-grid" id="cnnGrid"></div></div>
@@ -327,24 +334,24 @@ body{font-family:-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, 
 <div class="category-form" id="lifehackerForm"><div style="font-weight:600;margin-bottom:8px;">Лайфхакер — выберите категорию</div><div class="category-grid" id="lifehackerGrid"></div></div>
 <div class="category-form" id="vcForm"><div style="font-weight:600;margin-bottom:8px;">VC.ru — выберите категорию</div><div class="category-grid" id="vcGrid"></div></div>
 <div style="display:flex;gap:8px;margin-bottom:8px;margin-top:0px;">
-<button class="suggest-btn" style="flex:1;color:var(--text);" onclick="toggleCategoryBrowser()">Категории</button>
-<button class="suggest-btn" style="flex:1;color:var(--text-secondary);" onclick="suggestSource()">Предложить своё</button>
+<button class="suggest-btn" style="flex:1;color:var(--text);" id="categoryBrowserBtn">Категории</button>
+<button class="suggest-btn" style="flex:1;color:var(--text-secondary);" id="suggestSourceBtn">Предложить своё</button>
 </div>
 <div class="category-form" id="categoryBrowser" style="display:none;">
 <div class="category-form-header" style="font-weight:600;margin-bottom:8px;color:var(--text-secondary);text-align:center;" id="categoryBrowserHeader">Выберите категорию</div>
 <div class="category-grid" id="categoryGrid"></div>
-<button class="btn-secondary" id="categoryBackBtn" style="display:none;margin-top:8px;width:100%;" onclick="goBackLevel()">← Назад</button>
+<button class="btn-secondary" id="categoryBackBtn" style="display:none;margin-top:8px;width:100%;">← Назад</button>
 </div>
 
 <!-- Кнопка "Смотреть новости" -->
-<button class="payment-toggle-btn" id="digestToggleBtn" onclick="toggleDigest()">📰 Смотреть новости</button>
+<button class="payment-toggle-btn" id="digestToggleBtn">📰 Смотреть новости</button>
 <div id="digestContainer" style="display: none; margin-top: 0;">
     <div id="digestContent"></div>
 </div>
 
 <div class="section-header">Мои источники (<span id="counter">0</span>)</div>
 <div id="sourceListContainer"></div>
-<button class="payment-toggle-btn" id="paymentToggleBtn" onclick="toggleTariffs()">💰 Оплатить тариф</button>
+<button class="payment-toggle-btn" id="paymentToggleBtn">💰 Оплатить тариф</button>
 <div class="tariff-block" id="tariffBlock">
 <div class="tariff-grid">
 <div class="tariff-card"><div class="title">Базовый</div><button class="price-btn" onclick="handlePayment('basic_month')">190 ₽ <span class="label">/ мес</span></button><button class="price-btn" onclick="handlePayment('basic_year')">1 900 ₽ <span class="label">/ год</span></button></div>
@@ -366,15 +373,25 @@ body{font-family:-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, 
 <div class="status-row" style="border-bottom:none;padding-bottom:0;">
 <span>Текущее время:</span>
 <span id="currentTimeDisplay">—</span>
-<button class="change-time-btn" id="changeTimeBtn" onclick="toggleTimePicker()">Изменить</button>
+<button class="change-time-btn" id="changeTimeBtn">Изменить</button>
 <span class="upgrade-hint" id="upgradeHint" style="display:none;">🔒 <a href="#" onclick="toggleTariffs(); return false;">Доступно в Расширенном тарифе</a></span>
 </div>
 <div id="timePicker" style="display:none;margin-top:10px;">
 <div class="time-picker-grid" id="timePickerGrid"></div>
-<button class="close-picker-btn" onclick="closeTimePicker()">Закрыть</button>
+<button class="close-picker-btn" id="closeTimePickerBtn">Закрыть</button>
 </div>
 </div>
-<div id="logoutContainer" onclick="logout()">Выход (сброс кэша)</div>
+
+<!-- ===== ССЫЛКИ НА БОТОВ (VK, MAX и Telegram) ===== -->
+<div style="display:flex; justify-content:center; gap:12px; margin:12px 0; color:var(--text-secondary); font-size:14px; flex-wrap:wrap;">
+    <a href="https://max.ru/id772609477460_bot" target="_blank" style="color:var(--text-secondary); text-decoration:none;">Открыть в MAX</a>
+    <span class="sep">|</span>
+    <a href="https://t.me/My_AI_News_Aggregator_bot" target="_blank" style="color:var(--text-secondary); text-decoration:none;">Открыть в Telegram</a>
+    <span class="sep">|</span>
+    <a href="https://vk.ru/app54717257" target="_blank" style="color:var(--text-secondary); text-decoration:none;">Открыть в VK</a>
+</div>
+
+<div id="logoutContainer">Выход (сброс кэша)</div>
 </div> <!-- /appContent -->
 </div> <!-- /appScreen -->
 </div>
@@ -448,7 +465,7 @@ function showAppScreen(){document.getElementById('loginScreen').style.display='n
 async function apiRequest(url,options={}){try{const resp=await fetch(url,options);if(resp.status===503){alert('⚠️ Сервер временно недоступен. Пожалуйста, обновите страницу через несколько секунд.');return null;}
 return resp;}catch(err){throw err;}}
 
-// ===== ПРОВЕРКА СОГЛАСИЯ ВО ВСЕХ ДЕЙСТВИЯХ =====
+// ===== ПРОВЕРКА СОГЛАСИЯ =====
 function ensureConsent() {
     if (!consentGiven && !isTestUser) {
         alert('Сначала примите согласие на обработку данных.');
@@ -465,7 +482,6 @@ async function loadApp(){
         const resp=await apiRequest('/api/webapp/sources',{headers});
         if(!resp)return;
         if(!resp.ok){
-            // ===== ОБРАБОТКА 403: ПОКАЗЫВАЕМ БЛОК КОНФИДЕНЦИАЛЬНОСТИ =====
             if(resp.status === 403){
                 const consentBlock = document.getElementById('consentBlock');
                 const appScreen = document.getElementById('appScreen');
@@ -494,7 +510,6 @@ async function loadApp(){
         document.getElementById('counter').textContent=currentSources.length;
         updateStatus(data);
 
-        // Управление согласием
         const appScreen = document.getElementById('appScreen');
         const consentBlock = document.getElementById('consentBlock');
         isTestUser = (authToken === TEST_TOKEN);
@@ -509,7 +524,6 @@ async function loadApp(){
             appScreen.classList.remove('consent-pending');
             window.TEST_MODE = false;
         }
-
         document.getElementById('quickButtons').style.display='flex';
         document.getElementById('paymentToggleBtn').style.display='block';
     }catch(err){
@@ -562,6 +576,112 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
     }
+
+    // ===== ПРИВЯЗКА ОСНОВНЫХ КНОПОК (БЕЗ ДУБЛИРОВАНИЯ) =====
+    // Кнопки входа
+    const vkBtn = document.getElementById('vkLoginBtn');
+    if (vkBtn) vkBtn.addEventListener('click', startVkAuth);
+
+    const maxBtn = document.getElementById('maxLoginBtn');
+    if (maxBtn) maxBtn.addEventListener('click', startMaxAuth);
+
+    const yandexBtn = document.getElementById('yandexLoginBtn');
+    if (yandexBtn) yandexBtn.addEventListener('click', startYandexAuth);
+
+    // Кнопка "Смотреть новости"
+    const digestBtn = document.getElementById('digestToggleBtn');
+    if (digestBtn) digestBtn.addEventListener('click', toggleDigest);
+
+    // Кнопка "Выход"
+    const logoutEl = document.getElementById('logoutContainer');
+    if (logoutEl) logoutEl.addEventListener('click', logout);
+
+    // Кнопки быстрого меню (у них теперь есть id)
+    const btnDzen = document.getElementById('btn-dzen');
+    if (btnDzen) btnDzen.addEventListener('click', function() { toggleCategoryForm('dzen'); });
+    const btnRb = document.getElementById('btn-rb');
+    if (btnRb) btnRb.addEventListener('click', function() { toggleCategoryForm('rb'); });
+    const btnHabr = document.getElementById('btn-habr');
+    if (btnHabr) btnHabr.addEventListener('click', function() { toggleCategoryForm('habr'); });
+    const btnLifehacker = document.getElementById('btn-lifehacker');
+    if (btnLifehacker) btnLifehacker.addEventListener('click', function() { toggleCategoryForm('lifehacker'); });
+    const btnForbes = document.getElementById('btn-forbes');
+    if (btnForbes) btnForbes.addEventListener('click', addForbesTelegram);
+    const btnVc = document.getElementById('btn-vc');
+    if (btnVc) btnVc.addEventListener('click', function() { toggleCategoryForm('vc'); });
+    const btnAddRss = document.getElementById('btn-add-rss');
+    if (btnAddRss) btnAddRss.addEventListener('click', function() { toggleAddForm('rss'); });
+    const btnAddTelegram = document.getElementById('btn-add-telegram');
+    if (btnAddTelegram) btnAddTelegram.addEventListener('click', function() { toggleAddForm('telegram'); });
+    const btnAddVk = document.getElementById('btn-add-vk');
+    if (btnAddVk) btnAddVk.addEventListener('click', function() { toggleAddForm('vk'); });
+    const btnGithub = document.getElementById('btn-github');
+    if (btnGithub) btnGithub.addEventListener('click', toggleGitHubForm);
+    const btnYoutube = document.getElementById('btn-youtube');
+    if (btnYoutube) btnYoutube.addEventListener('click', toggleYouTubeForm);
+    const btnReddit = document.getElementById('btn-reddit');
+    if (btnReddit) btnReddit.addEventListener('click', toggleRedditForm);
+    const btnBbc = document.getElementById('btn-bbc');
+    if (btnBbc) btnBbc.addEventListener('click', function() { toggleCategoryForm('bbc'); });
+    const btnGoogleNews = document.getElementById('btn-google-news');
+    if (btnGoogleNews) btnGoogleNews.addEventListener('click', toggleGoogleNewsForm);
+    const btnCnn = document.getElementById('btn-cnn');
+    if (btnCnn) btnCnn.addEventListener('click', function() { toggleCategoryForm('cnn'); });
+
+    // Кнопки форм
+    const addSourceSubmitBtn = document.getElementById('addSourceSubmitBtn');
+    if (addSourceSubmitBtn) addSourceSubmitBtn.addEventListener('click', addSourceSubmit);
+    const closeAddFormBtn = document.getElementById('closeAddFormBtn');
+    if (closeAddFormBtn) closeAddFormBtn.addEventListener('click', closeAddForm);
+    const closeGitHubFormBtn = document.getElementById('closeGitHubFormBtn');
+    if (closeGitHubFormBtn) closeGitHubFormBtn.addEventListener('click', closeGitHubForm);
+    const generateYouTubeBtn = document.getElementById('generateYouTubeBtn');
+    if (generateYouTubeBtn) generateYouTubeBtn.addEventListener('click', generateYouTubeRSS);
+    const closeYouTubeFormBtn = document.getElementById('closeYouTubeFormBtn');
+    if (closeYouTubeFormBtn) closeYouTubeFormBtn.addEventListener('click', closeYouTubeForm);
+    const generateRedditBtn = document.getElementById('generateRedditBtn');
+    if (generateRedditBtn) generateRedditBtn.addEventListener('click', generateRedditRSS);
+    const closeRedditFormBtn = document.getElementById('closeRedditFormBtn');
+    if (closeRedditFormBtn) closeRedditFormBtn.addEventListener('click', closeRedditForm);
+    const generateGoogleNewsBtn = document.getElementById('generateGoogleNewsBtn');
+    if (generateGoogleNewsBtn) generateGoogleNewsBtn.addEventListener('click', generateGoogleNewsRSS);
+    const closeGoogleNewsFormBtn = document.getElementById('closeGoogleNewsFormBtn');
+    if (closeGoogleNewsFormBtn) closeGoogleNewsFormBtn.addEventListener('click', closeGoogleNewsForm);
+
+    // Кнопки GitHub grid
+    const githubReleases = document.getElementById('github-releases');
+    if (githubReleases) githubReleases.addEventListener('click', function() { generateGitHubRSS('releases'); });
+    const githubTags = document.getElementById('github-tags');
+    if (githubTags) githubTags.addEventListener('click', function() { generateGitHubRSS('tags'); });
+    const githubCommits = document.getElementById('github-commits');
+    if (githubCommits) githubCommits.addEventListener('click', function() { generateGitHubRSS('commits'); });
+    const githubMain = document.getElementById('github-main');
+    if (githubMain) githubMain.addEventListener('click', function() { generateGitHubRSS('main'); });
+    const githubMaster = document.getElementById('github-master');
+    if (githubMaster) githubMaster.addEventListener('click', function() { generateGitHubRSS('master'); });
+    const githubUsername = document.getElementById('github-username');
+    if (githubUsername) githubUsername.addEventListener('click', function() { generateGitHubRSS('username'); });
+
+    // Категории
+    const categoryBrowserBtn = document.getElementById('categoryBrowserBtn');
+    if (categoryBrowserBtn) categoryBrowserBtn.addEventListener('click', toggleCategoryBrowser);
+    const categoryBackBtn = document.getElementById('categoryBackBtn');
+    if (categoryBackBtn) categoryBackBtn.addEventListener('click', goBackLevel);
+    const suggestSourceBtn = document.getElementById('suggestSourceBtn');
+    if (suggestSourceBtn) suggestSourceBtn.addEventListener('click', suggestSource);
+
+    // Тарифы
+    const paymentToggleBtn = document.getElementById('paymentToggleBtn');
+    if (paymentToggleBtn) paymentToggleBtn.addEventListener('click', toggleTariffs);
+    // Кнопки тарифов имеют onclick, addEventListener не навешиваем (нет дублей)
+
+    // Время
+    const changeTimeBtn = document.getElementById('changeTimeBtn');
+    if (changeTimeBtn) changeTimeBtn.addEventListener('click', toggleTimePicker);
+    const closeTimePickerBtn = document.getElementById('closeTimePickerBtn');
+    if (closeTimePickerBtn) closeTimePickerBtn.addEventListener('click', closeTimePicker);
+    const upgradeLink = document.getElementById('upgradeLink');
+    if (upgradeLink) upgradeLink.addEventListener('click', function(e) { e.preventDefault(); toggleTariffs(); });
 });
 
 // ===== ОСТАЛЬНЫЕ ФУНКЦИИ (с проверкой согласия) =====
@@ -1073,44 +1193,6 @@ async function handlePayment(tariffKey){ if(!ensureConsent())return; hapticFeedb
 }
 
 // ===== ФУНКЦИИ ВХОДА =====
-async function startBotAuth(){
-    hapticFeedback();
-    document.getElementById('loginScreen').querySelector('.auth-container').style.display='none';
-    const w=document.getElementById('widgetContainer');
-    w.innerHTML='<div class="loader"></div>';
-    try{
-        const resp=await apiRequest('/api/auth/bot-token');
-        if(!resp){document.getElementById('loginScreen').querySelector('.auth-container').style.display='block';w.innerHTML='';return;}
-        if(!resp.ok)throw new Error('Не удалось получить токен');
-        const data=await resp.json();
-        const token=data.token;
-        const botUsername=data.bot_username||'My_AI_News_Aggregator_bot';
-        localStorage.setItem('bot_auth_token',token);
-        window.open('https://t.me/'+botUsername+'?start='+encodeURIComponent(token),'_blank');
-        pollBotAuthStatus(token);
-    }catch(err){alert('❌ Ошибка: '+err.message);document.getElementById('loginScreen').querySelector('.auth-container').style.display='block';w.innerHTML='';}
-}
-
-async function startMaxAuth(){
-    hapticFeedback();
-    document.getElementById('loginScreen').querySelector('.auth-container').style.display='none';
-    const w=document.getElementById('widgetContainer');
-    w.innerHTML='<div class="loader"></div>';
-    try{
-        const resp=await apiRequest('/api/auth/max-token');
-        if(!resp){document.getElementById('loginScreen').querySelector('.auth-container').style.display='block';w.innerHTML='';return;}
-        if(!resp.ok)throw new Error('Не удалось получить токен');
-        const data=await resp.json();
-        const token=data.token;
-        const botUsername=data.bot_username||'id772609477460_bot';
-        localStorage.setItem('max_auth_token',token);
-        startMaxWaiting(token);
-        window.open('https://max.ru/'+botUsername+'?start='+encodeURIComponent(token),'_blank');
-        w.innerHTML='<p style="color: var(--text-secondary);">Ожидаем подтверждения в MAX...</p>';
-    }catch(err){alert('❌ Ошибка: '+err.message);document.getElementById('loginScreen').querySelector('.auth-container').style.display='block';w.innerHTML='';}
-}
-
-// ===== VK AUTH С ПОДДЕРЖКОЙ PKCE =====
 async function startVkAuth(){
     hapticFeedback();
     // Генерируем code_verifier и code_challenge
@@ -1145,51 +1227,29 @@ async function startVkAuth(){
     window.location.href = authUrl;
 }
 
-function pollBotAuthStatus(token){
-    let attempts=0;
-    const maxAttempts=60;
-    const interval=setInterval(async()=>{
-        attempts++;
-        try{
-            const resp=await apiRequest('/api/auth/bot-status?token='+encodeURIComponent(token));
-            if(!resp)return;
-            const result=await resp.json();
-            if(result.status==='success'){
-                clearInterval(interval);
-                localStorage.removeItem('bot_auth_token');
-                const id=result.telegram_id;
-                if(id){
-                    const tr=await fetch('/api/auth/get-token?telegram_id='+encodeURIComponent(id));
-                    if(tr.ok){
-                        const td=await tr.json();
-                        if(td.token){
-                            localStorage.setItem('auth_token',td.token);
-                            authToken=td.token;
-                            alert('✅ Аккаунт привязан');
-                            loadApp();
-                            return;
-                        }
-                    }
-                }
-                alert('❌ Не удалось получить сессионный токен. Попробуйте снова.');
-                document.getElementById('loginScreen').querySelector('.auth-container').style.display='block';
-                document.getElementById('widgetContainer').innerHTML='';
-            }else if(result.status==='expired'){
-                clearInterval(interval);
-                localStorage.removeItem('bot_auth_token');
-                alert('⏰ Время истекло. Попробуйте снова.');
-                document.getElementById('loginScreen').querySelector('.auth-container').style.display='block';
-                document.getElementById('widgetContainer').innerHTML='';
-            }
-        }catch(e){}
-        if(attempts>=maxAttempts){
-            clearInterval(interval);
-            localStorage.removeItem('bot_auth_token');
-            alert('⏰ Время истекло. Попробуйте снова.');
-            document.getElementById('loginScreen').querySelector('.auth-container').style.display='block';
-            document.getElementById('widgetContainer').innerHTML='';
-        }
-    },3000);
+// ===== MAX AUTH (восстановлено) =====
+async function startMaxAuth(){
+    hapticFeedback();
+    const container = document.getElementById('loginScreen').querySelector('.auth-container');
+    if (container) container.style.display = 'none';
+    const w = document.getElementById('widgetContainer');
+    w.innerHTML = '<div class="loader"></div>';
+    try{
+        const resp=await apiRequest('/api/auth/max-token');
+        if(!resp){container.style.display='block';w.innerHTML='';return;}
+        if(!resp.ok)throw new Error('Не удалось получить токен');
+        const data=await resp.json();
+        const token=data.token;
+        const botUsername=data.bot_username||'id772609477460_bot';
+        localStorage.setItem('max_auth_token',token);
+        startMaxWaiting(token);
+        window.open('https://max.ru/'+botUsername+'?start='+encodeURIComponent(token),'_blank');
+        w.innerHTML='<p style="color: var(--text-secondary);">Ожидаем подтверждения в MAX...</p>';
+    }catch(err){
+        alert('❌ Ошибка: '+err.message);
+        container.style.display='block';
+        w.innerHTML='';
+    }
 }
 
 function startMaxWaiting(token){
@@ -1217,13 +1277,19 @@ function startMaxWaiting(token){
     },3000);
 }
 
-// ===== ОБРАБОТКА ВОЗВРАТА ИЗ VK =====
+// ===== Яндекс ID =====
+function startYandexAuth() {
+    hapticFeedback();
+    // Перенаправляем на бэкенд, который запустит OAuth-поток
+    window.location.href = '/api/auth/yandex/login';
+}
+
 // ===== ОБРАБОТКА ВОЗВРАТА ИЗ VK =====
 (function handleVkCallback() {
     const params = new URLSearchParams(window.location.search);
     const code = params.get('code');
     const state = params.get('state');
-    const device_id = params.get('device_id');  // ✅ добавить
+    const device_id = params.get('device_id');
 
     if (code) {
         const savedState = sessionStorage.getItem('vk_auth_state');
@@ -1250,48 +1316,43 @@ function startMaxWaiting(token){
         fetch('/api/auth/vk/callback', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ 
-                code: code, 
-                device_id: device_id,      // ✅ добавить
-                code_verifier: verifier 
+            body: JSON.stringify({
+                code: code,
+                device_id: device_id,
+                code_verifier: verifier
             })
         })
         .then(r => {
             if (!r.ok) return r.json().then(err => { throw new Error(err.detail || 'Ошибка авторизации') });
             return r.json();
         })
-.then(data => {
-    if (data.token) {
-        // Сохраняем токен
-        localStorage.setItem('auth_token', data.token);
-        authToken = data.token;
-        console.log('✅ VK токен сохранён:', authToken);
-        
-        // Очищаем URL от параметров
-        window.history.replaceState({}, '', '/pwa');
-
-        // Проверяем валидность токена
-        fetch('/api/health', {
-            headers: { 'X-Auth-Token': authToken }
-        })
-        .then(resp => {
-            if (resp.ok) {
-                console.log('✅ Токен валидный, загружаем приложение');
-                loadApp();  // вместо window.location.reload()
+        .then(data => {
+            if (data.token) {
+                localStorage.setItem('auth_token', data.token);
+                authToken = data.token;
+                console.log('✅ VK токен сохранён:', authToken);
+                window.history.replaceState({}, '', '/pwa');
+                fetch('/api/health', {
+                    headers: { 'X-Auth-Token': authToken }
+                })
+                .then(resp => {
+                    if (resp.ok) {
+                        console.log('✅ Токен валидный, загружаем приложение');
+                        loadApp();
+                    } else {
+                        console.error('❌ Токен невалидный, статус:', resp.status);
+                        alert('Ошибка авторизации. Попробуйте снова.');
+                        showLoginScreen();
+                    }
+                })
+                .catch(() => {
+                    alert('Ошибка проверки токена');
+                    showLoginScreen();
+                });
             } else {
-                console.error('❌ Токен невалидный, статус:', resp.status);
-                alert('Ошибка авторизации. Попробуйте снова.');
-                showLoginScreen();
+                throw new Error('Токен не получен');
             }
         })
-        .catch(() => {
-            alert('Ошибка проверки токена');
-            showLoginScreen();
-        });
-    } else {
-        throw new Error('Токен не получен');
-    }
-})
         .catch(err => {
             alert('❌ Ошибка входа через VK: ' + err.message);
             window.history.replaceState({}, '', '/pwa');
@@ -1302,40 +1363,68 @@ function startMaxWaiting(token){
     }
 })();
 
-
-// ===== КНОПКА "СМОТРЕТЬ НОВОСТИ" =====
+// ===== КНОПКА "СМОТРЕТЬ НОВОСТИ" С ПОДРОБНЫМИ ЛОГАМИ =====
 let digestVisible = false;
 async function toggleDigest() {
-    if (!ensureConsent()) return;
+    console.log('🟢 toggleDigest() вызвана');
+
+    // Проверка согласия
+    console.log('🔍 Проверка ensureConsent()...');
+    if (!ensureConsent()) {
+        console.warn('⛔ ensureConsent() вернул false, прерываем выполнение');
+        return;
+    }
+    console.log('✅ ensureConsent() пройден');
+
     const container = document.getElementById('digestContainer');
     const content = document.getElementById('digestContent');
+    console.log('📦 container:', container, 'content:', content);
+
     if (digestVisible) {
+        console.log('🔄 digestVisible = true, скрываем контейнер');
         container.style.display = 'none';
         digestVisible = false;
         return;
     }
+    console.log('🔄 digestVisible = false, показываем контейнер');
     container.style.display = 'block';
     digestVisible = true;
+
     content.innerHTML = '<div style="text-align:center; padding:20px; color: var(--text-secondary);">⏳ Загрузка...</div>';
+    console.log('📝 Установлен текст загрузки');
 
     try {
+        console.log('📡 Вызов apiRequest("/api/webapp/digest")...');
         const resp = await apiRequest('/api/webapp/digest', { headers: getHeaders() });
-        if (!resp) return;
+        console.log('📡 Ответ получен, статус:', resp ? resp.status : 'null');
+
+        if (!resp) {
+            console.warn('⚠️ resp = null, прерываем');
+            return;
+        }
         if (!resp.ok) {
             const err = await resp.json();
+            console.error('❌ Ошибка ответа:', err);
             content.innerHTML = `<div style="color: #ff6b6b; text-align:center; padding:20px;">❌ Ошибка: ${err.detail || 'Не удалось загрузить дайджест'}</div>`;
             return;
         }
         const data = await resp.json();
+        console.log('📄 Получены данные:', data);
+
         let digestHtml = data.digest;
+        console.log('📄 digestHtml длина:', digestHtml ? digestHtml.length : 0);
 
         if (!digestHtml || digestHtml.trim() === '' || digestHtml.includes('Дайджест ещё не формировался')) {
-            content.innerHTML = `<div style="text-align:center; padding:20px; color: var(--text-secondary);">📭 Дайджест ещё не формировался. Запустите сбор вручную или дождитесь автоматического.</div>`;
+            console.log('📭 Дайджест пуст или ещё не формировался');
+            content.innerHTML = `<div style="text-align:center; padding:20px; color: var(--text-secondary);">📭 Добавьте источники и дождитесь автоматического сбора новостей.</div>`;
             return;
         }
 
+        // Очистка от спецсимволов
         digestHtml = digestHtml.replace(/[\x00-\x1F\x7F-\x9F\u200B\u200C\u200D\uFEFF\u2028\u2029\r]/g, '');
+        console.log('🧹 После очистки длина:', digestHtml.length);
 
+        // Разбивка на блоки
         let blocks = digestHtml.split(/(?=\n- <b>)/).filter(b => b.trim().length > 0);
         if (blocks.length <= 1) {
             blocks = digestHtml.split(/(?=\n-)/).filter(b => b.trim().length > 0);
@@ -1344,7 +1433,7 @@ async function toggleDigest() {
             blocks = digestHtml.split(/(?=- <b>)/).filter(b => b.trim().length > 0);
             if (blocks[0] && blocks[0].trim() === '') blocks.shift();
         }
-        blocks = blocks.map(b => b.startsWith('\n') ? b.slice(1) : b);
+        console.log('🧩 Количество блоков:', blocks.length);
 
         let html = '';
         for (let block of blocks) {
@@ -1354,6 +1443,7 @@ async function toggleDigest() {
             while (lines.length > 0 && lines[lines.length - 1].trim() === '') lines.pop();
             let cleanedBlock = lines.join('\n');
 
+            // Обработка суммаризаций
             let isSummary = cleanedBlock.indexOf('<b>Обсуждения в ') !== -1;
             if (isSummary) {
                 let summaryStart = cleanedBlock.indexOf('<b>Обсуждения в ');
@@ -1393,14 +1483,16 @@ async function toggleDigest() {
         }
 
         if (html) {
+            console.log('✅ Готово, вставляем HTML, длина:', html.length);
             content.innerHTML = html;
             content.querySelectorAll('a').forEach(link => link.target = '_blank');
         } else {
+            console.log('📭 После обработки блоков ничего не осталось');
             content.innerHTML = `<div style="text-align:center; padding:20px; color: var(--text-secondary);">📭 Новости не найдены.</div>`;
         }
 
     } catch (e) {
-        console.error('Ошибка в toggleDigest:', e);
+        console.error('❌ Исключение в toggleDigest:', e);
         content.innerHTML = `<div style="color: #ff6b6b; text-align:center; padding:20px;">❌ Ошибка: ${e.message}</div>`;
     }
 }
@@ -1463,16 +1555,19 @@ window.suggestSource = function(){
 (function init(){
     if(authToken){
         if(document.getElementById('sourceListContainer').children.length===0)loadApp();
-    } else showLoginScreen();
+    } else {
+        showLoginScreen();
+        const container = document.getElementById('loginScreen').querySelector('.auth-container');
+        if (container) container.style.display = 'block';
+        const w = document.getElementById('widgetContainer');
+        if (w) w.innerHTML = '';
+    }
 })();
 
 // ---- ЭКСПОРТЫ ----
-window.startBotAuth = startBotAuth;
-window.startMaxAuth = startMaxAuth;
 window.startVkAuth = startVkAuth;
-window.pollBotAuthStatus = pollBotAuthStatus;
-window.startMaxWaiting = startMaxWaiting;
-
+window.startMaxAuth = startMaxAuth;
+window.startYandexAuth = startYandexAuth;
 window.toggleTariffs = toggleTariffs;
 window.handlePayment = handlePayment;
 window.startPayment = handlePayment;
