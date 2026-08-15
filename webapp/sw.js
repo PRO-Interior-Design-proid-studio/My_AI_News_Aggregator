@@ -1,4 +1,4 @@
-const CACHE_VERSION = 'v65'; // Автоматически обновляется скриптом rest
+const CACHE_VERSION = 'v78'; // Автоматически обновляется скриптом rest
 
 // Список файлов для кеширования (статичные ресурсы)
 const STATIC_FILES = [
@@ -65,24 +65,26 @@ self.addEventListener('fetch', event => {
     const request = event.request;
     const url = new URL(request.url);
 
-    // 1. API-запросы – сначала сеть, при ошибке – кеш
-    if (url.pathname.startsWith('/api/')) {
-        event.respondWith(
-            fetch(request)
-                .then(response => {
-                    // Кешируем успешный ответ для будущих офлайн-запросов
+    // 1. API-запросы – сначала сеть, при ошибке – кеш (только для GET)
+if (url.pathname.startsWith('/api/')) {
+    event.respondWith(
+        fetch(request)
+            .then(response => {
+                // Кешируем только успешные GET-запросы
+                if (request.method === 'GET' && response.ok) {
                     const clone = response.clone();
                     caches.open(CACHE_VERSION).then(cache => {
                         cache.put(request, clone);
                     });
-                    return response;
-                })
-                .catch(() => {
-                    return caches.match(request);
-                })
-        );
-        return;
-    }
+                }
+                return response;
+            })
+            .catch(() => {
+                return caches.match(request);
+            })
+    );
+    return;
+}
 
     // 2. HTML-страницы (навигация) – сначала сеть, при ошибке – кеш
     if (request.mode === 'navigate' || request.destination === 'document') {

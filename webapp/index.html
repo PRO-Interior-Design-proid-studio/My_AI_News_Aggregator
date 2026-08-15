@@ -44,7 +44,34 @@
         .quick-buttons button{flex:1 0 calc(33.33% - 6px);padding:10px 8px;border:1px solid var(--border);border-radius:var(--radius);background:var(--card-bg);color:var(--text);font-size:14px;font-weight:500;cursor:pointer;transition:all .2s;text-align:center;backdrop-filter:blur(4px);}
         .quick-buttons button:hover,.quick-buttons button:focus,.quick-buttons button:focus-visible{background:linear-gradient(180deg,rgba(159,103,255,.22),rgba(197,66,255,.35)) padding-box,linear-gradient(var(--bg-color),var(--bg-color)) padding-box,linear-gradient(180deg,rgba(171,78,252,.82) 0%,rgba(108,31,198,.24) 53%,#7C45C2 100%) border-box,linear-gradient(180deg,rgba(159,103,255,.22),rgba(197,66,255,.35)) border-box;border:1px solid transparent;color:#fff;}
         .quick-buttons button:active{background:linear-gradient(180deg,rgba(159,103,255,.22),rgba(197,66,255,.35)) padding-box,linear-gradient(var(--bg-color),var(--bg-color)) padding-box,linear-gradient(180deg,rgba(171,78,252,.82) 0%,rgba(108,31,198,.24) 53%,#7C45C2 100%) border-box,linear-gradient(180deg,rgba(159,103,255,.22),rgba(197,66,255,.35)) border-box;border:1px solid transparent;color:#fff;transform:scale(.97);}
-        .suggest-btn{width:100%;padding:10px 8px;border:1px solid var(--border);border-radius:var(--radius);background:var(--card-bg);color:var(--text-secondary);font-size:14px;font-weight:500;cursor:pointer;transition:all .2s;text-align:center;backdrop-filter:blur(4px);margin-top:4px;}
+.suggest-btn {
+    /* width: 100%;  ← УДАЛИТЬ */
+    flex: 1;          /* ← ДОБАВИТЬ */
+    padding: 10px 8px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    background: var(--card-bg);
+    color: var(--text-secondary);
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all .2s;
+    text-align: center;
+    backdrop-filter: blur(4px);
+    margin-top: 4px;
+}
+/* ===== ГАРАНТИРОВАННОЕ РАСПОЛОЖЕНИЕ КНОПОК ===== */
+#appContent .suggest-btn-wrapper {
+    display: flex !important;
+    flex-wrap: nowrap !important;
+    gap: 8px !important;
+    width: 100% !important;
+}
+#appContent .suggest-btn-wrapper .suggest-btn {
+    flex: 1 1 0% !important;
+    width: auto !important;
+    min-width: 0 !important;
+}
         .suggest-btn:hover{background:linear-gradient(180deg,rgba(159,103,255,.22),rgba(197,66,255,.35)) padding-box,linear-gradient(var(--bg-color),var(--bg-color)) padding-box,linear-gradient(180deg,rgba(171,78,252,.82) 0%,rgba(108,31,198,.24) 53%,#7C45C2 100%) border-box,linear-gradient(180deg,rgba(159,103,255,.22),rgba(197,66,255,.35)) border-box;border:1px solid transparent;color:#fff;}
         .suggest-btn:active{transform:scale(.97);}
         .add-form,.category-form{background:var(--card-bg);padding:16px;border-radius:var(--radius);border:1px solid var(--border);margin-top:8px;margin-bottom:4px;display:none;backdrop-filter:blur(4px);}
@@ -166,19 +193,6 @@
             text-decoration: underline;
             opacity: 0.8;
         }
-        #logoutContainer {
-            text-align: center;
-            margin-top: 12px;
-            font-size: 14px;
-            color: var(--text-secondary);
-            cursor: pointer;
-            text-decoration: none;
-            user-select: none;
-            transition: color 0.2s;
-        }
-        #logoutContainer:hover {
-            color: var(--text) !important;
-        }
         .consent-pending #appContent,
         .consent-pending #appContent * {
             pointer-events: none !important;
@@ -191,7 +205,6 @@
             opacity: 1 !important;
             user-select: auto !important;
         }
-        /* ===== СТИЛИ ДЛЯ ЭКРАНА ВХОДА ===== */
         .auth-container{max-width:420px;width:100%;background:transparent;border:none;box-shadow:none;padding:20px 0 0 0;margin:0 auto;text-align:center;}
         .auth-btn{display:flex;align-items:center;justify-content:center;gap:12px;width:300px;margin:0 auto 12px auto;padding:16px 24px;border:1px solid transparent;border-radius:26px;font-size:17px;font-weight:700;line-height:20px;color:#fff;cursor:pointer;transition:transform .2s,box-shadow .2s,opacity .2s;text-decoration:none;background:var(--card-bg);backdrop-filter:blur(4px);}
         .auth-btn.vk{--fill-colors:rgba(13,71,161,.26),rgba(30,136,229,.35);--border-colors:rgba(13,71,161,.82) 0%,rgba(21,101,192,.24) 53%,#1e88e5 100%;background:linear-gradient(180deg,var(--fill-colors)) padding-box,linear-gradient(var(--bg-color),var(--bg-color)) padding-box,linear-gradient(180deg,var(--border-colors)) border-box,linear-gradient(180deg,var(--fill-colors)) border-box;}
@@ -204,7 +217,6 @@
         .loader{display:inline-block;width:24px;height:24px;border:3px solid var(--border);border-top-color:var(--accent2);border-radius:50%;animation:spin .8s linear infinite;}
         @keyframes spin{to{transform:rotate(360deg);}}
         .hidden{display:none !important;}
-        /* ===== БЛОК СОГЛАСИЯ (два чекбокса) ===== */
         #consentBlock .consent-item{margin:12px 0;display:flex;align-items:flex-start;gap:12px;}
         #consentBlock .consent-item input[type="checkbox"]{width:20px;height:20px;margin-top:2px;flex-shrink:0;accent-color:var(--accent2);cursor:pointer;}
         #consentBlock .consent-item label{color:var(--text-secondary);font-size:14px;line-height:1.5;cursor:pointer;}
@@ -222,13 +234,33 @@
                 <button class="auth-btn max" id="maxLoginBtn"><span class="icon">🚀</span> Войти через MAX</button>
                 <button class="auth-btn vk" id="vkLoginBtn"><span class="icon">🚀</span> Войти через VK</button>
                 <button class="auth-btn yandex" id="yandexLoginBtn"><span class="icon">🚀</span> Войти через Яндекс</button>
-                <p class="small-note">Важно: аккаунт будет привязан к одному методу входа.<br>
-                зарубежные аккаунты запрещены законами РФ;<br>
-                иногда VPN может мешать входу в РФ аккаунты.</p>
-                <div class="widget-container" id="widgetContainer"></div>
+                
+               
+            </div>
+
+            <!-- ===== НОВЫЙ БЛОК "ВАЖНО" ===== -->
+            <div class="status-block" style="margin-top: 40px; max-width: 300px; margin-left: auto; margin-right: auto;">
+                <div class="status-title" style="color: var(--text);">Важно</div>
+                <div style="margin: 8px 0 10px; font-size: 13px; color: var(--text-secondary);">
+                    <div style="padding: 6px 0; border-bottom: 1px solid var(--border); text-align: center;">
+                        Telegram будет доступен после входа
+                    </div>
+                    <div style="padding: 6px 0; border-bottom: 1px solid var(--border); text-align: center;">
+                       Привязка аккаунта к одному методу входа
+                    </div>
+                    <div style="padding: 6px 0; border-bottom: 1px solid var(--border); text-align: center;">
+                        Зарубежный автовход запрещен в РФ
+                    </div>
+                    <div style="padding: 6px 0; border-bottom: 1px solid var(--border); text-align: center;">
+                        Иногда VPN может мешать авторизации 
+                    </div>
+                    <div style="padding: 6px 0; text-align: center;">
+                        Подробнее в нашей <a href="/support" target="_blank" style="color: var(--accent2); text-decoration: none;">Справке</a>
+                    </div>
+                </div>
             </div>
         </div>
-
+<div class="widget-container" id="widgetContainer"></div>
         <!-- ===== БЛОК СОГЛАСИЯ (два чекбокса) ===== -->
         <div class="status-block" id="consentBlock" style="display: none;">
             <div class="status-title">Конфиденциальность</div>
@@ -251,7 +283,7 @@
                 </label>
             </div>
             <button id="consentAcceptBtn" disabled style="width:100%;padding:12px;background:linear-gradient(290deg,#d235ff 0%,#a062ff 30%,#3088ff 66%,#61d8ff 100%);border:none;border-radius:12px;color:#fff;font-weight:600;font-size:16px;cursor:pointer;transition:opacity .2s;opacity:0.5;pointer-events:none;">
-                Принимаю
+                Соглашаюсь
             </button>
         </div>
 
@@ -366,10 +398,11 @@
                 <div style="font-weight:600; margin-bottom:8px;">VC.ru — выберите категорию</div>
                 <div class="category-grid" id="vcGrid"></div>
             </div>
-            <div style="display: flex; gap: 8px; margin-top: 0px;">
-                <button class="suggest-btn" style="flex: 1; color: var(--text);" onclick="toggleCategoryBrowser()">Категории</button>
-                <button class="suggest-btn" style="flex: 1; color: var(--text-secondary);" onclick="suggestSource()">Предложить своё</button>
-            </div>
+<div style="display: flex; flex-wrap: nowrap; gap: 8px; margin-bottom: 8px; margin-top: 0px; width: 100%;">
+<div class="suggest-btn-wrapper">
+    <button class="suggest-btn" style="color:var(--text);" onclick="toggleCategoryBrowser()">Категории</button>
+    <button class="suggest-btn" style="color:var(--text-secondary);" onclick="suggestSource()">Предложить своё</button>
+</div>
             <div class="category-form" id="categoryBrowser" style="display: none;">
                 <div class="category-form-header" id="categoryBrowserHeader">Выберите категорию</div>
                 <div class="category-grid" id="categoryGrid"></div>
@@ -419,27 +452,25 @@
                     <button class="close-picker-btn" onclick="closeTimePicker()">Закрыть</button>
                 </div>
             </div>
-            <div id="logoutContainer" onclick="logout()">Выход (сброс кэша)</div>
+
+<!-- ===== ССЫЛКА "ОТКРЫТЬ ПРИЛОЖЕНИЕ В БРАУЗЕРЕ" ===== -->
+<div style="text-align: center; margin-top: 16px;">
+    <a href="/pwa" target="_blank" style="color: var(--text-secondary); text-decoration: none; font-size: 14px;">Открыть приложение в браузере</a>
+</div>
+
+            <!-- ===== БЛОК: Согласие Telegram | Выход (сброс кэша) ===== -->
+            <div id="logoutContainer" style="display: flex; justify-content: center; gap: 12px; margin-top: 8px; font-size: 14px; color: var(--text-secondary);">
+                <span id="consentToggle" style="cursor: pointer;">Согласие Telegram</span>
+                <span>|</span>
+                <span id="logoutBtn" style="cursor: pointer;">Выход (сброс кэша)</span>
+            </div>
+
         </div>
     </div>
-</div>
-<div class="footer-wrapper">
-    <div class="footer-inner">
-        <span>© 2026 «Мои AI Новости»</span>
-        <span class="sep">|</span>
-        <a href="/privacy" target="_blank">Политика</a>
-        <span class="sep">|</span>
-        <a href="/offer" target="_blank">Оферта</a>
-        <span class="sep">|</span>
-        <a href="/consent" target="_blank">Согласие</a>
-        <span class="sep">|</span>
-        <a href="/offer#requisites" target="_blank">Реквизиты</a>
-        <span class="sep">|</span>
-        <a href="/support" target="_blank">Помощь</a>
-        <span class="sep">|</span>
-        <span>Создано: <a href="https://proid.studio" target="_blank" class="studio-link">proid.studio</a></span>
-    </div>
-</div>
+</div> <!-- /page-wrap -->
+
+
+
 <script src="/webapp/categories.js?v=50"></script>
 <script>
     // ============================================================
@@ -448,6 +479,43 @@
     const TEST_TOKEN = 'vol7Js5SZnjPuaTfkk46zea3I-k_vsInqyqQPho_dF0';
     const VK_APP_ID = '54718264';
     const API_BASE = window.location.origin;
+
+    // Глобальная переменная для состояния согласия Telegram
+    let telegramConsentGiven = false;
+
+// Опрос сервера для получения токена по state
+function pollForToken(state, onSuccess) {
+    let attempts = 0;
+    const maxAttempts = 60; // ~3 минуты
+    const interval = setInterval(async () => {
+        attempts++;
+        try {
+            const resp = await fetch(`/api/auth/get-token-by-state?state=${state}`);
+            if (resp.ok) {
+                const data = await resp.json();
+                if (data.token) {
+                    clearInterval(interval);
+                    localStorage.setItem('auth_token', data.token);
+                    authToken = data.token;
+                    alert('✅ Аккаунт привязан!');
+                    if (onSuccess) onSuccess();
+                    return;
+                }
+            }
+        } catch (e) {
+            // ignore
+        }
+        if (attempts >= maxAttempts) {
+            clearInterval(interval);
+            alert('⏰ Время истекло. Попробуйте снова.');
+            // Восстанавливаем интерфейс входа
+            const container = document.getElementById('loginScreen').querySelector('.auth-container');
+            if (container) container.style.display = 'block';
+            const w = document.getElementById('widgetContainer');
+            if (w) w.innerHTML = '';
+        }
+    }, 3000);
+}
 
     let authToken = localStorage.getItem('auth_token') || null;
     let currentSources = [];
@@ -489,6 +557,9 @@
         document.getElementById('loginScreen').style.display = 'block';
         document.getElementById('appContent').style.display = 'none';
         document.getElementById('consentBlock').style.display = 'none';
+        // Скрываем виджет, если он был виден
+        const w = document.getElementById('widgetContainer');
+        if (w) w.style.display = 'none';
     }
 
     function showAppContent(){
@@ -496,6 +567,15 @@
         document.getElementById('loginScreen').style.display = 'none';
         document.getElementById('appContent').style.display = 'block';
         document.getElementById('consentBlock').style.display = 'none';
+        // Скрываем виджет
+        const w = document.getElementById('widgetContainer');
+        if (w) w.style.display = 'none';
+        // Восстанавливаем видимость всех элементов внутри appContent
+        const children = document.getElementById('appContent').children;
+        for (let child of children) {
+            child.style.display = '';
+        }
+        document.getElementById('appContent').classList.remove('consent-pending');
     }
 
     function showConsentBlock(){
@@ -503,6 +583,16 @@
         document.getElementById('loginScreen').style.display = 'none';
         document.getElementById('appContent').style.display = 'block';
         document.getElementById('consentBlock').style.display = 'block';
+        // Скрываем виджет
+        const w = document.getElementById('widgetContainer');
+        if (w) w.style.display = 'none';
+        // Скрываем всё, кроме блока согласия
+        const children = document.getElementById('appContent').children;
+        for (let child of children) {
+            if (child.id !== 'consentBlock') {
+                child.style.display = 'none';
+            }
+        }
         document.getElementById('appContent').classList.add('consent-pending');
     }
 
@@ -538,10 +628,9 @@
     }
 
     // ============================================================
-    //  АВТОРИЗАЦИЯ ЧЕРЕЗ РОССИЙСКИЕ ID
+    //  АВТОРИЗАЦИЯ
     // ============================================================
 
-    // ----- VK OAuth с PKCE -----
     function generateCodeVerifier(){
         const array = new Uint8Array(32);
         crypto.getRandomValues(array);
@@ -567,21 +656,40 @@
         return base64UrlEncode(new Uint8Array(hash));
     }
 
-    async function startVkAuth(){
-        hapticFeedback();
-        const verifier = generateCodeVerifier();
-        const challenge = await generateCodeChallenge(verifier);
-        sessionStorage.setItem('vk_code_verifier', verifier);
-        const state = Math.random().toString(36).substring(2);
-        sessionStorage.setItem('vk_auth_state', state);
-        const redirectUri = window.location.origin + '/webapp';
-        const scope = 'vkid.personal_info';
-        const authUrl = `https://id.vk.ru/authorize?client_id=${VK_APP_ID}&redirect_uri=${encodeURIComponent(redirectUri)}&response_type=code&scope=${scope}&state=${state}&code_challenge=${challenge}&code_challenge_method=S256&v=5.199`;
-        document.getElementById('widgetContainer').innerHTML = '<p style="color: var(--text-secondary);">Перенаправление на VK...</p>';
-        window.location.href = authUrl;
+async function startVkAuth(){
+    hapticFeedback();
+    const verifier = generateCodeVerifier();
+    const challenge = await generateCodeChallenge(verifier);
+    const state = Math.random().toString(36).substring(2);
+
+    // Сохраняем состояние на сервере (новый эндпоинт)
+    try {
+        const resp = await fetch('/api/auth/save-state', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ state, code_verifier: verifier, provider: 'vk' })
+        });
+        if (!resp.ok) throw new Error('Не удалось сохранить состояние');
+    } catch (e) {
+        alert('Ошибка: ' + e.message);
+        return;
     }
 
-    // ----- MAX -----
+    const redirectUri = 'https://news.proid.studio/pwa';
+    const scope = 'vkid.personal_info';
+    const authUrl = `https://id.vk.ru/authorize?client_id=${VK_APP_ID}&redirect_uri=${encodeURIComponent(redirectUri)}&response_type=code&scope=${scope}&state=${state}&code_challenge=${challenge}&code_challenge_method=S256&v=5.199`;
+
+    // Скрываем интерфейс входа
+    const container = document.getElementById('loginScreen').querySelector('.auth-container');
+    if (container) container.style.display = 'none';
+    const w = document.getElementById('widgetContainer');
+    if (w) w.innerHTML = '<p style="color: var(--text-secondary);">Перенаправление на авторизацию VK...</p>';
+
+    window.open(authUrl, '_blank');
+    // Запускаем опрос сервера для получения токена
+    pollForToken(state, loadApp);
+}
+
     async function startMaxAuth(){
         hapticFeedback();
         document.getElementById('widgetContainer').innerHTML = '<div class="loader"></div>';
@@ -628,75 +736,84 @@
         }, 3000);
     }
 
-    // ----- Яндекс -----
     function startYandexAuth(){
-        hapticFeedback();
-        window.location.href = '/api/auth/yandex/login';
+    hapticFeedback();
+    // Генерируем state (как в VK)
+    const state = Math.random().toString(36).substring(2);
+    
+    // Скрываем интерфейс входа
+    const container = document.getElementById('loginScreen').querySelector('.auth-container');
+    if (container) container.style.display = 'none';
+    const w = document.getElementById('widgetContainer');
+    if (w) w.innerHTML = '<p style="color: var(--text-secondary);">Перенаправление на авторизацию Яндекс...</p>';
+    
+    // Открываем окно с переданным state
+    const url = '/api/auth/yandex/login?state=' + encodeURIComponent(state);
+    window.open(url, '_blank');
+    
+    // Запускаем опрос сервера для получения токена по state
+    pollForToken(state, loadApp);
+}
+
+    // ============================================================
+    //  ОБРАБОТКА ВОЗВРАТА ИЗ VK И ЯНДЕКСА (в новой вкладке)
+    // ============================================================
+(function handleVkCallback() {
+    const params = new URLSearchParams(window.location.search);
+    const code = params.get('code');
+    const state = params.get('state');
+    const device_id = params.get('device_id');
+
+    if (code && state) {
+        // Защита от повторной обработки
+        if (sessionStorage.getItem('vk_processed_' + state) === 'true') {
+            console.log('VK callback already processed, skipping');
+            window.history.replaceState({}, '', '/pwa');
+            return;
+        }
+        sessionStorage.setItem('vk_processed_' + state, 'pending');
+
+        fetch('/api/auth/vk/callback', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ code, device_id, state })
+        })
+        .then(r => {
+            if (!r.ok) return r.json().then(err => { throw new Error(err.detail || 'Ошибка авторизации') });
+            return r.json();
+        })
+        .then(data => {
+            if (data.token) {
+                localStorage.setItem('auth_token', data.token);
+                sessionStorage.setItem('vk_processed_' + state, 'true');
+                if (window.opener) {
+                    window.close();
+                } else {
+                    location.reload();
+                }
+            } else {
+                throw new Error('Токен не получен');
+            }
+        })
+        .catch(err => {
+            alert('❌ Ошибка входа через VK: ' + err.message);
+            sessionStorage.removeItem('vk_processed_' + state);
+            window.history.replaceState({}, '', '/pwa');
+            showLoginScreen();
+        });
     }
 
-    // ============================================================
-    //  ОБРАБОТКА ВОЗВРАТА ИЗ VK
-    // ============================================================
-    (function handleVkCallback(){
-        const params = new URLSearchParams(window.location.search);
-        const code = params.get('code');
-        const state = params.get('state');
-        const device_id = params.get('device_id');
-
-        if (code) {
-            const savedState = sessionStorage.getItem('vk_auth_state');
-            if (state && savedState && state !== savedState) {
-                alert('Ошибка CSRF');
-                sessionStorage.removeItem('vk_auth_state');
-                window.history.replaceState({}, '', '/webapp');
-                return;
-            }
-            sessionStorage.removeItem('vk_auth_state');
-            const verifier = sessionStorage.getItem('vk_code_verifier');
-            if (!verifier) {
-                alert('Ошибка: отсутствует code_verifier');
-                sessionStorage.removeItem('vk_code_verifier');
-                window.history.replaceState({}, '', '/webapp');
-                showLoginScreen();
-                return;
-            }
-            sessionStorage.removeItem('vk_code_verifier');
-
-            fetch('/api/auth/vk/callback', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ code, device_id, code_verifier: verifier })
-            })
-            .then(r => {
-                if (!r.ok) return r.json().then(err => { throw new Error(err.detail || 'Ошибка авторизации'); });
-                return r.json();
-            })
-            .then(data => {
-                if (data.token) {
-                    localStorage.setItem('auth_token', data.token);
-                    authToken = data.token;
-                    window.history.replaceState({}, '', '/webapp');
-                    loadApp();
-                } else {
-                    throw new Error('Токен не получен');
-                }
-            })
-            .catch(err => {
-                alert('❌ Ошибка входа через VK: ' + err.message);
-                window.history.replaceState({}, '', '/webapp');
-                showLoginScreen();
-            });
+    // Обработка Яндекса (если используется)
+    const yandexToken = params.get('auth_token');
+    if (yandexToken) {
+        localStorage.setItem('auth_token', yandexToken);
+        if (window.opener) {
+            window.close();
+        } else {
+            location.reload();
         }
-
-        // Обработка возврата из Яндекса (auth_token в URL)
-        const yandexToken = params.get('auth_token');
-        if (yandexToken) {
-            localStorage.setItem('auth_token', yandexToken);
-            authToken = yandexToken;
-            window.history.replaceState({}, '', '/webapp');
-            loadApp();
-        }
-    })();
+    }
+})();
 
     // ============================================================
     //  ЗАГРУЗКА ПРИЛОЖЕНИЯ
@@ -716,11 +833,9 @@
                 if (resp.status === 403) {
                     log('loadApp: 403 Forbidden — consent required');
                     showConsentBlock();
-                    const consentBlock = document.getElementById('consentBlock');
-                    consentBlock.style.display = 'block';
-                    document.getElementById('appContent').classList.add('consent-pending');
                     document.getElementById('quickButtons').style.display = 'none';
                     document.getElementById('paymentToggleBtn').style.display = 'none';
+                    setupConsentHandlers();
                     return;
                 }
                 if (resp.status === 401) {
@@ -737,11 +852,11 @@
             currentSources = data.sources || [];
             currentLimit = data.limit || 5;
             consentGiven = data.consent_given === true;
+            telegramConsentGiven = data.telegram_consent_given === true; // обновляем глобальную переменную
             isPremium = data.is_premium || false;
             currentSendTime = data.send_time || null;
             defaultSendHour = data.default_send_hour || 18;
 
-            // Если общее согласие не дано — показываем блок согласия (два чекбокса)
             if (!consentGiven) {
                 log('loadApp: consentGiven false, showing consent block (general)');
                 showConsentBlock();
@@ -751,8 +866,7 @@
                 return;
             }
 
-            // Если общее согласие дано, но нет привязки Telegram — показываем блок согласия (для привязки)
-            if ((!data.telegram_id || !data.telegram_consent_given) && !telegramConsentAccepted) {
+            if (!data.telegram_consent_given && !telegramConsentAccepted) {
                 log('loadApp: telegram not linked and telegramConsentAccepted false, showing consent block (telegram link)');
                 showConsentBlock();
                 document.getElementById('quickButtons').style.display = 'none';
@@ -778,7 +892,7 @@
     }
 
     // ============================================================
-    //  ОБРАБОТЧИКИ СОГЛАСИЯ (два чекбокса)
+    //  ОБРАБОТЧИКИ СОГЛАСИЯ
     // ============================================================
     function setupConsentHandlers(){
         log('setupConsentHandlers called');
@@ -829,7 +943,7 @@
                         alert('✅ Telegram успешно привязан!');
                         consentGiven = true;
                         telegramConsentAccepted = true;
-                        // Скрываем блок и перезагружаем страницу
+                        telegramConsentGiven = true;
                         document.getElementById('consentBlock').style.display = 'none';
                         document.getElementById('appContent').classList.remove('consent-pending');
                         document.getElementById('quickButtons').style.display = 'flex';
@@ -940,7 +1054,90 @@
             if(cleanedBlock){ html+='<div class="status-block">'+cleanedBlock+'</div>'; } }
         if(html){ content.innerHTML=html; content.querySelectorAll('a').forEach(link=>link.target='_blank'); } else { content.innerHTML='<div style="text-align:center; padding:20px; color: var(--text-secondary);">📭 Новости не найдены.</div>'; } } catch(e){ console.error('Ошибка в toggleDigest:',e); content.innerHTML='<div style="color: #ff6b6b; text-align:center; padding:20px;">❌ Ошибка: '+e.message+'</div>'; } }
     function suggestSource(){ if(!ensureConsent())return; hapticFeedback(); const url='https://t.me/professional_interior_design'; const text='Добрый день. Хочу предложить источник:'; window.open(url+'?text='+encodeURIComponent(text),'_blank'); }
-    function logout(){ const confirmLogout=()=>{ localStorage.removeItem('auth_token'); authToken=null; currentSources=[]; window.location.reload(); }; if(tg&&tg.showPopup){ tg.showPopup({title:'Выход',message:'Вы уверены, что хотите выйти?',buttons:[{id:'cancel',type:'cancel',text:'Отмена'},{id:'logout',type:'destructive',text:'Выйти'}]},function(btnId){ if(btnId==='logout')confirmLogout(); }); } else { if(confirm('Вы уверены, что хотите выйти?')){ confirmLogout(); } } }
+
+    // ============================================================
+    //  ВЫХОД (обновлённая функция)
+    // ============================================================
+    function logout(){
+        const confirmLogout=()=>{
+            localStorage.removeItem('auth_token');
+            authToken=null;
+            currentSources=[];
+            window.location.reload();
+        };
+        if(tg && tg.showPopup){
+            tg.showPopup({
+                title:'Выход',
+                message:'Вы уверены, что хотите выйти?',
+                buttons:[
+                    {id:'cancel', type:'cancel', text:'Отмена'},
+                    {id:'logout', type:'destructive', text:'Выйти'}
+                ]
+            }, function(btnId){
+                if(btnId==='logout') confirmLogout();
+            });
+        } else {
+            if(confirm('Вы уверены, что хотите выйти?')){
+                confirmLogout();
+            }
+        }
+    }
+
+    // ============================================================
+    //  ОБРАБОТЧИК ДЛЯ "СОГЛАСИЕ TELEGRAM"
+    // ============================================================
+    document.addEventListener('DOMContentLoaded', function() {
+        const consentToggle = document.getElementById('consentToggle');
+        const logoutBtn = document.getElementById('logoutBtn');
+
+        if (consentToggle) {
+            consentToggle.addEventListener('click', async function() {
+                if (!telegramConsentGiven) {
+                    // Если согласие не дано – показываем блок с чекбоксами
+                    showConsentBlock();
+                    return;
+                }
+
+                // Если согласие уже есть – спрашиваем подтверждение
+                if (!confirm('Вы действительно хотите отозвать согласие получать уведомления в Telegram?')) {
+                    return;
+                }
+
+                try {
+                    const resp = await fetch('/api/webapp/unlink_telegram', {
+                        method: 'POST',
+                        headers: { 'X-Auth-Token': localStorage.getItem('auth_token') }
+                    });
+                    if (resp.ok) {
+                        alert('Согласие отозвано. Вы больше не будете получать дайджесты в Telegram.');
+                        // Перезагружаем страницу, чтобы обновить состояние
+                        window.location.reload();
+                    } else {
+                        const err = await resp.json();
+                        alert('Ошибка при отзыве согласия: ' + (err.detail || ''));
+                    }
+                } catch (e) {
+                    alert('Ошибка: ' + e.message);
+                }
+            });
+        }
+
+        if (logoutBtn) {
+            logoutBtn.addEventListener('click', function() {
+                logout();
+            });
+        }
+    });
+
+    // ============================================================
+    //  СЛУШАТЕЛЬ STORAGE
+    // ============================================================
+    window.addEventListener('storage', function(e) {
+        if (e.key === 'auth_token' && e.newValue) {
+            log('storage event: auth_token changed, reloading');
+            location.reload();
+        }
+    });
 
     // ============================================================
     //  ИНИЦИАЛИЗАЦИЯ
@@ -954,12 +1151,10 @@
         }
         tg.ready();
 
-        // Навешиваем обработчики на кнопки входа
         document.getElementById('vkLoginBtn').addEventListener('click', startVkAuth);
         document.getElementById('maxLoginBtn').addEventListener('click', startMaxAuth);
         document.getElementById('yandexLoginBtn').addEventListener('click', startYandexAuth);
 
-        // Если есть auth_token — загружаем приложение, иначе показываем экран входа
         if (authToken) {
             log('init: authToken present, calling loadApp');
             loadApp();
@@ -969,7 +1164,7 @@
         }
     })();
 
-    // ===== ЭКСПОРТ ГЛОБАЛЬНЫХ ФУНКЦИЙ =====
+    // ===== ЭКСПОРТЫ =====
     window.toggleTariffs = toggleTariffs;
     window.handlePayment = handlePayment;
     window.startPayment = handlePayment;
@@ -1009,9 +1204,27 @@
     window.toggleDigest = toggleDigest;
     window.suggestSource = suggestSource;
     window.loadApp = loadApp;
-    window.loadSources = loadSources; // для совместимости, но не используется
     window.logout = logout;
     window.ensureConsent = ensureConsent;
+    window.telegramConsentGiven = telegramConsentGiven; // экспорт для отладки
 </script>
+<!-- ===== ФУТЕР ТЕПЕРЬ СНАРУЖИ ===== -->
+<div class="footer-wrapper">
+    <div class="footer-inner">
+        <span>© 2026 «Мои AI Новости»</span>
+        <span class="sep">|</span>
+        <a href="/privacy" target="_blank">Политика</a>
+        <span class="sep">|</span>
+        <a href="/offer" target="_blank">Оферта</a>
+        <span class="sep">|</span>
+        <a href="/consent" target="_blank">Согласие</a>
+        <span class="sep">|</span>
+        <a href="/offer#requisites" target="_blank">Реквизиты</a>
+        <span class="sep">|</span>
+        <a href="/support" target="_blank">Помощь</a>
+        <span class="sep">|</span>
+        <span>Создано: <a href="https://proid.studio" target="_blank" class="studio-link">proid.studio</a></span>
+    </div>
+</div>
 </body>
 </html>

@@ -1,198 +1,1611 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Мои AI Новости — расширение</title>
-  <link rel="icon" href="icon48.png">
-  <link rel="stylesheet" href="app.css">
+<link rel="icon" href="https://news.proid.studio/icons/favicon.ico">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Мои AI Новости — персонализированный дайджест с искусственным интеллектом</title>
+<meta name="description" content="Войдите в Мои AI Новости, чтобы получать ежедневные персонализированные дайджесты новостей из ваших любимых источников. Авторизация через VK, MAX или Яндекс ID.">
+<meta name="keywords" content="AI новости, дайджест, персонализированные новости, VK, MAX, Яндекс ID, агрегатор новостей">
+<meta name="robots" content="index, follow">
+<link rel="canonical" href="https://news.proid.studio/pwa">
+<meta property="og:title" content="Вход в Мои AI Новости">
+<meta property="og:description" content="Персонализированный AI-дайджест новостей. Войдите через VK, MAX или Яндекс ID.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://news.proid.studio/pwa">
+<meta property="og:image" content="https://news.proid.studio/picture/LOGO.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:site_name" content="Мои AI Новости">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Вход в Мои AI Новости">
+<meta name="twitter:description" content="Персонализированный AI-дайджест новостей. Войдите через VK, MAX или Яндекс ID.">
+<meta name="twitter:image" content="https://news.proid.studio/picture/LOGO.jpg">
+<script type="application/ld+json">
+{
+"@context": "https://schema.org",
+"@type": "WebApplication",
+"name": "Мои AI Новости",
+"url": "https://news.proid.studio/",
+"description": "Персонализированный AI-дайджест новостей из выбранных источников.",
+"applicationCategory": "NewsAggregator",
+"operatingSystem": "All",
+"browserRequirements": "Modern browser",
+"offers": {"@type":"Offer","price":"0","priceCurrency":"RUB"}
+}
+</script>
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<link rel="apple-touch-icon" href="https://news.proid.studio/icons/apple-icon-180x180.png">
+<link rel="apple-touch-icon" sizes="152x152" href="https://news.proid.studio/icons/apple-icon-152x152.png">
+<link rel="apple-touch-icon" sizes="144x144" href="https://news.proid.studio/icons/apple-icon-144x144.png">
+<link rel="apple-touch-icon" sizes="120x120" href="https://news.proid.studio/icons/apple-icon-120x120.png">
+<link rel="apple-touch-icon" sizes="114x114" href="https://news.proid.studio/icons/apple-icon-114x114.png">
+<meta name="theme-color" content="#010715">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+:root{--bg-color:#010715;--footer-bg:#111c40;--text:#fff;--text-secondary:#8a9bb5;--accent:#6c5ce7;--accent2:#3088ff;--card-bg:rgba(255,255,255,0.04);--border:rgba(255,255,255,0.06);--radius:20px;--shadow:0 12px 48px rgba(0,0,0,0.6);}
+html{scroll-behavior:smooth;}
+body{font-family:-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "Fira Sans", "Droid Sans", "Helvetica Neue", Arial, sans-serif;background:var(--footer-bg) linear-gradient(180deg,#020e33 0%,var(--bg-color) 25%,var(--bg-color) 84%,var(--footer-bg) 100%);color:var(--text);line-height:1.6;padding:0;min-height:100vh;-webkit-font-smoothing:antialiased;font-variant-ligatures:none;display:flex;flex-direction:column;}
+.page-wrap{padding:0 20px;flex:1 0 auto;display:flex;flex-direction:column;width:100%;}
+.container{max-width:600px;margin:0 auto;flex:1 0 auto;display:flex;flex-direction:column;width:100%;padding:0 0 20px;}
+.header{display:flex;align-items:center;justify-content:center;padding:100px 0 10px;border-bottom:1px solid var(--border);flex-shrink:0;}
+.header h1{font-size:28px;font-weight:700;background:linear-gradient(290deg,#d235ff 0%,#a062ff 30%,#3088ff 66%,#61d8ff 100%);-webkit-background-clip:text;background-clip:text;color:transparent;letter-spacing:-0.5px;}
+.section-header{text-align:center;font-size:18px;font-weight:600;color:var(--text);margin:20px 0 12px 0;}
+.quick-buttons{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:4px;}
+.quick-buttons button{flex:1 0 calc(33.33% - 6px);padding:10px 8px;border:1px solid var(--border);border-radius:var(--radius);background:var(--card-bg);color:var(--text);font-size:14px;font-weight:500;cursor:pointer;transition:all .2s;text-align:center;backdrop-filter:blur(4px);}
+.quick-buttons button:hover,.quick-buttons button:focus,.quick-buttons button:focus-visible{background:linear-gradient(180deg,rgba(159,103,255,.22),rgba(197,66,255,.35)) padding-box,linear-gradient(var(--bg-color),var(--bg-color)) padding-box,linear-gradient(180deg,rgba(171,78,252,.82) 0%,rgba(108,31,198,.24) 53%,#7C45C2 100%) border-box,linear-gradient(180deg,rgba(159,103,255,.22),rgba(197,66,255,.35)) border-box;border:1px solid transparent;color:#fff;}
+.quick-buttons button:active{background:linear-gradient(180deg,rgba(159,103,255,.22),rgba(197,66,255,.35)) padding-box,linear-gradient(var(--bg-color),var(--bg-color)) padding-box,linear-gradient(180deg,rgba(171,78,252,.82) 0%,rgba(108,31,198,.24) 53%,#7C45C2 100%) border-box,linear-gradient(180deg,rgba(159,103,255,.22),rgba(197,66,255,.35)) border-box;border:1px solid transparent;color:#fff;transform:scale(.97);}
+.suggest-btn{width:100%;padding:10px 8px;border:1px solid var(--border);border-radius:var(--radius);background:var(--card-bg);color:var(--text-secondary);font-size:14px;font-weight:500;cursor:pointer;transition:all .2s;text-align:center;backdrop-filter:blur(4px);margin-top:4px;}
+.suggest-btn:hover,.suggest-btn:focus,.suggest-btn:focus-visible{background:linear-gradient(180deg,rgba(159,103,255,.22),rgba(197,66,255,.35)) padding-box,linear-gradient(var(--bg-color),var(--bg-color)) padding-box,linear-gradient(180deg,rgba(171,78,252,.82) 0%,rgba(108,31,198,.24) 53%,#7C45C2 100%) border-box,linear-gradient(180deg,rgba(159,103,255,.22),rgba(197,66,255,.35)) border-box;border:1px solid transparent;color:#fff;}
+.suggest-btn:active{background:linear-gradient(180deg,rgba(159,103,255,.22),rgba(197,66,255,.35)) padding-box,linear-gradient(var(--bg-color),var(--bg-color)) padding-box,linear-gradient(180deg,rgba(171,78,252,.82) 0%,rgba(108,31,198,.24) 53%,#7C45C2 100%) border-box,linear-gradient(180deg,rgba(159,103,255,.22),rgba(197,66,255,.35)) border-box;border:1px solid transparent;color:#fff;transform:scale(.97);}
+.add-form,.category-form{background:var(--card-bg);padding:16px;border-radius:var(--radius);border:1px solid var(--border);margin-top:8px;margin-bottom:4px;display:none;backdrop-filter:blur(4px);}
+.add-form input{width:100%;padding:12px;margin-bottom:10px;background:rgba(0,0,0,0.3);color:var(--text);border:1px solid var(--border);border-radius:12px;font-size:15px;outline:none;}
+.add-form input:focus{border-color:var(--accent2);}
+.add-form button,.category-form button{width:100%;padding:12px;border:none;border-radius:12px;font-size:16px;font-weight:600;cursor:pointer;transition:all .2s;}
+.btn-primary{background:linear-gradient(290deg,#d235ff 0%,#a062ff 30%,#3088ff 66%,#61d8ff 100%);color:#fff;margin-bottom:8px;}
+.btn-primary:hover{opacity:.9;transform:scale(1.01);}
+.btn-primary:active{opacity:.8;transform:scale(.98);}
+.btn-secondary{background:transparent;color:var(--text-secondary);border:1px solid var(--border);}
+.btn-secondary:hover{background:rgba(255,255,255,0.05);}
+.btn-secondary:active{background:rgba(255,255,255,0.1);}
+.github-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin:8px 0;}
+.github-grid button{padding:8px 0;background:var(--card-bg);border:1px solid var(--border);border-radius:12px;color:var(--text);font-size:14px;font-weight:500;cursor:pointer;transition:all .2s;text-align:center;}
+.github-grid button:hover:not(:disabled){background:linear-gradient(180deg,rgba(159,103,255,.22),rgba(197,66,255,.35)) padding-box,linear-gradient(var(--bg-color),var(--bg-color)) padding-box,linear-gradient(180deg,rgba(171,78,252,.82) 0%,rgba(108,31,198,.24) 53%,#7C45C2 100%) border-box,linear-gradient(180deg,rgba(159,103,255,.22),rgba(197,66,255,.35)) border-box;border:1px solid transparent;color:#fff;}
+.github-grid button:active:not(:disabled){transform:scale(.95);}
+.github-grid button:disabled{opacity:.4;cursor:not-allowed;pointer-events:none;}
+.category-grid{display:flex;flex-wrap:wrap;gap:6px;margin:0px 0;}
+.category-grid button{flex:1 0 calc(50% - 6px);padding:8px 10px;background:var(--card-bg);border:1px solid var(--border);border-radius:12px;color:var(--text);font-size:13px;cursor:pointer;transition:all .2s;text-align:left;backdrop-filter:blur(4px);}
+.category-grid button:hover{background:linear-gradient(180deg,rgba(159,103,255,.22),rgba(197,66,255,.35)) padding-box,linear-gradient(var(--bg-color),var(--bg-color)) padding-box,linear-gradient(180deg,rgba(171,78,252,.82) 0%,rgba(108,31,198,.24) 53%,#7C45C2 100%) border-box,linear-gradient(180deg,rgba(159,103,255,.22),rgba(197,66,255,.35)) border-box;border:1px solid transparent;color:#fff;}
+.category-grid button:active{background:linear-gradient(180deg,rgba(159,103,255,.22),rgba(197,66,255,.35)) padding-box,linear-gradient(var(--bg-color),var(--bg-color)) padding-box,linear-gradient(180deg,rgba(171,78,252,.82) 0%,rgba(108,31,198,.24) 53%,#7C45C2 100%) border-box,linear-gradient(180deg,rgba(159,103,255,.22),rgba(197,66,255,.35)) border-box;border:1px solid transparent;color:#fff;transform:scale(.97);}
+.group-title{font-size:16px;font-weight:600;margin:16px 0 8px 0;color:var(--text-secondary);letter-spacing:.5px;text-transform:uppercase;border-bottom:1px solid var(--border);padding-bottom:4px;text-align:center;}
+.source-list{display:flex;flex-direction:column;gap:8px;margin-top:4px;}
+.source-item{background:var(--card-bg);border-radius:var(--radius);padding:12px 16px;display:flex;align-items:center;justify-content:space-between;border:1px solid var(--border);box-shadow:var(--shadow);cursor:pointer;transition:background .15s;backdrop-filter:blur(4px);}
+.source-item:hover{background:rgba(255,255,255,0.08);}
+.source-info{display:flex;align-items:center;gap:10px;flex:1;min-width:0;}
+.source-icon{width:32px;height:32px;border-radius:8px;flex-shrink:0;}
+.source-value{font-size:15px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:var(--text);}
+.delete-btn{background:none;border:none;color:var(--text-secondary);font-size:18px;cursor:pointer;padding:4px 8px;border-radius:6px;transition:all .2s;opacity:.6;flex-shrink:0;z-index:2;}
+.delete-btn:hover{background:rgba(255,70,70,0.15);color:#ff6b6b;opacity:1;}
+.empty-state{text-align:center;padding:30px 20px;color:var(--text-secondary);background:var(--card-bg);border-radius:var(--radius);border:1px dashed var(--border);backdrop-filter:blur(4px);}
+.empty-icon{font-size:40px;margin-bottom:12px;opacity:.6;}
+.footer-wrapper{width:100%;background:var(--footer-bg);border-top:1px solid var(--border);padding:12px 0;margin-top:auto;flex-shrink:0;}
+.footer-inner{margin:0 auto;display:flex;flex-wrap:wrap;justify-content:center;align-items:center;gap:6px 16px;font-size:13px;color:var(--text-secondary);padding:0 20px;}
+@media(min-width:600px){.footer-inner{flex-wrap:nowrap;gap:8px 20px;}}
+.footer-inner a{color:var(--text-secondary);text-decoration:none;transition:.2s;}
+.footer-inner a:hover{color:var(--text);}
+.footer-inner .docs a{color:var(--accent2);font-weight:500;}
+.footer-inner .docs a:hover{text-decoration:underline;}
+.footer-inner .studio-link{color:#3088ff !important;font-weight:500;}
+.footer-inner .studio-link:hover{text-decoration:underline;}
+.footer-inner .sep{color:var(--text-secondary);opacity:.3;}
+.footer-inner .landing-link{color:var(--accent2);font-weight:500;}
+.footer-inner .landing-link:hover{text-decoration:underline;}
+.disabled-overlay{pointer-events:none;opacity:.6;}
+@media(max-width:480px){.quick-buttons button{flex:1 0 calc(33.33% - 6px);}
+.github-grid{grid-template-columns:repeat(2,1fr);}
+.footer-inner{flex-wrap:wrap;gap:4px 8px;font-size:12px;padding:0 16px;}}
+.payment-toggle-btn{width:100%;padding:14px;font-size:18px;font-weight:700;border-radius:var(--radius);background:linear-gradient(290deg,#d235ff 0%,#a062ff 30%,#3088ff 66%,#61d8ff 100%);color:#fff;border:none;cursor:pointer;transition:all .2s;margin:16px 0 8px;}
+.payment-toggle-btn:hover{opacity:.9;transform:scale(1.01);}
+.payment-toggle-btn:active{transform:scale(.98);}
+.tariff-block{display:none;margin-top:10px;animation:fadeIn .3s ease;}
+.tariff-block.visible{display:block;}
+@keyframes fadeIn{from{opacity:0;transform:translateY(-10px);}to{opacity:1;transform:translateY(0);}}
+.tariff-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin:12px 0 8px;}
+.tariff-card{background:var(--card-bg);border-radius:var(--radius);padding:16px 12px;border:1px solid var(--border);text-align:center;backdrop-filter:blur(4px);transition:.2s;}
+.tariff-card:hover{border-color:var(--accent2);transform:translateY(-2px);}
+.tariff-card .title{font-size:20px;font-weight:700;background:linear-gradient(290deg,#d235ff 0%,#a062ff 30%,#3088ff 66%,#61d8ff 100%);-webkit-background-clip:text;background-clip:text;color:transparent;margin-bottom:8px;}
+.tariff-card .price-btn{display:block;width:100%;padding:10px 0;margin:6px 0;border:1px solid var(--border);border-radius:12px;background:var(--card-bg);color:var(--text);font-size:15px;font-weight:600;cursor:pointer;transition:all .2s;text-align:center;}
+.tariff-card .price-btn:hover{background:linear-gradient(180deg,rgba(159,103,255,.22),rgba(197,66,255,.35)) padding-box,linear-gradient(var(--bg-color),var(--bg-color)) padding-box,linear-gradient(180deg,rgba(171,78,252,.82) 0%,rgba(108,31,198,.24) 53%,#7C45C2 100%) border-box,linear-gradient(180deg,rgba(159,103,255,.22),rgba(197,66,255,.35)) border-box;border:1px solid transparent;color:#fff;}
+.tariff-card .price-btn:active{transform:scale(.97);}
+.tariff-card .price-btn .label{font-size:12px;font-weight:400;color:var(--text-secondary);}
+.tariff-link{text-align:center;margin-top:4px;}
+.tariff-link a{color:var(--accent2);text-decoration:none;font-size:14px;font-weight:500;}
+.tariff-link a:hover{text-decoration:underline;}
+.status-block{background:var(--card-bg);border-radius:var(--radius);padding:16px 18px;margin-top:16px;border:1px solid var(--border);backdrop-filter:blur(4px);}
+.status-title{font-size:16px;font-weight:600;color:var(--text-secondary);margin-bottom:10px;text-align:center;letter-spacing:.5px;}
+.status-row{display:flex;justify-content:space-between;padding:4px 0;font-size:14px;color:var(--text-secondary);border-bottom:1px solid var(--border);}
+.status-row:last-child{border-bottom:none;}
+.status-row span:first-child{color:var(--text-secondary);}
+.status-row span:last-child{color:var(--text);font-weight:500;}
+.time-picker-grid{display:grid;grid-template-columns:repeat(6,1fr);gap:6px;margin-top:10px;}
+.time-picker-grid button{padding:8px 0;background:var(--card-bg);border:1px solid var(--border);border-radius:12px;color:var(--text);font-size:14px;font-weight:500;cursor:pointer;transition:all .2s;text-align:center;}
+.time-picker-grid button:hover{background:linear-gradient(180deg,rgba(159,103,255,.22),rgba(197,66,255,.35)) padding-box,linear-gradient(var(--bg-color),var(--bg-color)) padding-box,linear-gradient(180deg,rgba(171,78,252,.82) 0%,rgba(108,31,198,.24) 53%,#7C45C2 100%) border-box,linear-gradient(180deg,rgba(159,103,255,.22),rgba(197,66,255,.35)) border-box;border:1px solid transparent;color:#fff;}
+.time-picker-grid button:active{transform:scale(.95);}
+.time-picker-grid button.selected{border-color:var(--accent2);background:rgba(48,136,255,0.15);}
+.change-time-btn{background:transparent;border:1px solid var(--border);color:var(--text-secondary);padding:4px 12px;border-radius:12px;font-size:13px;cursor:pointer;transition:.2s;}
+.change-time-btn:hover{background:rgba(255,255,255,0.05);color:var(--text);}
+.change-time-btn:disabled{opacity:.4;cursor:not-allowed;}
+.close-picker-btn{width:100%;padding:8px;background:transparent;border:1px solid var(--border);border-radius:12px;color:var(--text-secondary);font-size:14px;cursor:pointer;margin-top:8px;transition:.2s;}
+.close-picker-btn:hover{background:rgba(255,255,255,0.05);}
+.upgrade-hint{font-size:12px;color:var(--text-secondary);margin-left:8px;}
+.upgrade-hint a{color:var(--accent2);text-decoration:none;}
+.upgrade-hint a:hover{text-decoration:underline;}
+.auth-container{max-width:420px;width:100%;background:transparent;border:none;box-shadow:none;padding:20px 0 0 0;margin:0 auto;text-align:center;}
+.auth-btn{display:flex;align-items:center;justify-content:center;gap:12px;width:300px;margin:0 auto 12px auto;padding:16px 24px;border:1px solid transparent;border-radius:26px;font-size:17px;font-weight:700;line-height:20px;color:#fff;cursor:pointer;transition:transform .2s,box-shadow .2s,opacity .2s;text-decoration:none;background:var(--card-bg);backdrop-filter:blur(4px);}
+.auth-btn.vk{--fill-colors:rgba(13,71,161,.26),rgba(30,136,229,.35);--border-colors:rgba(13,71,161,.82) 0%,rgba(21,101,192,.24) 53%,#1e88e5 100%;background:linear-gradient(180deg,var(--fill-colors)) padding-box,linear-gradient(var(--bg-color),var(--bg-color)) padding-box,linear-gradient(180deg,var(--border-colors)) border-box,linear-gradient(180deg,var(--fill-colors)) border-box;}
+.auth-btn.max{--fill-colors:rgba(159,103,255,.22),rgba(197,66,255,.35);--border-colors:rgba(171,78,252,.82) 0%,rgba(108,31,198,.24) 53%,#7C45C2 100%;background:linear-gradient(180deg,var(--fill-colors)) padding-box,linear-gradient(var(--bg-color),var(--bg-color)) padding-box,linear-gradient(180deg,var(--border-colors)) border-box,linear-gradient(180deg,var(--fill-colors)) border-box;}
+.auth-btn.yandex{--fill-colors:rgba(216,67,21,.26),rgba(245,124,0,.35);--border-colors:rgba(216,67,21,.82) 0%,rgba(245,124,0,.24) 53%,#f57c00 100%;background:linear-gradient(180deg,var(--fill-colors)) padding-box,linear-gradient(var(--bg-color),var(--bg-color)) padding-box,linear-gradient(180deg,var(--border-colors)) border-box,linear-gradient(180deg,var(--fill-colors)) border-box;}
+.auth-btn:hover{transform:scale(1.03);opacity:.9;}
+.auth-btn:active{transform:scale(.97);opacity:.8;}
+.small-note{font-size:12px;color:var(--text-secondary);margin-top:4px;line-height:1.4;}
+.widget-container{margin-top:16px;min-height:60px;display:flex;justify-content:center;align-items:center;flex-direction:column;}
+.loader{display:inline-block;width:24px;height:24px;border:3px solid var(--border);border-top-color:var(--accent2);border-radius:50%;animation:spin .8s linear infinite;}
+@keyframes spin{to{transform:rotate(360deg);}}
+.hidden{display:none !important;}
+.consent-pending #appContent,
+.consent-pending #appContent * {
+    pointer-events: none !important;
+    opacity: 0.5 !important;
+    user-select: none !important;
+}
+.consent-pending #consentBlock,
+.consent-pending #consentBlock * {
+    pointer-events: auto !important;
+    opacity: 1 !important;
+    user-select: auto !important;
+}
+#digestContent .status-block {
+    white-space: pre-wrap;
+    word-wrap: normal;
+    overflow-wrap: normal;
+    hyphens: none;
+    padding: 16px;
+    margin-bottom: 12px;
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    backdrop-filter: blur(4px);
+    list-style: none !important;
+}
+#digestContent .status-block * {
+    list-style: none !important;
+    padding-left: 0 !important;
+    margin-left: 0 !important;
+    text-indent: 0 !important;
+}
+#digestContent .status-block a {
+    background: linear-gradient(290deg, #d235ff 0%, #a062ff 30%, #3088ff 66%, #61d8ff 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    text-decoration: none;
+    font-weight: 500;
+}
+#digestContent .status-block a:hover {
+    text-decoration: underline;
+    opacity: 0.8;
+}
+#logoutContainer {
+    text-align: center;
+    margin-top: 12px;
+    font-size: 14px;
+    color: var(--text-secondary);
+    cursor: pointer;
+    text-decoration: none;
+    user-select: none;
+    transition: color 0.2s;
+}
+#logoutContainer:hover {
+    color: var(--text) !important;
+}
+</style>
 </head>
 <body>
 <div class="page-wrap">
-  <div class="container">
+<div class="container">
+<div id="loginScreen">
+<div class="header"><h1>Мои AI Новости</h1></div>
+<div class="auth-container">
+   <button class="auth-btn max" id="maxLoginBtn"><span class="icon">🚀</span> Войти через MAX</button>
+   <button class="auth-btn vk" id="vkLoginBtn"><span class="icon">🚀</span> Войти через VK</button>
+   <button class="auth-btn yandex" id="yandexLoginBtn"><span class="icon">🚀</span> Войти через Yandex</button>
+</div>
 
-    <!-- ===== ЭКРАН ВХОДА ===== -->
-    <div id="loginScreen">
-      <div class="header"><h1>Мои AI Новости</h1></div>
-      <div class="auth-container">
-        <button class="auth-btn telegram" id="botLoginBtn"><span class="icon">🚀</span> Войти через Telegram</button>
-        <button class="auth-btn max" id="maxLoginBtn"><span class="icon">🚀</span> Войти через MAX</button>
-        <p class="small-note">*аккаунт будет привязан к одному методу входа</p>
-        <div class="widget-container" id="widgetContainer"></div>
-      </div>
+<!-- ===== БЛОК "ВАЖНО" ===== -->
+<div class="status-block" style="margin-top: 40px; max-width: 300px; margin-left: auto; margin-right: auto;">
+    <div class="status-title" style="color: var(--text);">Важно</div>
+    <div style="margin: 8px 0 10px; font-size: 13px; color: var(--text-secondary);">
+        <div style="padding: 6px 0; border-bottom: 1px solid var(--border); text-align: center;">
+            Telegram будет доступен после входа
+        </div>
+        <div style="padding: 6px 0; border-bottom: 1px solid var(--border); text-align: center;">
+            Привязка аккаунта к одному методу входа
+        </div>
+        <div style="padding: 6px 0; border-bottom: 1px solid var(--border); text-align: center;">
+            Зарубежный автовход запрещен в РФ
+        </div>
+        <div style="padding: 6px 0; border-bottom: 1px solid var(--border); text-align: center;">
+            Иногда VPN может мешать авторизации
+        </div>
+        <div style="padding: 6px 0; text-align: center;">
+            Подробнее в нашей <a href="https://news.proid.studio/support" target="_blank" style="color: var(--accent2); text-decoration: none;">Справке</a>
+        </div>
     </div>
+</div>
+<div class="widget-container" id="widgetContainer"></div>
+</div>
+<div id="appScreen" class="hidden">
+<div class="header"><h1>Мои AI Новости</h1></div>
 
-    <!-- ===== ОСНОВНОЙ ИНТЕРФЕЙС ===== -->
-    <div id="appScreen" class="hidden">
-      <div class="header"><h1>Мои AI Новости</h1></div>
-
-      <!-- ===== БЛОК КОНФИДЕНЦИАЛЬНОСТИ ===== -->
-      <div class="status-block" id="consentBlock" style="display: none;">
-        <div class="status-title">Конфиденциальность</div>
-        <p style="color: var(--text-secondary); font-size: 14px; margin-bottom: 12px; line-height: 1.6;">
-          Для работы приложения необходимо ваше согласие на обработку персональных данных.
-          Мы собираем минимальный набор данных (идентификатор в Telegram/MAX, IP-адрес, технические параметры) для предоставления сервиса.
-          Ваши данные не передаются третьим лицам и не используются для рекламы.
-          Подробнее в <a href="https://news.proid.studio/privacy" target="_blank" style="color: var(--accent2);">Политике обработки персональных данных</a>.
-        </p>
-        <div style="display: flex; align-items: flex-start; gap: 12px; margin: 12px 0;">
-          <input type="checkbox" id="consentCheck" style="width: 20px; height: 20px; margin-top: 2px; flex-shrink: 0; accent-color: var(--accent2); cursor: pointer;">
-          <label for="consentCheck" style="color: var(--text-secondary); font-size: 14px; line-height: 1.5; cursor: pointer;">
+<!-- Блок конфиденциальности -->
+<div class="status-block" id="consentBlock" style="display: none;">
+    <div class="status-title">Конфиденциальность</div>
+    <p style="color: var(--text-secondary); font-size: 14px; margin-bottom: 12px; line-height: 1.6;">
+        Для работы приложения необходимо ваше согласие на обработку персональных данных.
+        Мы собираем минимальный набор данных (идентификатор в VK/MAX или Яндекс ID, IP-адрес, технические параметры) для предоставления сервиса.
+        Ваши данные не передаются третьим лицам и не используются для рекламы.
+        Подробнее в <a href="https://news.proid.studio/privacy" target="_blank" style="color: var(--accent2);">Политике обработки персональных данных</a>.
+    </p>
+    <div style="display: flex; align-items: flex-start; gap: 12px; margin: 12px 0;">
+        <input type="checkbox" id="consentCheck" style="width: 20px; height: 20px; margin-top: 2px; flex-shrink: 0; accent-color: var(--accent2); cursor: pointer;">
+        <label for="consentCheck" style="color: var(--text-secondary); font-size: 14px; line-height: 1.5; cursor: pointer;">
             Я ознакомлен(а) и согласен(на) с условиями обработки персональных данных
-          </label>
-        </div>
-        <button id="consentAcceptBtn" disabled style="width: 100%; padding: 12px; background: linear-gradient(290deg, #d235ff 0%, #a062ff 30%, #3088ff 66%, #61d8ff 100%); border: none; border-radius: 12px; color: #fff; font-weight: 600; font-size: 16px; cursor: pointer; transition: opacity .2s; opacity: 0.5; pointer-events: none;">
-          Принимаю
-        </button>
-      </div>
+        </label>
+    </div>
+    <button id="consentAcceptBtn" disabled style="width: 100%; padding: 12px; background: linear-gradient(290deg, #d235ff 0%, #a062ff 30%, #3088ff 66%, #61d8ff 100%); border: none; border-radius: 12px; color: #fff; font-weight: 600; font-size: 16px; cursor: pointer; transition: opacity .2s; opacity: 0.5; pointer-events: none;">
+        Принимаю
+    </button>
+</div>
 
-      <!-- Добавить -->
-      <div class="section-header">Добавить</div>
-      <div class="quick-buttons" id="quickButtons">
-        <button id="btn-dzen">Дзен</button>
-        <button id="btn-rb">RB.ru</button>
-        <button id="btn-habr">Хабр</button>
-        <button id="btn-lifehacker">Лайфхакер</button>
-        <button id="btn-forbes">Forbes</button>
-        <button id="btn-vc">VC.ru</button>
-        <button id="btn-add-rss">RSS/HTML</button>
-        <button id="btn-add-telegram">Telegram</button>
-        <button id="btn-add-vk">VK</button>
-        <button id="btn-github">GitHub</button>
-        <button id="btn-youtube">YouTube</button>
-        <button id="btn-reddit">Reddit</button>
-        <button id="btn-bbc">BBC</button>
-        <button id="btn-google-news">Google News</button>
-        <button id="btn-cnn">CNN</button>
-      </div>
+<!-- Остальной контент -->
+<div id="appContent">
+<div class="section-header">Добавить</div>
+<div class="quick-buttons" id="quickButtons">
+<button id="btn-dzen">Дзен</button>
+<button id="btn-rb">RB.ru</button>
+<button id="btn-habr">Хабр</button>
+<button id="btn-lifehacker">Лайфхакер</button>
+<button id="btn-forbes">Forbes</button>
+<button id="btn-vc">VC.ru</button>
+<button id="btn-add-rss">RSS/HTML</button>
+<button id="btn-add-telegram">Telegram</button>
+<button id="btn-add-vk">VK</button>
+<button id="btn-github">GitHub</button>
+<button id="btn-youtube">YouTube</button>
+<button id="btn-reddit">Reddit</button>
+<button id="btn-bbc">BBC</button>
+<button id="btn-google-news">Google News</button>
+<button id="btn-cnn">CNN</button>
+</div>
+<div class="add-form" id="addForm">
+<div style="font-weight:600;margin-bottom:6px;" id="addFormTitle">Добавить RSS/HTML</div>
+<input id="sourceValue" type="text" placeholder="Введите URL...">
+<button class="btn-primary" id="addSourceSubmitBtn">Добавить</button>
+<button class="btn-secondary" id="closeAddFormBtn">Отмена</button>
+</div>
+<div class="add-form" id="githubForm">
+<div style="font-weight:600;margin-bottom:6px;">GitHub — генератор RSS</div>
+<input id="githubInput" type="text" placeholder="owner/repo или username">
+<div class="github-grid" id="githubGrid">
+<button data-type="releases" id="github-releases">releases</button>
+<button data-type="tags" id="github-tags">tags</button>
+<button data-type="commits" id="github-commits">commits</button>
+<button data-type="main" id="github-main">main</button>
+<button data-type="master" id="github-master">master</button>
+<button data-type="username" id="github-username">username</button>
+</div>
+<button class="btn-secondary" id="closeGitHubFormBtn">Отмена</button>
+</div>
+<div class="add-form" id="youtubeForm">
+<div style="font-weight:600;margin-bottom:6px;">YouTube — генератор RSS</div>
+<input id="youtubeInput" type="text" placeholder="логин канала или channelId">
+<button class="btn-primary" id="generateYouTubeBtn">Сгенерировать</button>
+<button class="btn-secondary" id="closeYouTubeFormBtn">Отмена</button>
+</div>
+<div class="add-form" id="redditForm">
+<div style="font-weight:600;margin-bottom:6px;">Reddit — генератор RSS</div>
+<input id="redditInput" type="text" placeholder="название сабреддита">
+<button class="btn-primary" id="generateRedditBtn">Сгенерировать</button>
+<button class="btn-secondary" id="closeRedditFormBtn">Отмена</button>
+</div>
+<div class="add-form" id="googleNewsForm">
+<div style="font-weight:600;margin-bottom:6px;">Google News — генератор RSS</div>
+<input id="googleNewsInput" type="text" placeholder="ключевое слово или фраза">
+<div style="margin:8px 0 10px;font-size:13px;color:var(--text-secondary);">
+<div style="display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid var(--border);font-weight:600;color:var(--text);"><span>пример</span><span>значение</span></div>
+<div style="display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid var(--border);"><span style="color:var(--text-secondary);">Forbes технологии</span><span style="color:var(--text-secondary);">поиск нескольких слов</span></div>
+<div style="display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid var(--border);"><span style="color:var(--text-secondary);">"точная фраза"</span><span style="color:var(--text-secondary);">точное совпадение</span></div>
+<div style="display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid var(--border);"><span style="color:var(--text-secondary);">технологии OR роботы</span><span style="color:var(--text-secondary);">одно из слов</span></div>
+<div style="display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid var(--border);"><span style="color:var(--text-secondary);">intitle:слово</span><span style="color:var(--text-secondary);">поиск в заголовке</span></div>
+<div style="display:flex;justify-content:space-between;padding:4px 0;"><span style="color:var(--text-secondary);">allintext:текст</span><span style="color:var(--text-secondary);">поиск в тексте</span></div>
+</div>
+<button class="btn-primary" id="generateGoogleNewsBtn">Сгенерировать</button>
+<button class="btn-secondary" id="closeGoogleNewsFormBtn">Отмена</button>
+</div>
+<div class="category-form" id="bbcForm"><div style="font-weight:600;margin-bottom:8px;">BBC — выберите категорию</div><div class="category-grid" id="bbcGrid"></div></div>
+<div class="category-form" id="cnnForm"><div style="font-weight:600;margin-bottom:8px;">CNN — выберите категорию</div><div class="category-grid" id="cnnGrid"></div></div>
+<div class="category-form" id="dzenForm"><div style="font-weight:600;margin-bottom:8px;">Дзен — выберите категорию</div><div class="category-grid" id="dzenGrid"></div></div>
+<div class="category-form" id="rbForm"><div style="font-weight:600;margin-bottom:8px;">Russian Business — выберите категорию</div><div class="category-grid" id="rbGrid"></div></div>
+<div class="category-form" id="habrForm"><div style="font-weight:600;margin-bottom:8px;">Хабр — выберите хаб</div><div class="category-grid" id="habrGrid"></div></div>
+<div class="category-form" id="lifehackerForm"><div style="font-weight:600;margin-bottom:8px;">Лайфхакер — выберите категорию</div><div class="category-grid" id="lifehackerGrid"></div></div>
+<div class="category-form" id="vcForm"><div style="font-weight:600;margin-bottom:8px;">VC.ru — выберите категорию</div><div class="category-grid" id="vcGrid"></div></div>
+<div style="display:flex;gap:8px;margin-bottom:8px;margin-top:0px;">
+<button class="suggest-btn" style="flex:1;color:var(--text);" id="categoryBrowserBtn">Категории</button>
+<button class="suggest-btn" style="flex:1;color:var(--text-secondary);" id="suggestSourceBtn">Предложить своё</button>
+</div>
+<div class="category-form" id="categoryBrowser" style="display:none;">
+<div class="category-form-header" style="font-weight:600;margin-bottom:8px;color:var(--text-secondary);text-align:center;" id="categoryBrowserHeader">Выберите категорию</div>
+<div class="category-grid" id="categoryGrid"></div>
+<button class="btn-secondary" id="categoryBackBtn" style="display:none;margin-top:8px;width:100%;">← Назад</button>
+</div>
 
-      <!-- Формы добавления -->
-      <div class="add-form" id="addForm">
-        <div style="font-weight:600;margin-bottom:6px;" id="addFormTitle">Добавить RSS/HTML</div>
-        <input id="sourceValue" type="text" placeholder="Введите URL...">
-        <button class="btn-primary" id="addSourceSubmitBtn">Добавить</button>
-        <button class="btn-secondary" id="closeAddFormBtn">Отмена</button>
-      </div>
+<!-- Кнопка "Смотреть новости" -->
+<button class="payment-toggle-btn" id="digestToggleBtn">📰 Смотреть новости</button>
+<div id="digestContainer" style="display: none; margin-top: 0;">
+    <div id="digestContent"></div>
+</div>
 
-      <div class="add-form" id="githubForm">
-        <div style="font-weight:600;margin-bottom:6px;">GitHub — генератор RSS</div>
-        <input id="githubInput" type="text" placeholder="owner/repo или username">
-        <div class="github-grid" id="githubGrid">
-          <button data-type="releases" id="github-releases">releases</button>
-          <button data-type="tags" id="github-tags">tags</button>
-          <button data-type="commits" id="github-commits">commits</button>
-          <button data-type="main" id="github-main">main</button>
-          <button data-type="master" id="github-master">master</button>
-          <button data-type="username" id="github-username">username</button>
-        </div>
-        <button class="btn-secondary" id="closeGitHubFormBtn">Отмена</button>
-      </div>
+<div class="section-header">Мои источники (<span id="counter">0</span>)</div>
+<div id="sourceListContainer"></div>
+<button class="payment-toggle-btn" id="paymentToggleBtn">💰 Оплатить тариф</button>
+<div class="tariff-block" id="tariffBlock">
+<div class="tariff-grid">
+<div class="tariff-card"><div class="title">Базовый</div><button class="price-btn" onclick="handlePayment('basic_month')">190 ₽ <span class="label">/ мес</span></button><button class="price-btn" onclick="handlePayment('basic_year')">1 900 ₽ <span class="label">/ год</span></button></div>
+<div class="tariff-card"><div class="title">Расширенный</div><button class="price-btn" onclick="handlePayment('premium_month')">490 ₽ <span class="label">/ мес</span></button><button class="price-btn" onclick="handlePayment('premium_year')">4 900 ₽ <span class="label">/ год</span></button></div>
+</div>
+<div class="tariff-link"><a href="https://news.proid.studio/#pricing" target="_blank">Описание тарифов</a></div>
+</div>
+<div class="status-block" id="userStatus">
+<div class="status-title">Текущий статус</div>
+<div class="status-row"><span>Тариф:</span> <span id="statusTariff">—</span></div>
+<div class="status-row"><span>Мои источники:</span> <span id="statusSources">0</span></div>
+<div class="status-row"><span>Лимит источников:</span> <span id="statusLimit">5</span></div>
+<div class="status-row"><span>Автополучение:</span> <span id="statusAutoSend">✅</span></div>
+<div class="status-row"><span>Получили:</span> <span id="statusLastSent">—</span></div>
+<div class="status-row"><span>Оплачено до:</span> <span id="statusExpires">—</span></div>
+</div>
+<div class="status-block" id="timeBlock">
+<div class="status-title">Время получения</div>
+<div class="status-row" style="border-bottom:none;padding-bottom:0;">
+<span>Текущее время:</span>
+<span id="currentTimeDisplay">—</span>
+<button class="change-time-btn" id="changeTimeBtn">Изменить</button>
+<span class="upgrade-hint" id="upgradeHint" style="display:none;">🔒 <a href="#" onclick="toggleTariffs(); return false;">Доступно в Расширенном тарифе</a></span>
+</div>
+<div id="timePicker" style="display:none;margin-top:10px;">
+<div class="time-picker-grid" id="timePickerGrid"></div>
+<button class="close-picker-btn" id="closeTimePickerBtn">Закрыть</button>
+</div>
+</div>
 
-      <div class="add-form" id="youtubeForm">
-        <div style="font-weight:600;margin-bottom:6px;">YouTube — генератор RSS</div>
-        <input id="youtubeInput" type="text" placeholder="логин канала или channelId">
-        <button class="btn-primary" id="generateYouTubeBtn">Сгенерировать</button>
-        <button class="btn-secondary" id="closeYouTubeFormBtn">Отмена</button>
-      </div>
+<!-- ===== ССЫЛКИ НА БОТОВ ===== -->
+<div style="display:flex; justify-content:center; gap:12px; margin:12px 0; color:var(--text-secondary); font-size:14px; flex-wrap:wrap;">
+    <a href="https://max.ru/id772609477460_bot" target="_blank" style="color:var(--text-secondary); text-decoration:none;">Открыть в MAX</a>
+    <span class="sep">|</span>
+    <a href="https://t.me/My_AI_News_Aggregator_bot" target="_blank" style="color:var(--text-secondary); text-decoration:none;">Открыть в Telegram</a>
+    <span class="sep">|</span>
+    <a href="https://vk.ru/app54717257" target="_blank" style="color:var(--text-secondary); text-decoration:none;">Открыть в VK</a>
+</div>
 
-      <div class="add-form" id="redditForm">
-        <div style="font-weight:600;margin-bottom:6px;">Reddit — генератор RSS</div>
-        <input id="redditInput" type="text" placeholder="название сабреддита">
-        <button class="btn-primary" id="generateRedditBtn">Сгенерировать</button>
-        <button class="btn-secondary" id="closeRedditFormBtn">Отмена</button>
-      </div>
+<div id="logoutContainer">Выход (сброс кэша)</div>
+</div> <!-- /appContent -->
+</div> <!-- /appScreen -->
+</div>
+</div>
 
-      <div class="add-form" id="googleNewsForm">
-        <div style="font-weight:600;margin-bottom:6px;">Google News — генератор RSS</div>
-        <input id="googleNewsInput" type="text" placeholder="ключевое слово или фраза">
-        <div style="margin:8px 0 10px;font-size:13px;color:var(--text-secondary);">
-          <div style="display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid var(--border);font-weight:600;color:var(--text);"><span>пример</span><span>значение</span></div>
-          <div style="display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid var(--border);"><span style="color:var(--text-secondary);">Forbes технологии</span><span style="color:var(--text-secondary);">поиск нескольких слов</span></div>
-          <div style="display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid var(--border);"><span style="color:var(--text-secondary);">"точная фраза"</span><span style="color:var(--text-secondary);">точное совпадение</span></div>
-          <div style="display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid var(--border);"><span style="color:var(--text-secondary);">технологии OR роботы</span><span style="color:var(--text-secondary);">одно из слов</span></div>
-          <div style="display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid var(--border);"><span style="color:var(--text-secondary);">intitle:слово</span><span style="color:var(--text-secondary);">поиск в заголовке</span></div>
-          <div style="display:flex;justify-content:space-between;padding:4px 0;"><span style="color:var(--text-secondary);">allintext:текст</span><span style="color:var(--text-secondary);">поиск в тексте</span></div>
-        </div>
-        <button class="btn-primary" id="generateGoogleNewsBtn">Сгенерировать</button>
-        <button class="btn-secondary" id="closeGoogleNewsFormBtn">Отмена</button>
-      </div>
+<!-- ===== ПОДКЛЮЧАЕМ CATEGORIES.JS ===== -->
+<script src="categories.js?v=50"></script>
 
-      <!-- Категории -->
-      <div class="category-form" id="bbcForm"><div style="font-weight:600;margin-bottom:8px;">BBC — выберите категорию</div><div class="category-grid" id="bbcGrid"></div></div>
-      <div class="category-form" id="cnnForm"><div style="font-weight:600;margin-bottom:8px;">CNN — выберите категорию</div><div class="category-grid" id="cnnGrid"></div></div>
-      <div class="category-form" id="dzenForm"><div style="font-weight:600;margin-bottom:8px;">Дзен — выберите категорию</div><div class="category-grid" id="dzenGrid"></div></div>
-      <div class="category-form" id="rbForm"><div style="font-weight:600;margin-bottom:8px;">Russian Business — выберите категорию</div><div class="category-grid" id="rbGrid"></div></div>
-      <div class="category-form" id="habrForm"><div style="font-weight:600;margin-bottom:8px;">Хабр — выберите хаб</div><div class="category-grid" id="habrGrid"></div></div>
-      <div class="category-form" id="lifehackerForm"><div style="font-weight:600;margin-bottom:8px;">Лайфхакер — выберите категорию</div><div class="category-grid" id="lifehackerGrid"></div></div>
-      <div class="category-form" id="vcForm"><div style="font-weight:600;margin-bottom:8px;">VC.ru — выберите категорию</div><div class="category-grid" id="vcGrid"></div></div>
+<script>
+// ===== КОНСТАНТЫ =====
+const TEST_TOKEN = 'vol7Js5SZnjPuaTfkk46zea3I-k_vsInqyqQPho_dF0';
+const VK_APP_ID = '54718264';
+const API_BASE = 'https://news.proid.studio';
 
-      <div style="display:flex;gap:8px;margin-bottom:8px;margin-top:0px;">
-        <button class="suggest-btn" id="categoryBrowserBtn" style="flex:1;color:var(--text);">Категории</button>
-        <button class="suggest-btn" id="suggestSourceBtn" style="flex:1;color:var(--text-secondary);">Предложить своё</button>
-      </div>
+// ===== PKCE ДЛЯ VK ID OAuth 2.1 =====
+function generateCodeVerifier() {
+    const array = new Uint8Array(32);
+    crypto.getRandomValues(array);
+    return base64UrlEncode(array);
+}
 
-      <div class="category-form" id="categoryBrowser" style="display:none;">
-        <div class="category-form-header" style="font-weight:600;margin-bottom:8px;color:var(--text-secondary);text-align:center;" id="categoryBrowserHeader">Выберите категорию</div>
-        <div class="category-grid" id="categoryGrid"></div>
-        <button class="btn-secondary" id="categoryBackBtn" style="display:none;margin-top:8px;width:100%;">← Назад</button>
-      </div>
+function base64UrlEncode(buffer) {
+    return btoa(String.fromCharCode(...buffer))
+        .replace(/\+/g, '-')
+        .replace(/\//g, '_')
+        .replace(/=+$/, '');
+}
 
-      <!-- Кнопка "Смотреть новости" -->
-      <button class="payment-toggle-btn" id="digestToggleBtn">📰 Смотреть новости</button>
-      <div id="digestContainer" style="display: none; margin-top: 0;">
-        <div id="digestContent"></div>
-      </div>
+async function sha256(plain) {
+    const encoder = new TextEncoder();
+    const data = encoder.encode(plain);
+    const hash = await crypto.subtle.digest('SHA-256', data);
+    return hash;
+}
 
-      <!-- Мои источники -->
-      <div class="section-header">Мои источники (<span id="counter">0</span>)</div>
-      <div id="sourceListContainer"></div>
+async function generateCodeChallenge(verifier) {
+    const hash = await sha256(verifier);
+    return base64UrlEncode(new Uint8Array(hash));
+}
 
-      <!-- Тарифы -->
-      <button class="payment-toggle-btn" id="paymentToggleBtn">💰 Оплатить тариф</button>
-      <div class="tariff-block" id="tariffBlock">
-        <div class="tariff-grid">
-          <div class="tariff-card"><div class="title">Базовый</div><button class="price-btn" id="basic_month">190 ₽ <span class="label">/ мес</span></button><button class="price-btn" id="basic_year">1 900 ₽ <span class="label">/ год</span></button></div>
-          <div class="tariff-card"><div class="title">Расширенный</div><button class="price-btn" id="premium_month">490 ₽ <span class="label">/ мес</span></button><button class="price-btn" id="premium_year">4 900 ₽ <span class="label">/ год</span></button></div>
-        </div>
-        <div class="tariff-link"><a href="https://news.proid.studio/#pricing" target="_blank">Описание тарифов</a></div>
-      </div>
+// ===== ГЛОБАЛЬНЫЕ ПЕРЕМЕННЫЕ =====
+let currentSources = [];
+let currentLimit = 5;
+let currentAddType = 'rss';
+let currentSendTime = null;
+let isPremium = false;
+let defaultSendHour = 18;
+let authToken = localStorage.getItem('auth_token') || null;
+let isTestUser = false;
+let consentGiven = false;
 
-      <!-- Статус -->
-      <div class="status-block" id="userStatus">
-        <div class="status-title">Текущий статус</div>
-        <div class="status-row"><span>Тариф:</span> <span id="statusTariff">—</span></div>
-        <div class="status-row"><span>Мои источники:</span> <span id="statusSources">0</span></div>
-        <div class="status-row"><span>Лимит источников:</span> <span id="statusLimit">5</span></div>
-        <div class="status-row"><span>Автополучение:</span> <span id="statusAutoSend">✅</span></div>
-        <div class="status-row"><span>Получили:</span> <span id="statusLastSent">—</span></div>
-        <div class="status-row"><span>Оплачено до:</span> <span id="statusExpires">—</span></div>
-      </div>
+function hapticFeedback(){if(navigator.vibrate)navigator.vibrate(10);}
+(function(){const p=new URLSearchParams(window.location.search);const t=p.get('auth_token');if(t){try{localStorage.setItem('auth_token',t);}catch(e){sessionStorage.setItem('auth_token',t);}
+window.history.replaceState({},document.title,window.location.pathname);authToken=t;if(document.readyState==='complete')loadApp();else window.addEventListener('load',function onLoad(){loadApp();window.removeEventListener('load',onLoad);});}})();
+function getHeaders(){return{'Content-Type':'application/json',...(authToken?{'X-Auth-Token':authToken}:{})};}
+function showLoginScreen(){document.getElementById('loginScreen').style.display='block';document.getElementById('appScreen').classList.add('hidden');}
 
-      <!-- Время получения -->
-      <div class="status-block" id="timeBlock">
-        <div class="status-title">Время получения</div>
-        <div class="status-row" style="border-bottom:none;padding-bottom:0;">
-          <span>Текущее время:</span>
-          <span id="currentTimeDisplay">—</span>
-          <button class="change-time-btn" id="changeTimeBtn">Изменить</button>
-          <span class="upgrade-hint" id="upgradeHint" style="display:none;">🔒 <a href="#" id="upgradeLink">Доступно в Расширенном тарифе</a></span>
-        </div>
-        <div id="timePicker" style="display:none;margin-top:10px;">
-          <div class="time-picker-grid" id="timePickerGrid"></div>
-          <button class="close-picker-btn" id="closeTimePickerBtn">Закрыть</button>
-        </div>
-      </div>
+// ===== УПРАВЛЕНИЕ СОГЛАСИЕМ =====
+function showConsentBlock() {
+    document.getElementById('loginScreen').style.display = 'none';
+    document.getElementById('appScreen').classList.remove('hidden');
+    document.getElementById('consentBlock').style.display = 'block';
+    document.getElementById('appContent').style.display = 'none';
+    document.getElementById('appScreen').classList.add('consent-pending');
+}
 
-      <!-- ===== КНОПКА ВЫХОДА ===== -->
-      <div id="logoutContainer">Выход</div>
+function showAppContent() {
+    document.getElementById('loginScreen').style.display = 'none';
+    document.getElementById('appScreen').classList.remove('hidden');
+    document.getElementById('consentBlock').style.display = 'none';
+    document.getElementById('appContent').style.display = 'block';
+    document.getElementById('appScreen').classList.remove('consent-pending');
+}
 
-    </div> <!-- /appScreen -->
-  </div> <!-- /container -->
-</div> <!-- /page-wrap -->
+// ===== ИСПРАВЛЕННАЯ APIREQUEST (добавляет API_BASE) =====
+async function apiRequest(url, options = {}) {
+    const fullUrl = url.startsWith('http') ? url : API_BASE + url;
+    try {
+        const resp = await fetch(fullUrl, options);
+        if (resp.status === 503) {
+            alert('⚠️ Сервер временно недоступен. Обновите страницу через несколько секунд.');
+            return null;
+        }
+        return resp;
+    } catch (err) {
+        console.error('apiRequest error:', err);
+        throw err;
+    }
+}
 
-<!-- Подвал -->
+function ensureConsent() {
+    if (!consentGiven && !isTestUser) {
+        alert('Сначала примите согласие на обработку данных.');
+        return false;
+    }
+    return true;
+}
+
+// ===== ЗАГРУЗКА ПРИЛОЖЕНИЯ =====
+async function loadApp(){
+    if(!authToken){showLoginScreen();return;}
+    const headers=getHeaders();
+    try{
+        const resp=await apiRequest('/api/webapp/sources',{headers});
+        if(!resp)return;
+        if(!resp.ok){
+            if(resp.status === 403){
+                isTestUser = (authToken === TEST_TOKEN);
+                window.TEST_MODE = isTestUser;
+                consentGiven = false;
+                showConsentBlock();
+                document.getElementById('quickButtons').style.display = 'none';
+                document.getElementById('paymentToggleBtn').style.display = 'none';
+                return;
+            }
+            if(resp.status === 401){
+                document.getElementById('sourceListContainer').innerHTML='<div class="empty-state"><div class="empty-icon">🔒</div><h3>Ошибка авторизации</h3><p>Попробуйте обновить страницу или перелогиниться.</p></div>';
+                showAppContent();
+                return;
+            }
+            const err=await resp.json();throw new Error(err.detail||'Ошибка загрузки');
+        }
+        const data=await resp.json();
+        currentSources=data.sources||[];
+        currentLimit=data.limit||5;
+        renderGroupedSources(currentSources);
+        document.getElementById('counter').textContent=currentSources.length;
+        updateStatus(data);
+
+        isTestUser = (authToken === TEST_TOKEN);
+        consentGiven = data.consent_given === true;
+        window.TEST_MODE = isTestUser;
+
+        if (!consentGiven || isTestUser) {
+            showConsentBlock();
+            document.getElementById('quickButtons').style.display = 'none';
+            document.getElementById('paymentToggleBtn').style.display = 'none';
+        } else {
+            showAppContent();
+            document.getElementById('quickButtons').style.display = 'flex';
+            document.getElementById('paymentToggleBtn').style.display = 'block';
+        }
+    }catch(err){
+        document.getElementById('sourceListContainer').innerHTML='<div class="empty-state"><div class="empty-icon">⚠️</div><h3>Ошибка загрузки</h3><p>'+err.message+'</p></div>';
+        showAppContent();
+    }
+}
+
+// ===== ОБРАБОТЧИК КНОПКИ "ПРИНИМАЮ" =====
+document.addEventListener('DOMContentLoaded', function() {
+    const check = document.getElementById('consentCheck');
+    const btn = document.getElementById('consentAcceptBtn');
+    if (check && btn) {
+        check.addEventListener('change', function() {
+            if (this.checked) {
+                btn.disabled = false;
+                btn.style.opacity = '1';
+                btn.style.pointerEvents = 'auto';
+            } else {
+                btn.disabled = true;
+                btn.style.opacity = '0.5';
+                btn.style.pointerEvents = 'none';
+            }
+        });
+        btn.addEventListener('click', async function() {
+            if (!check.checked) return;
+            if (window.TEST_MODE) {
+                showAppContent();
+                document.getElementById('quickButtons').style.display = 'flex';
+                document.getElementById('paymentToggleBtn').style.display = 'block';
+                return;
+            }
+            try {
+                const resp = await apiRequest('/api/webapp/consent', {
+                    method: 'POST',
+                    headers: getHeaders()
+                });
+                if (resp && resp.ok) {
+                    consentGiven = true;
+                    showAppContent();
+                    document.getElementById('quickButtons').style.display = 'flex';
+                    document.getElementById('paymentToggleBtn').style.display = 'block';
+                    await loadApp();
+                } else {
+                    const err = resp ? await resp.json() : { detail: 'Ошибка' };
+                    alert('❌ Ошибка: ' + (err.detail || 'Не удалось сохранить согласие'));
+                }
+            } catch (e) {
+                alert('❌ Ошибка: ' + e.message);
+            }
+        });
+    }
+
+    // ===== ПРИВЯЗКА ОСНОВНЫХ КНОПОК =====
+    const vkBtn = document.getElementById('vkLoginBtn');
+    if (vkBtn) vkBtn.addEventListener('click', startVkAuth);
+
+    const maxBtn = document.getElementById('maxLoginBtn');
+    if (maxBtn) maxBtn.addEventListener('click', startMaxAuth);
+
+    const yandexBtn = document.getElementById('yandexLoginBtn');
+    if (yandexBtn) yandexBtn.addEventListener('click', startYandexAuth);
+
+    const digestBtn = document.getElementById('digestToggleBtn');
+    if (digestBtn) digestBtn.addEventListener('click', toggleDigest);
+
+    const logoutEl = document.getElementById('logoutContainer');
+    if (logoutEl) logoutEl.addEventListener('click', logout);
+
+    // Быстрое меню
+    const btnDzen = document.getElementById('btn-dzen');
+    if (btnDzen) btnDzen.addEventListener('click', function() { toggleCategoryForm('dzen'); });
+    const btnRb = document.getElementById('btn-rb');
+    if (btnRb) btnRb.addEventListener('click', function() { toggleCategoryForm('rb'); });
+    const btnHabr = document.getElementById('btn-habr');
+    if (btnHabr) btnHabr.addEventListener('click', function() { toggleCategoryForm('habr'); });
+    const btnLifehacker = document.getElementById('btn-lifehacker');
+    if (btnLifehacker) btnLifehacker.addEventListener('click', function() { toggleCategoryForm('lifehacker'); });
+    const btnForbes = document.getElementById('btn-forbes');
+    if (btnForbes) btnForbes.addEventListener('click', addForbesTelegram);
+    const btnVc = document.getElementById('btn-vc');
+    if (btnVc) btnVc.addEventListener('click', function() { toggleCategoryForm('vc'); });
+    const btnAddRss = document.getElementById('btn-add-rss');
+    if (btnAddRss) btnAddRss.addEventListener('click', function() { toggleAddForm('rss'); });
+    const btnAddTelegram = document.getElementById('btn-add-telegram');
+    if (btnAddTelegram) btnAddTelegram.addEventListener('click', function() { toggleAddForm('telegram'); });
+    const btnAddVk = document.getElementById('btn-add-vk');
+    if (btnAddVk) btnAddVk.addEventListener('click', function() { toggleAddForm('vk'); });
+    const btnGithub = document.getElementById('btn-github');
+    if (btnGithub) btnGithub.addEventListener('click', toggleGitHubForm);
+    const btnYoutube = document.getElementById('btn-youtube');
+    if (btnYoutube) btnYoutube.addEventListener('click', toggleYouTubeForm);
+    const btnReddit = document.getElementById('btn-reddit');
+    if (btnReddit) btnReddit.addEventListener('click', toggleRedditForm);
+    const btnBbc = document.getElementById('btn-bbc');
+    if (btnBbc) btnBbc.addEventListener('click', function() { toggleCategoryForm('bbc'); });
+    const btnGoogleNews = document.getElementById('btn-google-news');
+    if (btnGoogleNews) btnGoogleNews.addEventListener('click', toggleGoogleNewsForm);
+    const btnCnn = document.getElementById('btn-cnn');
+    if (btnCnn) btnCnn.addEventListener('click', function() { toggleCategoryForm('cnn'); });
+
+    // Формы
+    const addSourceSubmitBtn = document.getElementById('addSourceSubmitBtn');
+    if (addSourceSubmitBtn) addSourceSubmitBtn.addEventListener('click', addSourceSubmit);
+    const closeAddFormBtn = document.getElementById('closeAddFormBtn');
+    if (closeAddFormBtn) closeAddFormBtn.addEventListener('click', closeAddForm);
+    const closeGitHubFormBtn = document.getElementById('closeGitHubFormBtn');
+    if (closeGitHubFormBtn) closeGitHubFormBtn.addEventListener('click', closeGitHubForm);
+    const generateYouTubeBtn = document.getElementById('generateYouTubeBtn');
+    if (generateYouTubeBtn) generateYouTubeBtn.addEventListener('click', generateYouTubeRSS);
+    const closeYouTubeFormBtn = document.getElementById('closeYouTubeFormBtn');
+    if (closeYouTubeFormBtn) closeYouTubeFormBtn.addEventListener('click', closeYouTubeForm);
+    const generateRedditBtn = document.getElementById('generateRedditBtn');
+    if (generateRedditBtn) generateRedditBtn.addEventListener('click', generateRedditRSS);
+    const closeRedditFormBtn = document.getElementById('closeRedditFormBtn');
+    if (closeRedditFormBtn) closeRedditFormBtn.addEventListener('click', closeRedditForm);
+    const generateGoogleNewsBtn = document.getElementById('generateGoogleNewsBtn');
+    if (generateGoogleNewsBtn) generateGoogleNewsBtn.addEventListener('click', generateGoogleNewsRSS);
+    const closeGoogleNewsFormBtn = document.getElementById('closeGoogleNewsFormBtn');
+    if (closeGoogleNewsFormBtn) closeGoogleNewsFormBtn.addEventListener('click', closeGoogleNewsForm);
+
+    // GitHub grid
+    const githubReleases = document.getElementById('github-releases');
+    if (githubReleases) githubReleases.addEventListener('click', function() { generateGitHubRSS('releases'); });
+    const githubTags = document.getElementById('github-tags');
+    if (githubTags) githubTags.addEventListener('click', function() { generateGitHubRSS('tags'); });
+    const githubCommits = document.getElementById('github-commits');
+    if (githubCommits) githubCommits.addEventListener('click', function() { generateGitHubRSS('commits'); });
+    const githubMain = document.getElementById('github-main');
+    if (githubMain) githubMain.addEventListener('click', function() { generateGitHubRSS('main'); });
+    const githubMaster = document.getElementById('github-master');
+    if (githubMaster) githubMaster.addEventListener('click', function() { generateGitHubRSS('master'); });
+    const githubUsername = document.getElementById('github-username');
+    if (githubUsername) githubUsername.addEventListener('click', function() { generateGitHubRSS('username'); });
+
+    // Категории
+    const categoryBrowserBtn = document.getElementById('categoryBrowserBtn');
+    if (categoryBrowserBtn) categoryBrowserBtn.addEventListener('click', toggleCategoryBrowser);
+    const categoryBackBtn = document.getElementById('categoryBackBtn');
+    if (categoryBackBtn) categoryBackBtn.addEventListener('click', goBackLevel);
+    const suggestSourceBtn = document.getElementById('suggestSourceBtn');
+    if (suggestSourceBtn) suggestSourceBtn.addEventListener('click', suggestSource);
+
+    // Тарифы
+    const paymentToggleBtn = document.getElementById('paymentToggleBtn');
+    if (paymentToggleBtn) paymentToggleBtn.addEventListener('click', toggleTariffs);
+
+    // Время
+    const changeTimeBtn = document.getElementById('changeTimeBtn');
+    if (changeTimeBtn) changeTimeBtn.addEventListener('click', toggleTimePicker);
+    const closeTimePickerBtn = document.getElementById('closeTimePickerBtn');
+    if (closeTimePickerBtn) closeTimePickerBtn.addEventListener('click', closeTimePicker);
+    const upgradeLink = document.getElementById('upgradeLink');
+    if (upgradeLink) upgradeLink.addEventListener('click', function(e) { e.preventDefault(); toggleTariffs(); });
+});
+
+// ===== ОСТАЛЬНЫЕ ФУНКЦИИ =====
+function getTypeLabel(t){const m={'rss':'RSS/HTML','telegram':'Telegram','vk':'VK','max':'MAX'};return m[t]||t;}
+function truncate(s,l){l=l||40;return s.length>l?s.slice(0,l)+'…':s;}
+function safeDecodeUrl(u){try{return decodeURIComponent(u);}catch(e){return u;}}
+function formatSourceValue(s){let v=s.value;if(s.type==='telegram'||s.type==='vk'){if(!v.startsWith('http')&&!v.startsWith('@'))v='@'+v;}
+if(s.type==='rss'){v=safeDecodeUrl(v).replace(/^https?:\/\//,'').replace(/^www\./,'');}
+return v;}
+function getSourceUrl(s){let u=s.value;if(s.type==='telegram')u='https://t.me/'+u.replace(/^@/,'');else if(s.type==='vk')u='https://vk.com/'+u.replace(/^@/,'');return u;}
+function askOpenLink(u){hapticFeedback();if(window.confirm('Открыть ссылку?\n\n'+u))window.open(u,'_blank');}
+
+function renderGroupedSources(sources) {
+    const container = document.getElementById('sourceListContainer');
+    if (!container) return;
+    container.innerHTML = '';
+    if (!sources || sources.length === 0) {
+        container.innerHTML = '<div class="empty-state"><div class="empty-icon">📭</div><h3>Нет источников</h3><p>Добавьте свой первый источник</p></div>';
+        return;
+    }
+    const sorted = [...sources].sort((a,b) => a.value.toLowerCase().localeCompare(b.value.toLowerCase()));
+    const groups = {'rss':[], 'telegram':[], 'vk':[], 'max':[]};
+    sorted.forEach(s => { if (groups[s.type]) groups[s.type].push(s); else groups[s.type] = [s]; });
+    const order = ['telegram','vk','max','rss'];
+    order.forEach(type => {
+        const items = groups[type];
+        if (!items || items.length === 0) return;
+        const title = document.createElement('div');
+        title.className = 'group-title';
+        title.textContent = getTypeLabel(type);
+        container.appendChild(title);
+        const list = document.createElement('div');
+        list.className = 'source-list';
+        items.forEach(s => {
+            const f = formatSourceValue(s);
+            const v = truncate(f, 50);
+            const u = getSourceUrl(s);
+            const g = getIconGradient(s.type);
+            const item = document.createElement('div');
+            item.className = 'source-item';
+            item.onclick = function() { askOpenLink(u); };
+            const info = document.createElement('div');
+            info.className = 'source-info';
+            const icon = document.createElement('div');
+            icon.className = 'source-icon';
+            icon.style.background = g;
+            const valueSpan = document.createElement('span');
+            valueSpan.className = 'source-value';
+            valueSpan.textContent = v;
+            valueSpan.title = f;
+            info.appendChild(icon);
+            info.appendChild(valueSpan);
+            const delBtn = document.createElement('button');
+            delBtn.className = 'delete-btn';
+            delBtn.textContent = '✕';
+            delBtn.onclick = function(e) { e.stopPropagation(); hapticFeedback(); confirmDelete(s.id); };
+            item.appendChild(info);
+            item.appendChild(delBtn);
+            list.appendChild(item);
+        });
+        container.appendChild(list);
+    });
+}
+
+function getIconGradient(t){switch(t){case'telegram':return'linear-gradient(290deg,#d235ff 0%,#a062ff 30%,#3088ff 66%,#61d8ff 100%)';case'vk':return'linear-gradient(290deg,#0d47a1 0%,#1565c0 30%,#1e88e5 66%,#64b5f6 100%)';case'rss':return'linear-gradient(290deg,#d84315 0%,#f57c00 30%,#f9a825 66%,#ffee58 100%)';default:return'linear-gradient(290deg,#d235ff 0%,#a062ff 30%,#3088ff 66%,#61d8ff 100%)';}}
+function updateStatus(d){document.getElementById('statusTariff').textContent=d.tariff_name||'—';document.getElementById('statusSources').textContent=d.used||0;document.getElementById('statusLimit').textContent=d.limit||5;document.getElementById('statusAutoSend').textContent='✅';document.getElementById('statusLastSent').textContent=d.last_sent||'—';document.getElementById('statusExpires').textContent=d.expires_at||'—';isPremium=d.is_premium||false;defaultSendHour=d.default_send_hour||18;currentSendTime=d.send_time||null;const display=currentSendTime?currentSendTime:(defaultSendHour.toString().padStart(2,'0')+':00');document.getElementById('currentTimeDisplay').textContent=display+' MSK';const btn=document.getElementById('changeTimeBtn');const hint=document.getElementById('upgradeHint');if(isPremium){btn.style.display='inline-block';btn.disabled=false;hint.style.display='none';}else{btn.style.display='none';hint.style.display='inline-block';if(document.getElementById('timePicker').style.display!=='none')closeTimePicker();}}
+
+function confirmDelete(id){hapticFeedback();const s=currentSources.find(s=>s.id===id);if(!s){alert('Источник не найден');return;}
+const f=formatSourceValue(s);if(window.confirm('Удалить источник?\n\n'+f+'\n\nЭто действие нельзя отменить.'))deleteSource(id);}
+async function deleteSource(id){if(!ensureConsent())return; try{const resp=await apiRequest('/api/webapp/delete',{method:'POST',headers:getHeaders(),body:JSON.stringify({source_id:id})});if(!resp)return;if(!resp.ok){const err=await resp.json();alert('❌ Ошибка удаления: '+err.detail);return;}
+await loadApp();alert('✅ Источник удалён');}catch(err){alert('❌ Ошибка: '+err.message);}}
+
+function closeAddForm(){document.getElementById('addForm').style.display='none';}
+function closeGitHubForm(){document.getElementById('githubForm').style.display='none';}
+function closeYouTubeForm(){document.getElementById('youtubeForm').style.display='none';}
+function closeRedditForm(){document.getElementById('redditForm').style.display='none';}
+function closeGoogleNewsForm(){document.getElementById('googleNewsForm').style.display='none';}
+
+function toggleForm(formId) {
+    const form = document.getElementById(formId);
+    if (!form) return;
+    const isHidden = window.getComputedStyle(form).display === 'none';
+    document.querySelectorAll('.category-form, .add-form').forEach(el => {
+        if (el.id !== formId) el.style.display = 'none';
+    });
+    if (isHidden) {
+        form.style.display = 'block';
+    } else {
+        form.style.display = 'none';
+    }
+}
+
+function toggleCategoryForm(type) { if(!ensureConsent())return; hapticFeedback();
+    const map = {
+        'bbc':'bbcForm','cnn':'cnnForm','dzen':'dzenForm',
+        'rb':'rbForm','habr':'habrForm','lifehacker':'lifehackerForm',
+        'vc':'vcForm'
+    };
+    const id = map[type];
+    if (!id) return;
+    const form = document.getElementById(id);
+    if (form && window.getComputedStyle(form).display !== 'none') {
+        form.style.display = 'none';
+        return;
+    }
+    toggleForm(id);
+    if (form && form.style.display === 'block') {
+        const grid = document.getElementById(id.replace('Form', 'Grid'));
+        if (grid && grid.children.length === 0) {
+            let cats;
+            if (type === 'bbc') cats = window.BBC_CATEGORIES;
+            else if (type === 'cnn') cats = window.CNN_CATEGORIES;
+            else if (type === 'dzen') cats = window.DZEN_CATEGORIES;
+            else if (type === 'rb') cats = window.RB_CATEGORIES;
+            else if (type === 'habr') cats = window.HABR_CATEGORIES;
+            else if (type === 'lifehacker') cats = window.LIFEHACKER_CATEGORIES;
+            else if (type === 'vc') cats = window.VC_CATEGORIES;
+            if (cats) {
+                Object.entries(cats).sort((a,b)=>a[0].localeCompare(b[0],'ru')).forEach(([name,url])=>{
+                    const btn = document.createElement('button');
+                    btn.textContent = name;
+                    btn.onclick = function() { addCategorySource('rss', url, name); };
+                    grid.appendChild(btn);
+                });
+            } else {
+                grid.innerHTML = '<div style="text-align:center;padding:10px;color:var(--text-secondary);">Категории не загружены</div>';
+            }
+        }
+    }
+}
+
+function toggleAddForm(type) { if(!ensureConsent())return; hapticFeedback();
+    const form = document.getElementById('addForm');
+    const isHidden = window.getComputedStyle(form).display === 'none';
+    document.querySelectorAll('.category-form, .add-form').forEach(el => el.style.display = 'none');
+    if (isHidden) {
+        currentAddType = type;
+        const title = document.getElementById('addFormTitle');
+        const labels = {'rss':'RSS/HTML','telegram':'Telegram','vk':'VK'};
+        title.textContent = 'Добавить '+labels[type];
+        const input = document.getElementById('sourceValue');
+        input.placeholder = type==='rss'?'Введите URL...':(type==='telegram'?'Введите username (без @)...':'Введите username (без @)...');
+        input.value = '';
+        form.style.display = 'block';
+    } else {
+        form.style.display = 'none';
+    }
+}
+
+function toggleGitHubForm() { if(!ensureConsent())return; hapticFeedback();
+    const form = document.getElementById('githubForm');
+    const isHidden = window.getComputedStyle(form).display === 'none';
+    document.querySelectorAll('.category-form, .add-form').forEach(el => el.style.display = 'none');
+    if (isHidden) {
+        form.style.display = 'block';
+        updateGitHubButtons('');
+        const input = document.getElementById('githubInput');
+        input.removeEventListener('input', window._githubInputHandler);
+        window._githubInputHandler = function() {
+            updateGitHubButtons(this.value);
+        };
+        input.addEventListener('input', window._githubInputHandler);
+    } else {
+        form.style.display = 'none';
+    }
+}
+
+function toggleYouTubeForm() { if(!ensureConsent())return; hapticFeedback();
+    const form = document.getElementById('youtubeForm');
+    const isHidden = window.getComputedStyle(form).display === 'none';
+    document.querySelectorAll('.category-form, .add-form').forEach(el => el.style.display = 'none');
+    if (isHidden) {
+        form.style.display = 'block';
+    } else {
+        form.style.display = 'none';
+    }
+}
+
+function toggleRedditForm() { if(!ensureConsent())return; hapticFeedback();
+    const form = document.getElementById('redditForm');
+    const isHidden = window.getComputedStyle(form).display === 'none';
+    document.querySelectorAll('.category-form, .add-form').forEach(el => el.style.display = 'none');
+    if (isHidden) {
+        form.style.display = 'block';
+    } else {
+        form.style.display = 'none';
+    }
+}
+
+function toggleGoogleNewsForm() { if(!ensureConsent())return; hapticFeedback();
+    const form = document.getElementById('googleNewsForm');
+    const isHidden = window.getComputedStyle(form).display === 'none';
+    document.querySelectorAll('.category-form, .add-form').forEach(el => el.style.display = 'none');
+    if (isHidden) {
+        form.style.display = 'block';
+    } else {
+        form.style.display = 'none';
+    }
+}
+
+function addForbesTelegram() { if(!ensureConsent())return; hapticFeedback();
+    addCategorySource('telegram','forbesrussia','Forbes (Telegram)');
+}
+
+async function addSourceSubmit(){ if(!ensureConsent())return; hapticFeedback();
+    const val=document.getElementById('sourceValue').value.trim();
+    if(!val){alert('Введите значение');return;}
+    if(!window.confirm('Добавить источник?\n\n'+val))return;
+    try{
+        const resp=await apiRequest('/api/webapp/add',{
+            method:'POST',
+            headers:getHeaders(),
+            body:JSON.stringify({source_type:currentAddType,source_value:val})
+        });
+        if(!resp)return;
+        if(!resp.ok){const err=await resp.json();alert('❌ Ошибка: '+err.detail);return;}
+        await loadApp();
+        alert('✅ Источник добавлен');
+        document.getElementById('addForm').style.display='none';
+        document.getElementById('sourceValue').value='';
+    }catch(err){alert('❌ Ошибка добавления: '+err.message);}
+}
+
+async function addCategorySource(t,u,n){ if(!ensureConsent())return; hapticFeedback();
+    if(!u||!u.trim()){alert('URL не может быть пустым');return;}
+    let final=u.trim();
+    let type=t||'rss';
+    if(final.startsWith('https://t.me/')){type='telegram';final=final.replace(/^https:\/\/t\.me\//,'').split('/')[0];if(final.startsWith('@'))final=final.slice(1);}
+    else if(final.startsWith('https://vk.com/')||final.startsWith('https://vk.ru/')){type='vk';final=final.replace(/^https:\/\/(vk\.com|vk\.ru)\//,'').split('/')[0];if(final.startsWith('@'))final=final.slice(1);}
+    else if(!final.startsWith('http://')&&!final.startsWith('https://')){if(type!=='telegram'&&type!=='vk')final='https://'+final;}
+    if(!window.confirm('Добавить источник?\n\n'+n+'\n'+final))return;
+    try{
+        const resp=await apiRequest('/api/webapp/add',{
+            method:'POST',
+            headers:getHeaders(),
+            body:JSON.stringify({source_type:type,source_value:final})
+        });
+        if(!resp)return;
+        if(!resp.ok){const err=await resp.json();alert('❌ Ошибка: '+err.detail);return;}
+        await loadApp();
+        alert('✅ Добавлено: '+n);
+        document.querySelectorAll('.category-form').forEach(el=>el.style.display='none');
+    }catch(err){alert('❌ Ошибка добавления: '+err.message);}
+}
+
+function addRSSSource(u,n){ if(!ensureConsent())return; hapticFeedback();
+    if(!u||!u.trim()){alert('URL не может быть пустым.');return;}
+    let final=u.trim();
+    if(!final.startsWith('http://')&&!final.startsWith('https://'))final='https://'+final;
+    fetch(API_BASE+'/api/webapp/add',{
+        method:'POST',
+        headers:getHeaders(),
+        body:JSON.stringify({source_type:'rss',source_value:final})
+    })
+    .then(async resp=>{
+        if(resp.status===503){alert('⚠️ Сервер временно недоступен. Пожалуйста, обновите страницу через несколько секунд.');return;}
+        if(!resp.ok){const err=await resp.json();alert('❌ Ошибка добавления: '+err.detail);return;}
+        await loadApp();
+        alert('✅ Источник добавлен: '+n);
+        document.querySelectorAll('.category-form,.add-form').forEach(f=>f.style.display='none');
+    })
+    .catch(err=>{alert('❌ Ошибка: '+err.message);});
+}
+
+function addSourceByType(t,u,n){ if(!ensureConsent())return; hapticFeedback();
+    let type=t;
+    if(!['rss','telegram','vk','max'].includes(type))type='rss';
+    addCategorySource(type,u,n);
+}
+
+function updateGitHubButtons(v){
+    const grid=document.getElementById('githubGrid');
+    const btns=grid.querySelectorAll('button');
+    const hasSlash=v&&v.includes('/');
+    btns.forEach(btn=>{
+        const type=btn.dataset.type;
+        if(type==='username')btn.disabled=!v||!v.trim();
+        else btn.disabled=!(hasSlash&&v.trim());
+    });
+}
+function generateGitHubRSS(t){ if(!ensureConsent())return; hapticFeedback();
+    const input=document.getElementById('githubInput');
+    let raw=input.value.trim();
+    if(!raw){alert('Введите owner/repo или username.');return;}
+    raw=raw.replace(/^https?:\/\/github\.com\//,'').replace(/\/+$/,'');
+    let url='',display='GitHub';
+    if(t==='username'){
+        const parts=raw.split('/');
+        const username=parts[0];
+        if(!username){alert('Некорректный username.');return;}
+        url='https://github.com/'+username+'.atom';
+        display='GitHub ('+username+')';
+    }else{
+        if(!raw.includes('/')){alert('Для этого типа нужен owner/repo.');return;}
+        const parts=raw.split('/');
+        const owner=parts[0],repo=parts.slice(1).join('/');
+        if(!owner||!repo){alert('Некорректный owner/repo.');return;}
+        let path='';
+        switch(t){
+            case'releases':path='releases.atom';break;
+            case'tags':path='tags.atom';break;
+            case'commits':path='commits.atom';break;
+            case'main':path='commits/main.atom';break;
+            case'master':path='commits/master.atom';break;
+            default:path='releases.atom';
+        }
+        url='https://github.com/'+owner+'/'+repo+'/'+path;
+        display='GitHub ('+owner+'/'+repo+')';
+    }
+    if(!window.confirm('Добавить источник?\n'+display+'\n'+url))return;
+    addRSSSource(url,display);
+}
+
+async function generateYouTubeRSS(){ if(!ensureConsent())return; hapticFeedback();
+    const input=document.getElementById('youtubeInput');
+    let val=input.value.trim();
+    if(!val){alert('Введите имя канала или channelId.');return;}
+    try{
+        const resp=await apiRequest('/api/youtube/resolve',{
+            method:'POST',
+            headers:{'Content-Type':'application/json'},
+            body:JSON.stringify({input:val})
+        });
+        if(!resp)return;
+        if(!resp.ok){const err=await resp.json();alert('Ошибка: '+(err.detail||err.message||'Канал не найден'));return;}
+        const data=await resp.json();
+        const id=data.channelId;
+        if(!id){alert('Канал не найден. Проверьте имя.');return;}
+        const url='https://www.youtube.com/feeds/videos.xml?channel_id='+encodeURIComponent(id);
+        const name=data.title||'YouTube канал';
+        if(!window.confirm('Добавить источник?\n'+name))return;
+        addRSSSource(url,name);
+        document.getElementById('youtubeForm').style.display='none';
+        document.getElementById('youtubeInput').value='';
+    }catch(err){alert('Ошибка: '+err.message);}
+}
+
+function generateRedditRSS(){ if(!ensureConsent())return; hapticFeedback();
+    const input=document.getElementById('redditInput');
+    let sub=input.value.trim();
+    if(!sub){alert('Введите название сабреддита.');return;}
+    sub=sub.replace(/^https?:\/\/(?:www\.)?reddit\.com\/r\//,'').split('/')[0];
+    sub=sub.replace(/[^a-zA-Z0-9_]/g,'');
+    if(!sub){alert('Некорректное название сабреддита.');return;}
+    const url='https://www.reddit.com/r/'+sub+'/.rss';
+    if(!window.confirm('Добавить источник?\nReddit (r/'+sub+')\n'+url))return;
+    addRSSSource(url,'Reddit (r/'+sub+')');
+}
+
+function generateGoogleNewsRSS(){ if(!ensureConsent())return; hapticFeedback();
+    const input=document.getElementById('googleNewsInput');
+    let q=input.value.trim();
+    if(!q){alert('Введите ключевое слово или фразу для поиска.');return;}
+    q=q.replace(/\s+/g,' ').trim();
+    const enc=q.replace(/ /g,'+');
+    const url='https://news.google.com/rss/search?q='+enc+'&hl=ru&gl=RU&ceid=RU:ru';
+    if(!window.confirm('Добавить источник?\nGoogle News: '+q+'\n'+url))return;
+    addRSSSource(url,'Google News: '+q);
+}
+
+let categoryHistory=[];
+const CATEGORY_CACHE_TTL=3600000;
+async function loadCategoryLevel(parentId=null){
+    const key=parentId===null?'categories_root':'categories_'+parentId;
+    const cached=localStorage.getItem(key);
+    if(cached){
+        try{const parsed=JSON.parse(cached);if(Date.now()-parsed.timestamp<CATEGORY_CACHE_TTL)return parsed.data;}catch(e){}
+    }
+    const url=parentId===null?'/api/categories':'/api/categories?parent_id='+parentId;
+    const resp=await apiRequest(url);
+    if(!resp)return[];
+    if(!resp.ok)throw new Error('Ошибка загрузки');
+    const data=await resp.json();
+    localStorage.setItem(key,JSON.stringify({timestamp:Date.now(),data}));
+    return data;
+}
+function shortenCategoryName(n){
+    const map={
+        'DevOps и инфраструктура':'DevOps','IT и разработка':'IT','Информационная безопасность':'Инфобез',
+        'Искусственный интеллект':'AI','Машинное обучение':'ML','Глубокое обучение':'Deep Learning',
+        'Компьютерное зрение':'CV','Обработка естественного языка':'NLP','Кибербезопасность':'Кибербез',
+        'Разработка ПО':'Разработка','Архитектура ПО':'Архитектура ПО','Базы данных':'БД',
+        'Облачные технологии':'Облака','Веб-разработка':'Веб','Мобильная разработка':'Мобильная',
+        'Научные исследования':'Наука','Новости и общество':'Новости','Финансы и инвестиции':'Финансы',
+        'Экономика':'Экономика','Политика':'Политика','Медицина':'Медицина','Образование':'Образование',
+        'Экология':'Экология','Архитектура':'Архитектура','Дизайн':'Дизайн','Фотография':'Фото',
+        'Видеопроизводство':'Видео','Искусство':'Искусство','Музыка':'Музыка','Кино и ТВ':'Кино',
+        'Спорт':'Спорт','Путешествия':'Путешествия','Еда':'Еда','Дом':'Дом','Сад':'Сад',
+        'Семья':'Семья','Саморазвитие':'Саморазвитие','История':'История','Книги':'Книги',
+        'Хобби':'Хобби','Религия и философия':'Религия','HR':'HR','Отраслевые технологии':'Отраслевые',
+        'Маркетинг':'Маркетинг','Медиа':'Медиа','Мода':'Мода','Красота':'Красота','Игры':'Игры',
+        'Киберспорт':'Киберспорт','Автомобили':'Автотехника','Авиация':'Авиация','Морская отрасль':'Морская',
+        'Логистика':'Логистика','Сельское хозяйство':'Сельхоз','Энергетика':'Энергетика',
+        'Промышленность':'Промышленность','Инженерия':'Инженерия','Строительство':'Строительство',
+        'Недвижимость':'Недвижимость','Юриспруденция':'Юриспруденция','Законодательство':'Законодательство',
+        'Госуправление':'Госуправление','Международные отношения':'Международные','Геополитика':'Геополитика',
+        'Общество':'Общество','Региональные':'Региональные','Национальные':'Национальные','Мировые':'Мировые',
+        'Градостроительство':'Градостр.'
+    };
+    return map[n]||n;
+}
+function sortItems(items){
+    const late=['IT и разработка','DevOps и инфраструктура'];
+    const normal=items.filter(i=>!late.includes(i.name));
+    const lateItems=items.filter(i=>late.includes(i.name));
+    const rus=normal.filter(i=>/[а-яё]/i.test(i.name));
+    const eng=normal.filter(i=>!/[а-яё]/i.test(i.name));
+    rus.sort((a,b)=>a.name.localeCompare(b.name,'ru'));
+    eng.sort((a,b)=>a.name.localeCompare(b.name,'en'));
+    lateItems.sort((a,b)=>a.name.localeCompare(b.name,'ru'));
+    return[...rus,...eng,...lateItems];
+}
+function toggleCategoryBrowser(){ if(!ensureConsent())return; hapticFeedback();
+    const b=document.getElementById('categoryBrowser');
+    if(b.style.display==='block'){b.style.display='none';return;}
+    document.querySelectorAll('.add-form,.category-form').forEach(f=>f.style.display='none');
+    b.style.display='block';
+    categoryHistory=[];
+    showLevel(null);
+}
+function showLevel(parentId){
+    const header=document.getElementById('categoryBrowserHeader');
+    const grid=document.getElementById('categoryGrid');
+    const back=document.getElementById('categoryBackBtn');
+    grid.innerHTML='<div style="text-align:center;padding:10px;color:var(--text-secondary);">Загрузка...</div>';
+    loadCategoryLevel(parentId).then(items=>{
+        if(!items||items.length===0){grid.innerHTML='<div style="text-align:center;padding:10px;color:var(--text-secondary);">Нет элементов</div>';return;}
+        const sorted=sortItems(items);
+        const hasSources=sorted.some(i=>i.url&&i.url.trim()!=='');
+        let hText=parentId===null?'Выберите категорию':(categoryHistory[categoryHistory.length-1]?.name||'Категория')+(hasSources?' — выберите источник':' — выберите подкатегорию');
+        header.textContent=hText;
+        grid.innerHTML = '';
+        sorted.forEach(i => {
+            const name = shortenCategoryName(i.name);
+            const btn = document.createElement('button');
+            btn.textContent = name;
+            if (i.url) {
+                btn.onclick = function() { addSourceByType(i.source_type || 'rss', i.url, name); };
+            } else {
+                btn.onclick = function() { openLevel(i.id, name); };
+            }
+            grid.appendChild(btn);
+        });
+        back.style.display = categoryHistory.length > 0 ? 'block' : 'none';
+    }).catch(err=>{grid.innerHTML='<div style="text-align:center;padding:10px;color:red;">Ошибка: '+err.message+'</div>';});
+}
+function openLevel(id,name){hapticFeedback();categoryHistory.push({id:id,name:name});showLevel(id);}
+function goBackLevel(){ if(!ensureConsent())return; hapticFeedback();
+    if(categoryHistory.length===0){document.getElementById('categoryBrowser').style.display='none';return;}
+    categoryHistory.pop();
+    if(categoryHistory.length===0)showLevel(null);
+    else showLevel(categoryHistory[categoryHistory.length-1].id);
+}
+
+function toggleTimePicker(){ if(!ensureConsent())return; hapticFeedback();
+    if(!isPremium){alert('⛔ Доступно только для Расширенного тарифа. Оформите подписку.');return;}
+    const p=document.getElementById('timePicker');
+    if(p.style.display==='none')openTimePicker();
+    else closeTimePicker();
+}
+function openTimePicker(){if(!isPremium)return;document.getElementById('timePicker').style.display='block';renderTimePicker();}
+function closeTimePicker(){document.getElementById('timePicker').style.display='none';}
+function renderTimePicker(){
+    const grid=document.getElementById('timePickerGrid');
+    grid.innerHTML='';
+    const cur=currentSendTime?parseInt(currentSendTime.split(':')[0]):-1;
+    for(let h=0;h<24;h++){
+        const btn=document.createElement('button');
+        btn.textContent=h.toString().padStart(2,'0')+':00';
+        if(h===cur)btn.classList.add('selected');
+        btn.onclick=function() { setTime(h); };
+        grid.appendChild(btn);
+    }
+}
+async function setTime(hour){ if(!ensureConsent())return; hapticFeedback();
+    try{
+        const resp=await apiRequest('/api/webapp/set_time',{
+            method:'POST',
+            headers:getHeaders(),
+            body:JSON.stringify({hour:hour})
+        });
+        if(!resp)return;
+        if(!resp.ok){const err=await resp.json();alert('❌ Ошибка: '+err.detail);return;}
+        const data=await resp.json();
+        currentSendTime=data.send_time;
+        document.getElementById('currentTimeDisplay').textContent=currentSendTime+' MSK';
+        document.querySelectorAll('#timePickerGrid button').forEach((btn,idx)=>{btn.classList.toggle('selected',idx===hour);});
+        alert('✅ Время установлено на '+currentSendTime);
+        closeTimePicker();
+        await loadApp();
+    }catch(err){alert('❌ Ошибка: '+err.message);}
+}
+
+function toggleTariffs(){ if(!ensureConsent())return; hapticFeedback();document.getElementById('tariffBlock').classList.toggle('visible');}
+async function handlePayment(tariffKey){ if(!ensureConsent())return; hapticFeedback();
+    if(!authToken){alert('❌ Вы не авторизованы. Пожалуйста, войдите.');return;}
+    try{
+        const resp=await apiRequest('/api/payment/create-invoice',{
+            method:'POST',
+            headers:getHeaders(),
+            body:JSON.stringify({tariff:tariffKey})
+        });
+        if(!resp)return;
+        if(!resp.ok){const err=await resp.json();alert('❌ Ошибка: '+err.detail);return;}
+        const data=await resp.json();
+        if(data.payment_url){window.open(data.payment_url,'_blank');alert('🔗 Переход к оплате...');}
+        else{alert('❌ Не удалось получить ссылку на оплату');}
+    }catch(err){alert('❌ Ошибка: '+err.message);}
+}
+
+// ===== ФУНКЦИИ ВХОДА =====
+
+// ----- VK OAuth с серверным хранением code_verifier (новая вкладка) -----
+async function startVkAuth(){
+    hapticFeedback();
+    const verifier = generateCodeVerifier();
+    const challenge = await generateCodeChallenge(verifier);
+    const state = Math.random().toString(36).substring(2);
+
+    // Сохраняем verifier на сервере
+    try {
+        const resp = await apiRequest('/api/auth/vk/save-verifier', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ state, code_verifier: verifier })
+        });
+        if (!resp.ok) throw new Error('Не удалось сохранить verifier на сервере');
+    } catch (e) {
+        alert('Ошибка: ' + e.message);
+        return;
+    }
+
+    const redirectUri = 'https://news.proid.studio/pwa';
+    const scope = 'vkid.personal_info';
+    const authUrl = `https://id.vk.ru/authorize?client_id=${VK_APP_ID}&redirect_uri=${encodeURIComponent(redirectUri)}&response_type=code&scope=${scope}&state=${state}&code_challenge=${challenge}&code_challenge_method=S256&v=5.199`;
+
+    const container = document.getElementById('loginScreen').querySelector('.auth-container');
+    if (container) container.style.display = 'none';
+    const w = document.getElementById('widgetContainer');
+    if (w) w.innerHTML = '<p style="color: var(--text-secondary);">Перенаправление на авторизацию VK...</p>';
+
+    window.open(authUrl, '_blank');
+}
+
+// ----- MAX AUTH -----
+async function startMaxAuth(){
+    hapticFeedback();
+    const container = document.getElementById('loginScreen').querySelector('.auth-container');
+    if (container) container.style.display = 'none';
+    const w = document.getElementById('widgetContainer');
+    w.innerHTML = '<div class="loader"></div>';
+    try{
+        const resp=await apiRequest('/api/auth/max-token');
+        if(!resp){container.style.display='block';w.innerHTML='';return;}
+        if(!resp.ok)throw new Error('Не удалось получить токен');
+        const data=await resp.json();
+        const token=data.token;
+        const botUsername=data.bot_username||'id772609477460_bot';
+        localStorage.setItem('max_auth_token',token);
+        startMaxWaiting(token);
+        window.open('https://max.ru/'+botUsername+'?start='+encodeURIComponent(token),'_blank');
+        w.innerHTML='<p style="color: var(--text-secondary);">Ожидаем подтверждения в MAX...</p>';
+    }catch(err){
+        alert('❌ Ошибка: '+err.message);
+        container.style.display='block';
+        w.innerHTML='';
+    }
+}
+
+function startMaxWaiting(token){
+    let attempts=0;
+    const maxAttempts=60;
+    const timer=setInterval(async()=>{
+        attempts++;
+        try{
+            const resp=await apiRequest('/api/auth/max-status/'+token);
+            if(!resp)return;
+            const data=await resp.json();
+            if(data.ready&&data.auth_token){
+                clearInterval(timer);
+                alert('✅ Аккаунт привязан, перенаправляем...');
+                window.location.href='/pwa?auth_token='+encodeURIComponent(data.auth_token);
+                return;
+            }
+            if(attempts>=maxAttempts){
+                clearInterval(timer);
+                alert('⏰ Время истекло. Попробуйте снова.');
+                document.getElementById('loginScreen').querySelector('.auth-container').style.display='block';
+                document.getElementById('widgetContainer').innerHTML='';
+            }
+        }catch(e){}
+    },3000);
+}
+
+// ----- Яндекс ID (теперь открывается в новой вкладке) -----
+function startYandexAuth() {
+    hapticFeedback();
+    window.open('/api/auth/yandex/login', '_blank');
+}
+
+// ===== ОБРАБОТКА ВОЗВРАТА ИЗ VK (новая вкладка) =====
+(function handleVkCallback() {
+    const params = new URLSearchParams(window.location.search);
+    const code = params.get('code');
+    const state = params.get('state');
+    const device_id = params.get('device_id');
+
+    if (code && state) {
+        if (sessionStorage.getItem('vk_processed_' + state) === 'true') {
+            console.log('VK callback already processed, skipping');
+            window.history.replaceState({}, '', '/pwa');
+            return;
+        }
+        sessionStorage.setItem('vk_processed_' + state, 'pending');
+
+        apiRequest('/api/auth/vk/callback', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ code, device_id, state })
+        })
+        .then(async r => {
+            if (!r) return;
+            if (!r.ok) {
+                const err = await r.json();
+                throw new Error(err.detail || 'Ошибка авторизации');
+            }
+            return r.json();
+        })
+        .then(data => {
+            if (data.token) {
+                localStorage.setItem('auth_token', data.token);
+                sessionStorage.setItem('vk_processed_' + state, 'true');
+                if (window.opener) {
+                    window.close();
+                } else {
+                    location.reload();
+                }
+            } else {
+                throw new Error('Токен не получен');
+            }
+        })
+        .catch(err => {
+            alert('❌ Ошибка входа через VK: ' + err.message);
+            sessionStorage.removeItem('vk_processed_' + state);
+            window.history.replaceState({}, '', '/pwa');
+            showLoginScreen();
+        });
+    }
+
+    // Обработка Яндекса (если используется)
+    const yandexToken = params.get('auth_token');
+    if (yandexToken) {
+        localStorage.setItem('auth_token', yandexToken);
+        if (window.opener) {
+            window.close();
+        } else {
+            location.reload();
+        }
+    }
+})();
+
+// ===== СЛУШАТЕЛЬ STORAGE =====
+window.addEventListener('storage', function(e) {
+    if (e.key === 'auth_token' && e.newValue) {
+        console.log('VK/Yandex: auth_token changed, reloading parent');
+        location.reload();
+    }
+});
+
+// ===== КНОПКА "СМОТРЕТЬ НОВОСТИ" =====
+let digestVisible = false;
+async function toggleDigest() {
+    console.log('🟢 toggleDigest() вызвана');
+    if (!ensureConsent()) {
+        console.warn('⛔ ensureConsent() вернул false, прерываем выполнение');
+        return;
+    }
+    console.log('✅ ensureConsent() пройден');
+
+    const container = document.getElementById('digestContainer');
+    const content = document.getElementById('digestContent');
+    console.log('📦 container:', container, 'content:', content);
+
+    if (digestVisible) {
+        console.log('🔄 digestVisible = true, скрываем контейнер');
+        container.style.display = 'none';
+        digestVisible = false;
+        return;
+    }
+    console.log('🔄 digestVisible = false, показываем контейнер');
+    container.style.display = 'block';
+    digestVisible = true;
+
+    content.innerHTML = '<div style="text-align:center; padding:20px; color: var(--text-secondary);">⏳ Загрузка...</div>';
+    console.log('📝 Установлен текст загрузки');
+
+    try {
+        console.log('📡 Вызов apiRequest("/api/webapp/digest")...');
+        const resp = await apiRequest('/api/webapp/digest', { headers: getHeaders() });
+        console.log('📡 Ответ получен, статус:', resp ? resp.status : 'null');
+
+        if (!resp) {
+            console.warn('⚠️ resp = null, прерываем');
+            return;
+        }
+        if (!resp.ok) {
+            const err = await resp.json();
+            console.error('❌ Ошибка ответа:', err);
+            content.innerHTML = `<div style="color: #ff6b6b; text-align:center; padding:20px;">❌ Ошибка: ${err.detail || 'Не удалось загрузить дайджест'}</div>`;
+            return;
+        }
+        const data = await resp.json();
+        console.log('📄 Получены данные:', data);
+
+        let digestHtml = data.digest;
+        console.log('📄 digestHtml длина:', digestHtml ? digestHtml.length : 0);
+
+        if (!digestHtml || digestHtml.trim() === '' || digestHtml.includes('Дайджест ещё не формировался')) {
+            console.log('📭 Дайджест пуст или ещё не формировался');
+            content.innerHTML = `<div style="text-align:center; padding:20px; color: var(--text-secondary);">📭 Добавьте источники и дождитесь автоматического сбора новостей.</div>`;
+            return;
+        }
+
+        digestHtml = digestHtml.replace(/[\x00-\x1F\x7F-\x9F\u200B\u200C\u200D\uFEFF\u2028\u2029\r]/g, '');
+        console.log('🧹 После очистки длина:', digestHtml.length);
+
+        let blocks = digestHtml.split(/(?=\n- <b>)/).filter(b => b.trim().length > 0);
+        if (blocks.length <= 1) {
+            blocks = digestHtml.split(/(?=\n-)/).filter(b => b.trim().length > 0);
+        }
+        if (blocks.length <= 1) {
+            blocks = digestHtml.split(/(?=- <b>)/).filter(b => b.trim().length > 0);
+            if (blocks[0] && blocks[0].trim() === '') blocks.shift();
+        }
+        console.log('🧩 Количество блоков:', blocks.length);
+
+        let html = '';
+        for (let block of blocks) {
+            let lines = block.split('\n');
+            lines = lines.map(line => line.replace(/^[\s\u00A0]+/, ''));
+            while (lines.length > 0 && lines[0].trim() === '') lines.shift();
+            while (lines.length > 0 && lines[lines.length - 1].trim() === '') lines.pop();
+            let cleanedBlock = lines.join('\n');
+
+            let isSummary = cleanedBlock.indexOf('<b>Обсуждения в ') !== -1;
+            if (isSummary) {
+                let summaryStart = cleanedBlock.indexOf('<b>Обсуждения в ');
+                if (summaryStart !== -1) {
+                    let closeBpos = cleanedBlock.indexOf('</b>', summaryStart);
+                    if (closeBpos !== -1) {
+                        let linkStart = cleanedBlock.indexOf('<a href', closeBpos);
+                        if (linkStart === -1) linkStart = cleanedBlock.length;
+                        let before = cleanedBlock.slice(0, closeBpos + 4);
+                        let body = cleanedBlock.slice(closeBpos + 4, linkStart);
+                        let after = cleanedBlock.slice(linkStart);
+                        body = body.replace(/^\s*\n+/, '').replace(/\n+\s*$/, '');
+                        after = after.replace(/^\s*\n+/, '');
+                        let parts = body.split(/\s*-\s*/).filter(p => p.trim() !== '');
+                        let newBody;
+                        if (parts.length > 1) {
+                            newBody = parts.map(p => '- ' + p.trim()).join('\n\n');
+                        } else {
+                            newBody = body.trim();
+                        }
+                        cleanedBlock = before + '\n\n' + newBody + '\n' + after;
+                    }
+                }
+            }
+
+            if (cleanedBlock.includes('</b>')) {
+                cleanedBlock = cleanedBlock.replace(/(<\/b>)(?!\n)/, '$1\n');
+            }
+            if (cleanedBlock.includes('<a href')) {
+                cleanedBlock = cleanedBlock.replace(/(?!\n)(<a href)/, '\n$1');
+            }
+            cleanedBlock = cleanedBlock.replace(/\n{3,}/g, '\n\n');
+
+            if (cleanedBlock) {
+                html += `<div class="status-block">${cleanedBlock}</div>`;
+            }
+        }
+
+        if (html) {
+            console.log('✅ Готово, вставляем HTML, длина:', html.length);
+            content.innerHTML = html;
+            content.querySelectorAll('a').forEach(link => link.target = '_blank');
+        } else {
+            console.log('📭 После обработки блоков ничего не осталось');
+            content.innerHTML = `<div style="text-align:center; padding:20px; color: var(--text-secondary);">📭 Новости не найдены.</div>`;
+        }
+
+    } catch (e) {
+        console.error('❌ Исключение в toggleDigest:', e);
+        content.innerHTML = `<div style="color: #ff6b6b; text-align:center; padding:20px;">❌ Ошибка: ${e.message}</div>`;
+    }
+}
+
+// ===== ВЫХОД ИЗ АККАУНТА =====
+function logout() {
+    const confirmLogout = () => {
+        localStorage.removeItem('auth_token');
+        localStorage.removeItem('bot_auth_token');
+        localStorage.removeItem('max_auth_token');
+        sessionStorage.removeItem('auth_token');
+        sessionStorage.removeItem('bot_auth_token');
+        sessionStorage.removeItem('max_auth_token');
+        sessionStorage.removeItem('vk_auth_state');
+        sessionStorage.removeItem('vk_code_verifier');
+        authToken = null;
+        currentSources = [];
+        window.location.reload();
+    };
+
+    if (window.Telegram && window.Telegram.WebApp && window.Telegram.WebApp.showPopup) {
+        window.Telegram.WebApp.showPopup({
+            title: 'Выход',
+            message: 'Вы уверены, что хотите выйти?',
+            buttons: [
+                { id: 'cancel', type: 'cancel', text: 'Отмена' },
+                { id: 'logout', type: 'destructive', text: 'Выйти' }
+            ]
+        }, function (btnId) {
+            if (btnId === 'logout') confirmLogout();
+        });
+    } else if (window.WebApp && window.WebApp.showPopup) {
+        window.WebApp.showPopup({
+            title: 'Выход',
+            message: 'Вы уверены, что хотите выйти?',
+            buttons: [
+                { id: 'cancel', type: 'cancel', text: 'Отмена' },
+                { id: 'logout', type: 'destructive', text: 'Выйти' }
+            ]
+        }, function (btnId) {
+            if (btnId === 'logout') confirmLogout();
+        });
+    } else {
+        if (confirm('Вы уверены, что хотите выйти?')) {
+            confirmLogout();
+        }
+    }
+}
+
+window.suggestSource = function(){
+    if (!ensureConsent()) return;
+    hapticFeedback();
+    const url='https://t.me/professional_interior_design';
+    const text='Добрый день. Хочу предложить источник:';
+    window.open(url+'?text='+encodeURIComponent(text),'_blank');
+};
+
+// ---- ИНИЦИАЛИЗАЦИЯ ----
+(function init(){
+    if(authToken){
+        if(document.getElementById('sourceListContainer').children.length===0)loadApp();
+    } else {
+        showLoginScreen();
+        const container = document.getElementById('loginScreen').querySelector('.auth-container');
+        if (container) container.style.display = 'block';
+        const w = document.getElementById('widgetContainer');
+        if (w) w.innerHTML = '';
+    }
+})();
+
+// ---- ЭКСПОРТЫ ----
+window.startVkAuth = startVkAuth;
+window.startMaxAuth = startMaxAuth;
+window.startYandexAuth = startYandexAuth;
+window.toggleTariffs = toggleTariffs;
+window.handlePayment = handlePayment;
+window.startPayment = handlePayment;
+window.toggleCategoryForm = toggleCategoryForm;
+window.toggleAddForm = toggleAddForm;
+window.toggleGitHubForm = toggleGitHubForm;
+window.toggleYouTubeForm = toggleYouTubeForm;
+window.toggleRedditForm = toggleRedditForm;
+window.toggleGoogleNewsForm = toggleGoogleNewsForm;
+window.addSourceSubmit = addSourceSubmit;
+window.addCategorySource = addCategorySource;
+window.addForbesTelegram = addForbesTelegram;
+window.closeAddForm = closeAddForm;
+window.closeGitHubForm = closeGitHubForm;
+window.closeYouTubeForm = closeYouTubeForm;
+window.closeRedditForm = closeRedditForm;
+window.closeGoogleNewsForm = closeGoogleNewsForm;
+window.confirmDelete = confirmDelete;
+window.askOpenLink = askOpenLink;
+window.updateStatus = updateStatus;
+window.toggleTimePicker = toggleTimePicker;
+window.closeTimePicker = closeTimePicker;
+window.setTime = setTime;
+window.toggleCategoryBrowser = toggleCategoryBrowser;
+window.goBackLevel = goBackLevel;
+window.openLevel = openLevel;
+window.showLevel = showLevel;
+window.addSourceByType = addSourceByType;
+window.loadCategoryLevel = loadCategoryLevel;
+window.shortenCategoryName = shortenCategoryName;
+window.sortItems = sortItems;
+window.generateGitHubRSS = generateGitHubRSS;
+window.generateYouTubeRSS = generateYouTubeRSS;
+window.generateRedditRSS = generateRedditRSS;
+window.generateGoogleNewsRSS = generateGoogleNewsRSS;
+window.addRSSSource = addRSSSource;
+window.toggleDigest = toggleDigest;
+window.suggestSource = window.suggestSource;
+window.ensureConsent = ensureConsent;
+window.logout = logout;
+</script>
+
+<!-- ===== ФУТЕР ===== -->
 <div class="footer-wrapper">
-      <div class="footer-inner">
+    <div class="footer-inner">
         <span>© 2026 «Мои AI Новости»</span>
         <span class="sep">|</span>
         <a href="https://news.proid.studio/privacy" target="_blank">Политика</a>
@@ -205,11 +1618,9 @@
         <span class="sep">|</span>
         <a href="https://news.proid.studio/support" target="_blank">Помощь</a>
         <span class="sep">|</span>
-        <span>Создано: <a href="https://proid.studio" target="_blank" class="studio-link">proid.studio</a></span>
+        <span>Создано: <a href="https://proid.studio" target="_blank" style="color:#3088ff; font-weight:500;">proid.studio</a></span>
     </div>
 </div>
 
-<script src="categories.js"></script>
-<script src="app.js"></script>
 </body>
 </html>

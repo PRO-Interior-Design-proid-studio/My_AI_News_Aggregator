@@ -155,29 +155,16 @@
             text-decoration: underline;
             opacity: 0.8;
         }
-        #logoutContainer {
-            text-align: center;
-            margin-top: 12px;
-            font-size: 14px;
-            color: var(--text-secondary);
-            cursor: pointer;
-            text-decoration: none;
-            user-select: none;
-            transition: color 0.2s;
-        }
-        #logoutContainer:hover {
-            color: var(--text) !important;
-        }
+        /* ===== УДАЛЯЕМ КОНФЛИКТУЮЩИЕ СТИЛИ ДЛЯ КНОПОК ===== */
+        #logoutContainer,
         #deleteAccountContainer {
-            text-align: center;
-            margin-top: 8px;
-            font-size: 14px;
-            color: var(--text-secondary);
+            display: inline-block;
             cursor: pointer;
-            text-decoration: none;
-            user-select: none;
+            color: var(--text-secondary);
+            font-size: 14px;
             transition: color 0.2s;
         }
+        #logoutContainer:hover,
         #deleteAccountContainer:hover {
             color: var(--text) !important;
         }
@@ -192,6 +179,25 @@
             pointer-events: auto !important;
             opacity: 1 !important;
             user-select: auto !important;
+        }
+        /* Стиль для ссылки на proid.studio (заменена на span) */
+        #studioLink {
+            color: #3088ff !important;
+            font-weight: 500;
+            cursor: pointer;
+        }
+        #studioLink:hover {
+            text-decoration: underline;
+        }
+        /* Убедимся, что ссылка "Открыть приложение" ведёт себя как кнопка */
+        #openPwaLink {
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-size: 14px;
+            cursor: pointer;
+        }
+        #openPwaLink:hover {
+            color: var(--text);
         }
     </style>
 </head>
@@ -345,9 +351,19 @@
                 </div>
             </div>
 
-            <!-- ===== КНОПКИ ВЫХОДА И УДАЛЕНИЯ ===== -->
-            <div id="logoutContainer" onclick="logout()">Выход (сброс кэша)</div>
-            <div id="deleteAccountContainer" onclick="deleteAccount()">Удалить аккаунт</div>
+            <!-- ===== ССЫЛКА "ОТКРЫТЬ ПРИЛОЖЕНИЕ В БРАУЗЕРЕ" (исправлена) ===== -->
+            <div style="text-align: center; margin-top: 16px;">
+                <a id="openPwaLink" href="https://news.proid.studio/pwa" target="_blank" style="color: var(--text-secondary); text-decoration: none; font-size: 14px; cursor: pointer;">Открыть приложение в браузере</a>
+            </div>
+
+            <!-- ===== ИСПРАВЛЕННЫЙ БЛОК КНОПОК (СТАБИЛЬНЫЙ) ===== -->
+            <div style="display: flex; justify-content: center; align-items: center; gap: 12px; margin-top: 8px; font-size: 14px; color: var(--text-secondary); white-space: nowrap;">
+                <span id="deleteAccountContainer" style="display: inline-block; cursor: pointer; flex-shrink: 0;" onclick="deleteAccount()">Удалить аккаунт</span>
+                <span style="color: var(--text-secondary); opacity: 0.3; flex-shrink: 0;">|</span>
+                <span id="logoutContainer" style="display: inline-block; cursor: pointer; flex-shrink: 0;" onclick="logout()">Выход (сброс кэша)</span>
+            </div>
+            <!-- ===== КОНЕЦ БЛОКА ===== -->
+
         </div> <!-- /appContent -->
     </div> <!-- /container -->
 </div> <!-- /page-wrap -->
@@ -366,7 +382,7 @@
         <span class="sep">|</span>
         <a href="/support" target="_blank">Помощь</a>
         <span class="sep">|</span>
-        <span>Создано: <a href="https://proid.studio" target="_blank" class="studio-link">proid.studio</a></span>
+        <span>Создано: <span id="studioLink" style="color:#3088ff; font-weight:500; cursor:pointer;">proid.studio</span></span>
     </div>
 </div>
 
@@ -379,31 +395,150 @@
 
     console.log('✅ VK Mini App script loaded');
 
-    const API_BASE = 'https://news.proid.studio';
+    var API_BASE = 'https://news.proid.studio';
 
     // === ГЛОБАЛЬНЫЕ ПЕРЕМЕННЫЕ ===
-    let authToken = localStorage.getItem('auth_token') || null;
-    let currentSources = [];
-    let currentLimit = 5;
-    let currentAddType = 'rss';
-    let currentSendTime = null;
-    let isPremium = false;
-    let defaultSendHour = 18;
-    let digestVisible = false;
-    let categoryHistory = [];
-    const CATEGORY_CACHE_TTL = 3600000;
-    let isTestUser = false;
-    let consentGiven = false;
-    let vkUserInfo = null;
+    var authToken = localStorage.getItem('auth_token') || null;
+    var currentSources = [];
+    var currentLimit = 5;
+    var currentAddType = 'rss';
+    var currentSendTime = null;
+    var isPremium = false;
+    var defaultSendHour = 18;
+    var digestVisible = false;
+    var categoryHistory = [];
+    var CATEGORY_CACHE_TTL = 3600000;
+    var isTestUser = false;
+    var consentGiven = false;
+    var vkUserInfo = null;
 
     // === VK BRIDGE ===
-    const vkBridge = window.vkBridge;
+    var vkBridge = window.vkBridge;
 
-    // === Функции работы с API (абсолютные URL) ===
-    async function apiRequest(url, options = {}) {
-        const fullUrl = url.startsWith('http') ? url : API_BASE + url;
+    // === УНИВЕРСАЛЬНАЯ ФУНКЦИЯ ОТКРЫТИЯ ВНЕШНИХ ССЫЛОК (с fallback) ===
+    function openUrlViaVK(url, fallback) {
+        console.log('openUrlViaVK called with URL:', url);
+        if (window.vkBridge) {
+            window.vkBridge.send('VKWebAppOpenURL', { url: url })
+                .then(function() {
+                    console.log('✅ Ссылка открыта через VK Bridge');
+                })
+                .catch(function(err) {
+                    console.warn('VKWebAppOpenURL failed:', err);
+                    if (typeof fallback === 'function') {
+                        fallback();
+                    } else {
+                        try {
+                            window.open(url, '_blank');
+                        } catch (e) {
+                            alert('Не удалось открыть ссылку. Пожалуйста, скопируйте её вручную:\n' + url);
+                        }
+                    }
+                });
+        } else {
+            console.warn('VK Bridge недоступен, используем fallback');
+            if (typeof fallback === 'function') {
+                fallback();
+            } else {
+                try {
+                    window.open(url, '_blank');
+                } catch (e) {
+                    alert('Не удалось открыть ссылку. Пожалуйста, скопируйте её вручную:\n' + url);
+                }
+            }
+        }
+    }
+
+    // === ОБРАБОТЧИК ССЫЛКИ "ОТКРЫТЬ ПРИЛОЖЕНИЕ В БРАУЗЕРЕ" ===
+    document.addEventListener('DOMContentLoaded', function() {
+        var link = document.getElementById('openPwaLink');
+        if (link) {
+            link.addEventListener('click', function(e) {
+                e.preventDefault(); // предотвращаем обычный переход по ссылке
+                var url = this.href;
+                openUrlViaVK(url, function() {
+                    // fallback: пробуем через window.open
+                    try {
+                        window.open(url, '_blank');
+                    } catch (e) {
+                        alert('Не удалось открыть приложение. Пожалуйста, скопируйте ссылку вручную:\n' + url);
+                    }
+                });
+            });
+        }
+    });
+
+    // === ПРЕДЛОЖИТЬ ИСТОЧНИК (Telegram) ===
+    function suggestSource() {
+        hapticFeedback();
+        var url = 'https://t.me/professional_interior_design';
+        var text = 'Добрый день. Хочу предложить источник:';
+        var fullUrl = url + '?text=' + encodeURIComponent(text);
+        openUrlViaVK(fullUrl, function() {
+            try {
+                window.open(fullUrl, '_blank');
+            } catch (e) {
+                alert('Не удалось открыть Telegram. Пожалуйста, скопируйте ссылку вручную:\n' + fullUrl);
+            }
+        });
+    }
+
+    // === УДАЛЕНИЕ АККАУНТА ===
+    function deleteAccount() {
+        if (!authToken) {
+            alert('Вы не авторизованы.');
+            return;
+        }
+        if (!confirm('Вы уверены, что хотите полностью удалить аккаунт и все данные? Это действие необратимо.')) {
+            return;
+        }
+        var url = '/delete-account?token=' + encodeURIComponent(authToken);
+        openUrlViaVK(url, function() {
+            try {
+                window.open(url, '_blank');
+            } catch (e) {
+                alert('Не удалось открыть страницу удаления. Пожалуйста, скопируйте ссылку вручную:\n' + url);
+            }
+        });
+    }
+
+    // === ОТКРЫТИЕ ССЫЛКИ ИСТОЧНИКА (используется в списке источников) ===
+    function askOpenLink(url) {
+        hapticFeedback();
+        if (confirm('Открыть ссылку?\n\n' + url)) {
+            openUrlViaVK(url, function() {
+                try {
+                    window.open(url, '_blank');
+                } catch (e) {
+                    alert('Не удалось открыть ссылку. Пожалуйста, скопируйте её вручную:\n' + url);
+                }
+            });
+        }
+    }
+
+    // === ССЫЛКА НА proid.studio (в футере) ===
+    document.addEventListener('DOMContentLoaded', function() {
+        var studioLink = document.getElementById('studioLink');
+        if (studioLink) {
+            studioLink.addEventListener('click', function(e) {
+                e.preventDefault();
+                openUrlViaVK('https://proid.studio', function() {
+                    try {
+                        window.open('https://proid.studio', '_blank');
+                    } catch (e) {
+                        alert('Не удалось открыть сайт разработчика. Пожалуйста, скопируйте ссылку вручную:\nhttps://proid.studio');
+                    }
+                });
+            });
+        }
+    });
+
+    // === Функции работы с API ===
+    async function apiRequest(url, options) {
+        options = options || {};
+        var fullUrl = url.startsWith('http') ? url : API_BASE + url;
         try {
-            const resp = await fetch(fullUrl, options);
+            var resp = await fetch(fullUrl, options);
             if (resp.status === 503) {
                 alert('⚠️ Сервер временно недоступен. Обновите страницу через несколько секунд.');
                 return null;
@@ -432,11 +567,11 @@
             await vkBridge.send('VKWebAppInit', {});
             console.log('✅ VK Bridge инициализирован');
 
-            const user = await vkBridge.send('VKWebAppGetUserInfo', {});
+            var user = await vkBridge.send('VKWebAppGetUserInfo', {});
             vkUserInfo = user;
             console.log('👤 Пользователь VK:', user);
 
-            const resp = await apiRequest('/api/miniapp/vk/auth', {
+            var resp = await apiRequest('/api/miniapp/vk/auth', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
@@ -447,10 +582,10 @@
 
             if (!resp) return;
             if (!resp.ok) {
-                const err = await resp.text();
-                throw new Error('Ошибка авторизации на сервере: ' + err);
+                var errText = await resp.text();
+                throw new Error('Ошибка авторизации на сервере: ' + errText);
             }
-            const data = await resp.json();
+            var data = await resp.json();
 
             if (data.status === 'ok' && data.token) {
                 authToken = data.token;
@@ -465,7 +600,7 @@
         } catch (e) {
             console.error('❌ Ошибка инициализации VK Bridge:', e);
             document.getElementById('sourceListContainer').innerHTML =
-                `<div class="empty-state"><div class="empty-icon">❌</div><h3>Ошибка авторизации</h3><p>${e.message}</p></div>`;
+                '<div class="empty-state"><div class="empty-icon">❌</div><h3>Ошибка авторизации</h3><p>' + e.message + '</p></div>';
             document.getElementById('appContainer').style.display = 'block';
         }
     }
@@ -478,12 +613,12 @@
             return;
         }
         apiRequest('/api/webapp/sources', { headers: getHeaders() })
-            .then(resp => {
+            .then(function(resp) {
                 if (!resp) return;
                 if (!resp.ok) {
                     if (resp.status === 403) {
-                        const consentBlock = document.getElementById('consentBlock');
-                        const appContainer = document.getElementById('appContainer');
+                        var consentBlock = document.getElementById('consentBlock');
+                        var appContainer = document.getElementById('appContainer');
                         consentBlock.style.display = 'block';
                         appContainer.classList.add('consent-pending');
                         consentGiven = false;
@@ -497,11 +632,11 @@
                         initVK();
                         return;
                     }
-                    return resp.json().then(err => { throw new Error(err.detail || 'Ошибка загрузки'); });
+                    return resp.json().then(function(err) { throw new Error(err.detail || 'Ошибка загрузки'); });
                 }
                 return resp.json();
             })
-            .then(data => {
+            .then(function(data) {
                 if (!data) return;
                 currentSources = data.sources || [];
                 currentLimit = data.limit || 5;
@@ -514,8 +649,8 @@
                 document.getElementById('counter').textContent = currentSources.length;
                 updateStatus(data);
 
-                const consentBlock = document.getElementById('consentBlock');
-                const appContainer = document.getElementById('appContainer');
+                var consentBlock = document.getElementById('consentBlock');
+                var appContainer = document.getElementById('appContainer');
                 if (!consentGiven) {
                     consentBlock.style.display = 'block';
                     appContainer.classList.add('consent-pending');
@@ -528,17 +663,17 @@
                     document.getElementById('paymentToggleBtn').style.display = 'block';
                 }
             })
-            .catch(err => {
+            .catch(function(err) {
                 console.error('loadSources error:', err);
                 document.getElementById('sourceListContainer').innerHTML =
-                    `<div class="empty-state"><div class="empty-icon">⚠️</div><h3>Ошибка загрузки</h3><p>${err.message}</p></div>`;
+                    '<div class="empty-state"><div class="empty-icon">⚠️</div><h3>Ошибка загрузки</h3><p>' + err.message + '</p></div>';
             });
     }
 
     // === ОБРАБОТЧИК СОГЛАСИЯ ===
     document.addEventListener('DOMContentLoaded', function() {
-        const check = document.getElementById('consentCheck');
-        const btn = document.getElementById('consentAcceptBtn');
+        var check = document.getElementById('consentCheck');
+        var btn = document.getElementById('consentAcceptBtn');
         if (check && btn) {
             check.addEventListener('change', function() {
                 if (this.checked) {
@@ -553,8 +688,8 @@
             });
             btn.addEventListener('click', async function() {
                 if (!check.checked) return;
-                const appContainer = document.getElementById('appContainer');
-                const consentBlock = document.getElementById('consentBlock');
+                var appContainer = document.getElementById('appContainer');
+                var consentBlock = document.getElementById('consentBlock');
                 if (authToken === 'vol7Js5SZnjPuaTfkk46zea3I-k_vsInqyqQPho_dF0') {
                     consentBlock.style.display = 'none';
                     appContainer.classList.remove('consent-pending');
@@ -563,7 +698,7 @@
                     return;
                 }
                 try {
-                    const resp = await apiRequest('/api/webapp/consent', {
+                    var resp = await apiRequest('/api/webapp/consent', {
                         method: 'POST',
                         headers: getHeaders()
                     });
@@ -575,7 +710,7 @@
                         document.getElementById('paymentToggleBtn').style.display = 'block';
                         loadSources();
                     } else {
-                        const err = resp ? await resp.json() : { detail: 'Ошибка' };
+                        var err = resp ? await resp.json() : { detail: 'Ошибка' };
                         alert('❌ Ошибка: ' + (err.detail || 'Не удалось сохранить согласие'));
                     }
                 } catch (e) {
@@ -587,55 +722,55 @@
 
     // === ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ ===
     function hapticFeedback(){ if(navigator.vibrate) navigator.vibrate(10); }
-    function getTypeLabel(t){ const m={'rss':'RSS/HTML','telegram':'Telegram','vk':'VK','max':'MAX'}; return m[t]||t; }
+    function getTypeLabel(t){ var m={'rss':'RSS/HTML','telegram':'Telegram','vk':'VK','max':'MAX'}; return m[t]||t; }
     function truncate(s,l){ l=l||40; return s.length>l?s.slice(0,l)+'…':s; }
     function safeDecodeUrl(u){ try{ return decodeURIComponent(u); } catch(e){ return u; } }
-    function formatSourceValue(s){ let v=s.value; if(s.type==='telegram'||s.type==='vk'){ if(!v.startsWith('http')&&!v.startsWith('@'))v='@'+v;} if(s.type==='rss'){ v=safeDecodeUrl(v).replace(/^https?:\/\//,'').replace(/^www\./,''); } return v; }
-    function getSourceUrl(s){ let u=s.value; if(s.type==='telegram')u='https://t.me/'+u.replace(/^@/,''); else if(s.type==='vk')u='https://vk.com/'+u.replace(/^@/,''); return u; }
-    function askOpenLink(u){ hapticFeedback(); if(confirm('Открыть ссылку?\n\n'+u)) window.open(u,'_blank'); }
+    function formatSourceValue(s){ var v=s.value; if(s.type==='telegram'||s.type==='vk'){ if(!v.startsWith('http')&&!v.startsWith('@'))v='@'+v;} if(s.type==='rss'){ v=safeDecodeUrl(v).replace(/^https?:\/\//,'').replace(/^www\./,''); } return v; }
+    function getSourceUrl(s){ var u=s.value; if(s.type==='telegram')u='https://t.me/'+u.replace(/^@/,''); else if(s.type==='vk')u='https://vk.com/'+u.replace(/^@/,''); return u; }
     function getIconGradient(t){ switch(t){ case'telegram':return'linear-gradient(290deg,#d235ff 0%,#a062ff 30%,#3088ff 66%,#61d8ff 100%)'; case'vk':return'linear-gradient(290deg,#0d47a1 0%,#1565c0 30%,#1e88e5 66%,#64b5f6 100%)'; case'rss':return'linear-gradient(290deg,#d84315 0%,#f57c00 30%,#f9a825 66%,#ffee58 100%)'; default:return'linear-gradient(290deg,#d235ff 0%,#a062ff 30%,#3088ff 66%,#61d8ff 100%)'; } }
 
     function renderGroupedSources(sources){
         console.log('renderGroupedSources called with', sources);
-        const container = document.getElementById('sourceListContainer');
+        var container = document.getElementById('sourceListContainer');
         if(!sources||sources.length===0){ container.innerHTML='<div class="empty-state"><div class="empty-icon">📭</div><h3>Нет источников</h3><p>Добавьте свой первый источник</p></div>'; return; }
-        const sorted=[...sources].sort((a,b)=>a.value.toLowerCase().localeCompare(b.value.toLowerCase()));
-        const groups={'rss':[],'telegram':[],'vk':[],'max':[]};
-        sorted.forEach(s=>{ if(groups[s.type]) groups[s.type].push(s); else groups[s.type]=[s]; });
-        let html='';
-        const order=['telegram','vk','max','rss'];
-        for(const type of order){
-            const items=groups[type];
+        var sorted=[...sources].sort(function(a,b){ return a.value.toLowerCase().localeCompare(b.value.toLowerCase()); });
+        var groups={'rss':[],'telegram':[],'vk':[],'max':[]};
+        sorted.forEach(function(s){ if(groups[s.type]) groups[s.type].push(s); else groups[s.type]=[s]; });
+        var html='';
+        var order=['telegram','vk','max','rss'];
+        for(var i=0; i<order.length; i++){
+            var type=order[i];
+            var items=groups[type];
             if(items&&items.length>0){
                 html+='<div class="group-title">'+getTypeLabel(type)+'</div>';
                 html+='<div class="source-list">';
-                items.forEach(s=>{
-                    const f=formatSourceValue(s);
-                    const v=truncate(f,50);
-                    const u=getSourceUrl(s);
-                    const g=getIconGradient(s.type);
+                items.forEach(function(s){
+                    var f=formatSourceValue(s);
+                    var v=truncate(f,50);
+                    var u=getSourceUrl(s);
+                    var g=getIconGradient(s.type);
                     html+='<div class="source-item" data-url="'+u+'" data-id="'+s.id+'"><div class="source-info"><div class="source-icon" style="background:'+g+';"></div><span class="source-value" title="'+f+'">'+v+'</span></div><button class="delete-btn" onclick="event.stopPropagation(); confirmDelete('+s.id+')">✕</button></div>';
                 });
                 html+='</div>';
             }
         }
         container.innerHTML=html;
-        container.querySelectorAll('.source-item').forEach(el=>{
-            el.addEventListener('click',function(e){ if(e.target.classList.contains('delete-btn'))return; const url=this.dataset.url; if(url) askOpenLink(url); });
+        container.querySelectorAll('.source-item').forEach(function(el){
+            el.addEventListener('click',function(e){ if(e.target.classList.contains('delete-btn'))return; var url=this.dataset.url; if(url) askOpenLink(url); });
         });
     }
 
-    function confirmDelete(id){ hapticFeedback(); const s=currentSources.find(s=>s.id===id); if(!s){ alert('Источник не найден'); return; } const f=formatSourceValue(s); if(confirm('Удалить источник?\n\n'+f+'\n\nЭто действие нельзя отменить.')) deleteSource(id); }
+    function confirmDelete(id){ hapticFeedback(); var s=currentSources.find(function(s){ return s.id===id; }); if(!s){ alert('Источник не найден'); return; } var f=formatSourceValue(s); if(confirm('Удалить источник?\n\n'+f+'\n\nЭто действие нельзя отменить.')) deleteSource(id); }
     async function deleteSource(id){
         if (!authToken) return;
         try {
-            const resp = await apiRequest('/api/webapp/delete', {
+            var resp = await apiRequest('/api/webapp/delete', {
                 method: 'POST',
                 headers: getHeaders(),
                 body: JSON.stringify({ source_id: id })
             });
             if(!resp) return;
-            if(!resp.ok){ const err=await resp.json(); alert('❌ Ошибка удаления: '+err.detail); return; }
+            if(!resp.ok){ var err=await resp.json(); alert('❌ Ошибка удаления: '+err.detail); return; }
             await loadSources();
             alert('✅ Источник удалён');
         } catch(err){ alert('❌ Ошибка: '+err.message); }
@@ -651,10 +786,10 @@
         isPremium=data.is_premium||false;
         defaultSendHour=data.default_send_hour||18;
         currentSendTime=data.send_time||null;
-        const display=currentSendTime?currentSendTime:(defaultSendHour.toString().padStart(2,'0')+':00');
+        var display=currentSendTime?currentSendTime:(defaultSendHour.toString().padStart(2,'0')+':00');
         document.getElementById('currentTimeDisplay').textContent=display+' MSK';
-        const btn=document.getElementById('changeTimeBtn');
-        const hint=document.getElementById('upgradeHint');
+        var btn=document.getElementById('changeTimeBtn');
+        var hint=document.getElementById('upgradeHint');
         if(isPremium){ btn.style.display='inline-block'; btn.disabled=false; hint.style.display='none'; }
         else{ btn.style.display='none'; hint.style.display='inline-block'; if(document.getElementById('timePicker').style.display!=='none') closeTimePicker(); }
     }
@@ -665,41 +800,41 @@
     function closeYouTubeForm(){ document.getElementById('youtubeForm').style.display='none'; }
     function closeRedditForm(){ document.getElementById('redditForm').style.display='none'; }
     function closeGoogleNewsForm(){ document.getElementById('googleNewsForm').style.display='none'; }
-    function toggleForm(formId){ const form=document.getElementById(formId); if(!form) return; const isHidden=window.getComputedStyle(form).display==='none'; document.querySelectorAll('.category-form, .add-form').forEach(el=>{ if(el.id!==formId) el.style.display='none'; }); if(isHidden){ form.style.display='block'; } else { form.style.display='none'; } }
-    function toggleCategoryForm(type){ hapticFeedback(); console.log('toggleCategoryForm called with', type); const map={'bbc':'bbcForm','cnn':'cnnForm','dzen':'dzenForm','rb':'rbForm','habr':'habrForm','lifehacker':'lifehackerForm','vc':'vcForm'}; const id=map[type]; const form=document.getElementById(id); if(form&&window.getComputedStyle(form).display!=='none'){ form.style.display='none'; return; } toggleForm(id); if(form&&form.style.display==='block'){ const grid=document.getElementById(id.replace('Form','Grid')); if(grid&&grid.children.length===0){ let cats; if(type==='bbc') cats=window.BBC_CATEGORIES; else if(type==='cnn') cats=window.CNN_CATEGORIES; else if(type==='dzen') cats=window.DZEN_CATEGORIES; else if(type==='rb') cats=window.RB_CATEGORIES; else if(type==='habr') cats=window.HABR_CATEGORIES; else if(type==='lifehacker') cats=window.LIFEHACKER_CATEGORIES; else if(type==='vc') cats=window.VC_CATEGORIES; if(cats){ Object.entries(cats).sort((a,b)=>a[0].localeCompare(b[0],'ru')).forEach(([name,url])=>{ const btn=document.createElement('button'); btn.textContent=name; btn.onclick=function(){ addCategorySource('rss', url, name); }; grid.appendChild(btn); }); } else { grid.innerHTML='<div style="text-align:center;padding:10px;color:var(--text-secondary);">Категории не загружены</div>'; } } } }
-    function toggleAddForm(type){ hapticFeedback(); const form=document.getElementById('addForm'); const isHidden=window.getComputedStyle(form).display==='none'; document.querySelectorAll('.category-form, .add-form').forEach(el=>el.style.display='none'); if(isHidden){ currentAddType=type; const title=document.getElementById('addFormTitle'); const labels={'rss':'RSS/HTML','telegram':'Telegram','vk':'VK'}; title.textContent='Добавить '+labels[type]; const input=document.getElementById('sourceValue'); input.placeholder=type==='rss'?'Введите URL...':(type==='telegram'?'Введите username (без @)...':'Введите username (без @)...'); input.value=''; form.style.display='block'; } else { form.style.display='none'; } }
-    function toggleGitHubForm(){ hapticFeedback(); const form=document.getElementById('githubForm'); const isHidden=window.getComputedStyle(form).display==='none'; document.querySelectorAll('.category-form, .add-form').forEach(el=>el.style.display='none'); if(isHidden){ form.style.display='block'; updateGitHubButtons(''); const input=document.getElementById('githubInput'); input.removeEventListener('input', window._githubInputHandler); window._githubInputHandler=function(){ updateGitHubButtons(this.value); }; input.addEventListener('input', window._githubInputHandler); } else { form.style.display='none'; } }
-    function toggleYouTubeForm(){ hapticFeedback(); const form=document.getElementById('youtubeForm'); const isHidden=window.getComputedStyle(form).display==='none'; document.querySelectorAll('.category-form, .add-form').forEach(el=>el.style.display='none'); if(isHidden) form.style.display='block'; else form.style.display='none'; }
-    function toggleRedditForm(){ hapticFeedback(); const form=document.getElementById('redditForm'); const isHidden=window.getComputedStyle(form).display==='none'; document.querySelectorAll('.category-form, .add-form').forEach(el=>el.style.display='none'); if(isHidden) form.style.display='block'; else form.style.display='none'; }
-    function toggleGoogleNewsForm(){ hapticFeedback(); const form=document.getElementById('googleNewsForm'); const isHidden=window.getComputedStyle(form).display==='none'; document.querySelectorAll('.category-form, .add-form').forEach(el=>el.style.display='none'); if(isHidden) form.style.display='block'; else form.style.display='none'; }
+    function toggleForm(formId){ var form=document.getElementById(formId); if(!form) return; var isHidden=window.getComputedStyle(form).display==='none'; document.querySelectorAll('.category-form, .add-form').forEach(function(el){ if(el.id!==formId) el.style.display='none'; }); if(isHidden){ form.style.display='block'; } else { form.style.display='none'; } }
+    function toggleCategoryForm(type){ hapticFeedback(); console.log('toggleCategoryForm called with', type); var map={'bbc':'bbcForm','cnn':'cnnForm','dzen':'dzenForm','rb':'rbForm','habr':'habrForm','lifehacker':'lifehackerForm','vc':'vcForm'}; var id=map[type]; var form=document.getElementById(id); if(form&&window.getComputedStyle(form).display!=='none'){ form.style.display='none'; return; } toggleForm(id); if(form&&form.style.display==='block'){ var grid=document.getElementById(id.replace('Form','Grid')); if(grid&&grid.children.length===0){ var cats; if(type==='bbc') cats=window.BBC_CATEGORIES; else if(type==='cnn') cats=window.CNN_CATEGORIES; else if(type==='dzen') cats=window.DZEN_CATEGORIES; else if(type==='rb') cats=window.RB_CATEGORIES; else if(type==='habr') cats=window.HABR_CATEGORIES; else if(type==='lifehacker') cats=window.LIFEHACKER_CATEGORIES; else if(type==='vc') cats=window.VC_CATEGORIES; if(cats){ Object.entries(cats).sort(function(a,b){ return a[0].localeCompare(b[0],'ru'); }).forEach(function(entry){ var name=entry[0]; var url=entry[1]; var btn=document.createElement('button'); btn.textContent=name; btn.onclick=function(){ addCategorySource('rss', url, name); }; grid.appendChild(btn); }); } else { grid.innerHTML='<div style="text-align:center;padding:10px;color:var(--text-secondary);">Категории не загружены</div>'; } } } }
+    function toggleAddForm(type){ hapticFeedback(); var form=document.getElementById('addForm'); var isHidden=window.getComputedStyle(form).display==='none'; document.querySelectorAll('.category-form, .add-form').forEach(function(el){ el.style.display='none'; }); if(isHidden){ currentAddType=type; var title=document.getElementById('addFormTitle'); var labels={'rss':'RSS/HTML','telegram':'Telegram','vk':'VK'}; title.textContent='Добавить '+labels[type]; var input=document.getElementById('sourceValue'); input.placeholder=type==='rss'?'Введите URL...':(type==='telegram'?'Введите username (без @)...':'Введите username (без @)...'); input.value=''; form.style.display='block'; } else { form.style.display='none'; } }
+    function toggleGitHubForm(){ hapticFeedback(); var form=document.getElementById('githubForm'); var isHidden=window.getComputedStyle(form).display==='none'; document.querySelectorAll('.category-form, .add-form').forEach(function(el){ el.style.display='none'; }); if(isHidden){ form.style.display='block'; updateGitHubButtons(''); var input=document.getElementById('githubInput'); input.removeEventListener('input', window._githubInputHandler); window._githubInputHandler=function(){ updateGitHubButtons(this.value); }; input.addEventListener('input', window._githubInputHandler); } else { form.style.display='none'; } }
+    function toggleYouTubeForm(){ hapticFeedback(); var form=document.getElementById('youtubeForm'); var isHidden=window.getComputedStyle(form).display==='none'; document.querySelectorAll('.category-form, .add-form').forEach(function(el){ el.style.display='none'; }); if(isHidden) form.style.display='block'; else form.style.display='none'; }
+    function toggleRedditForm(){ hapticFeedback(); var form=document.getElementById('redditForm'); var isHidden=window.getComputedStyle(form).display==='none'; document.querySelectorAll('.category-form, .add-form').forEach(function(el){ el.style.display='none'; }); if(isHidden) form.style.display='block'; else form.style.display='none'; }
+    function toggleGoogleNewsForm(){ hapticFeedback(); var form=document.getElementById('googleNewsForm'); var isHidden=window.getComputedStyle(form).display==='none'; document.querySelectorAll('.category-form, .add-form').forEach(function(el){ el.style.display='none'; }); if(isHidden) form.style.display='block'; else form.style.display='none'; }
     function addForbesTelegram(){ hapticFeedback(); addCategorySource('telegram','forbesrussia','Forbes (Telegram)'); }
-    async function addSourceSubmit(){ hapticFeedback(); const val=document.getElementById('sourceValue').value.trim(); if(!val){ alert('Введите значение'); return; } if(!confirm('Добавить источник?\n\n'+val)) return; try{ const resp=await apiRequest('/api/webapp/add',{ method:'POST', headers:getHeaders(), body:JSON.stringify({source_type:currentAddType,source_value:val}) }); if(!resp)return; if(!resp.ok){ const err=await resp.json(); alert('❌ Ошибка: '+err.detail); return; } await loadSources(); alert('✅ Источник добавлен'); document.getElementById('addForm').style.display='none'; document.getElementById('sourceValue').value=''; } catch(err){ alert('❌ Ошибка добавления: '+err.message); } }
-    async function addCategorySource(t,u,n){ hapticFeedback(); if(!u||!u.trim()){ alert('URL не может быть пустым'); return; } let final=u.trim(); let type=t||'rss'; if(final.startsWith('https://t.me/')){ type='telegram'; final=final.replace(/^https:\/\/t\.me\//,'').split('/')[0]; if(final.startsWith('@')) final=final.slice(1); } else if(final.startsWith('https://vk.com/')||final.startsWith('https://vk.ru/')){ type='vk'; final=final.replace(/^https:\/\/(vk\.com|vk\.ru)\//,'').split('/')[0]; if(final.startsWith('@')) final=final.slice(1); } else if(!final.startsWith('http://')&&!final.startsWith('https://')){ if(type!=='telegram'&&type!=='vk') final='https://'+final; } if(!confirm('Добавить источник?\n\n'+n+'\n'+final)) return; try{ const resp=await apiRequest('/api/webapp/add',{ method:'POST', headers:getHeaders(), body:JSON.stringify({source_type:type,source_value:final}) }); if(!resp)return; if(!resp.ok){ const err=await resp.json(); alert('❌ Ошибка: '+err.detail); return; } await loadSources(); alert('✅ Добавлено: '+n); document.querySelectorAll('.category-form').forEach(el=>el.style.display='none'); } catch(err){ alert('❌ Ошибка добавления: '+err.message); } }
-    function addSourceByType(t,u,n){ let type=t; if(!['rss','telegram','vk','max'].includes(type)) type='rss'; addCategorySource(type,u,n); }
+    async function addSourceSubmit(){ hapticFeedback(); var val=document.getElementById('sourceValue').value.trim(); if(!val){ alert('Введите значение'); return; } if(!confirm('Добавить источник?\n\n'+val)) return; try{ var resp=await apiRequest('/api/webapp/add',{ method:'POST', headers:getHeaders(), body:JSON.stringify({source_type:currentAddType,source_value:val}) }); if(!resp)return; if(!resp.ok){ var err=await resp.json(); alert('❌ Ошибка: '+err.detail); return; } await loadSources(); alert('✅ Источник добавлен'); document.getElementById('addForm').style.display='none'; document.getElementById('sourceValue').value=''; } catch(err){ alert('❌ Ошибка добавления: '+err.message); } }
+    async function addCategorySource(t,u,n){ hapticFeedback(); if(!u||!u.trim()){ alert('URL не может быть пустым'); return; } var final=u.trim(); var type=t||'rss'; if(final.startsWith('https://t.me/')){ type='telegram'; final=final.replace(/^https:\/\/t\.me\//,'').split('/')[0]; if(final.startsWith('@')) final=final.slice(1); } else if(final.startsWith('https://vk.com/')||final.startsWith('https://vk.ru/')){ type='vk'; final=final.replace(/^https:\/\/(vk\.com|vk\.ru)\//,'').split('/')[0]; if(final.startsWith('@')) final=final.slice(1); } else if(!final.startsWith('http://')&&!final.startsWith('https://')){ if(type!=='telegram'&&type!=='vk') final='https://'+final; } if(!confirm('Добавить источник?\n\n'+n+'\n'+final)) return; try{ var resp=await apiRequest('/api/webapp/add',{ method:'POST', headers:getHeaders(), body:JSON.stringify({source_type:type,source_value:final}) }); if(!resp)return; if(!resp.ok){ var err=await resp.json(); alert('❌ Ошибка: '+err.detail); return; } await loadSources(); alert('✅ Добавлено: '+n); document.querySelectorAll('.category-form').forEach(function(el){ el.style.display='none'; }); } catch(err){ alert('❌ Ошибка добавления: '+err.message); } }
+    function addSourceByType(t,u,n){ var type=t; if(!['rss','telegram','vk','max'].includes(type)) type='rss'; addCategorySource(type,u,n); }
 
     // === ГЕНЕРАТОРЫ ===
-    function updateGitHubButtons(v){ const grid=document.getElementById('githubGrid'); const btns=grid.querySelectorAll('button'); const hasSlash=v&&v.includes('/'); btns.forEach(btn=>{ const type=btn.dataset.type; if(type==='username') btn.disabled=!v||!v.trim(); else btn.disabled=!(hasSlash&&v.trim()); }); }
-    function generateGitHubRSS(type){ hapticFeedback(); const input=document.getElementById('githubInput'); let raw=input.value.trim(); if(!raw){ alert('Введите owner/repo или username.'); return; } raw=raw.replace(/^https?:\/\/github\.com\//,'').replace(/\/+$/,''); let url='',display='GitHub'; if(type==='username'){ const parts=raw.split('/'); const username=parts[0]; if(!username){ alert('Некорректный username.'); return; } url='https://github.com/'+username+'.atom'; display='GitHub ('+username+')'; } else { if(!raw.includes('/')){ alert('Для этого типа нужен owner/repo.'); return; } const parts=raw.split('/'); const owner=parts[0], repo=parts.slice(1).join('/'); if(!owner||!repo){ alert('Некорректный owner/repo.'); return; } let path=''; switch(type){ case'releases': path='releases.atom'; break; case'tags': path='tags.atom'; break; case'commits': path='commits.atom'; break; case'main': path='commits/main.atom'; break; case'master': path='commits/master.atom'; break; default: path='releases.atom'; } url='https://github.com/'+owner+'/'+repo+'/'+path; display='GitHub ('+owner+'/'+repo+')'; } if(!confirm('Добавить источник?\n'+display+'\n'+url)) return; addRSSSource(url,display); }
-    function addRSSSource(u,n){ hapticFeedback(); if(!u||!u.trim()){ alert('URL не может быть пустым.'); return; } let final=u.trim(); if(!final.startsWith('http://')&&!final.startsWith('https://')) final='https://'+final; fetch(API_BASE+'/api/webapp/add',{ method:'POST', headers:getHeaders(), body:JSON.stringify({source_type:'rss',source_value:final}) }).then(async resp=>{ if(resp.status===503){ alert('⚠️ Сервер временно недоступен.'); return; } if(!resp.ok){ const err=await resp.json(); alert('❌ Ошибка добавления: '+err.detail); return; } await loadSources(); alert('✅ Источник добавлен: '+n); document.querySelectorAll('.category-form,.add-form').forEach(f=>f.style.display='none'); }).catch(err=>{ alert('❌ Ошибка: '+err.message); }); }
-    async function generateYouTubeRSS(){ hapticFeedback(); const input=document.getElementById('youtubeInput'); let val=input.value.trim(); if(!val){ alert('Введите имя канала или channelId.'); return; } try{ const resp=await apiRequest('/api/youtube/resolve',{ method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({input:val}) }); if(!resp)return; if(!resp.ok){ const err=await resp.json(); alert('Ошибка: '+(err.detail||err.message||'Канал не найден')); return; } const data=await resp.json(); const id=data.channelId; if(!id){ alert('Канал не найден. Проверьте имя.'); return; } const url='https://www.youtube.com/feeds/videos.xml?channel_id='+encodeURIComponent(id); const name=data.title||'YouTube канал'; if(!confirm('Добавить источник?\n'+name)) return; addRSSSource(url,name); document.getElementById('youtubeForm').style.display='none'; document.getElementById('youtubeInput').value=''; } catch(err){ alert('Ошибка: '+err.message); } }
-    function generateRedditRSS(){ hapticFeedback(); const input=document.getElementById('redditInput'); let sub=input.value.trim(); if(!sub){ alert('Введите название сабреддита.'); return; } sub=sub.replace(/^https?:\/\/(?:www\.)?reddit\.com\/r\//,'').split('/')[0]; sub=sub.replace(/[^a-zA-Z0-9_]/g,''); if(!sub){ alert('Некорректное название сабреддита.'); return; } const url='https://www.reddit.com/r/'+sub+'/.rss'; if(!confirm('Добавить источник?\nReddit (r/'+sub+')\n'+url)) return; addRSSSource(url,'Reddit (r/'+sub+')'); }
-    function generateGoogleNewsRSS(){ hapticFeedback(); const input=document.getElementById('googleNewsInput'); let q=input.value.trim(); if(!q){ alert('Введите ключевое слово или фразу для поиска.'); return; } q=q.replace(/\s+/g,' ').trim(); const enc=q.replace(/ /g,'+'); const url='https://news.google.com/rss/search?q='+enc+'&hl=ru&gl=RU&ceid=RU:ru'; if(!confirm('Добавить источник?\nGoogle News: '+q+'\n'+url)) return; addRSSSource(url,'Google News: '+q); }
+    function updateGitHubButtons(v){ var grid=document.getElementById('githubGrid'); var btns=grid.querySelectorAll('button'); var hasSlash=v&&v.includes('/'); btns.forEach(function(btn){ var type=btn.dataset.type; if(type==='username') btn.disabled=!v||!v.trim(); else btn.disabled=!(hasSlash&&v.trim()); }); }
+    function generateGitHubRSS(type){ hapticFeedback(); var input=document.getElementById('githubInput'); var raw=input.value.trim(); if(!raw){ alert('Введите owner/repo или username.'); return; } raw=raw.replace(/^https?:\/\/github\.com\//,'').replace(/\/+$/,''); var url='',display='GitHub'; if(type==='username'){ var parts=raw.split('/'); var username=parts[0]; if(!username){ alert('Некорректный username.'); return; } url='https://github.com/'+username+'.atom'; display='GitHub ('+username+')'; } else { if(!raw.includes('/')){ alert('Для этого типа нужен owner/repo.'); return; } var parts=raw.split('/'); var owner=parts[0], repo=parts.slice(1).join('/'); if(!owner||!repo){ alert('Некорректный owner/repo.'); return; } var path=''; switch(type){ case'releases': path='releases.atom'; break; case'tags': path='tags.atom'; break; case'commits': path='commits.atom'; break; case'main': path='commits/main.atom'; break; case'master': path='commits/master.atom'; break; default: path='releases.atom'; } url='https://github.com/'+owner+'/'+repo+'/'+path; display='GitHub ('+owner+'/'+repo+')'; } if(!confirm('Добавить источник?\n'+display+'\n'+url)) return; addRSSSource(url,display); }
+    function addRSSSource(u,n){ hapticFeedback(); if(!u||!u.trim()){ alert('URL не может быть пустым.'); return; } var final=u.trim(); if(!final.startsWith('http://')&&!final.startsWith('https://')) final='https://'+final; fetch(API_BASE+'/api/webapp/add',{ method:'POST', headers:getHeaders(), body:JSON.stringify({source_type:'rss',source_value:final}) }).then(async function(resp){ if(resp.status===503){ alert('⚠️ Сервер временно недоступен.'); return; } if(!resp.ok){ var err=await resp.json(); alert('❌ Ошибка добавления: '+err.detail); return; } await loadSources(); alert('✅ Источник добавлен: '+n); document.querySelectorAll('.category-form,.add-form').forEach(function(f){ f.style.display='none'; }); }).catch(function(err){ alert('❌ Ошибка: '+err.message); }); }
+    async function generateYouTubeRSS(){ hapticFeedback(); var input=document.getElementById('youtubeInput'); var val=input.value.trim(); if(!val){ alert('Введите имя канала или channelId.'); return; } try{ var resp=await apiRequest('/api/youtube/resolve',{ method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({input:val}) }); if(!resp)return; if(!resp.ok){ var err=await resp.json(); alert('Ошибка: '+(err.detail||err.message||'Канал не найден')); return; } var data=await resp.json(); var id=data.channelId; if(!id){ alert('Канал не найден. Проверьте имя.'); return; } var url='https://www.youtube.com/feeds/videos.xml?channel_id='+encodeURIComponent(id); var name=data.title||'YouTube канал'; if(!confirm('Добавить источник?\n'+name)) return; addRSSSource(url,name); document.getElementById('youtubeForm').style.display='none'; document.getElementById('youtubeInput').value=''; } catch(err){ alert('Ошибка: '+err.message); } }
+    function generateRedditRSS(){ hapticFeedback(); var input=document.getElementById('redditInput'); var sub=input.value.trim(); if(!sub){ alert('Введите название сабреддита.'); return; } sub=sub.replace(/^https?:\/\/(?:www\.)?reddit\.com\/r\//,'').split('/')[0]; sub=sub.replace(/[^a-zA-Z0-9_]/g,''); if(!sub){ alert('Некорректное название сабреддита.'); return; } var url='https://www.reddit.com/r/'+sub+'/.rss'; if(!confirm('Добавить источник?\nReddit (r/'+sub+')\n'+url)) return; addRSSSource(url,'Reddit (r/'+sub+')'); }
+    function generateGoogleNewsRSS(){ hapticFeedback(); var input=document.getElementById('googleNewsInput'); var q=input.value.trim(); if(!q){ alert('Введите ключевое слово или фразу для поиска.'); return; } q=q.replace(/\s+/g,' ').trim(); var enc=q.replace(/ /g,'+'); var url='https://news.google.com/rss/search?q='+enc+'&hl=ru&gl=RU&ceid=RU:ru'; if(!confirm('Добавить источник?\nGoogle News: '+q+'\n'+url)) return; addRSSSource(url,'Google News: '+q); }
 
     // === КАТЕГОРИИ ===
-    async function loadCategoryLevel(parentId=null){ const key=parentId===null?'categories_root':'categories_'+parentId; const cached=localStorage.getItem(key); if(cached){ try{ const parsed=JSON.parse(cached); if(Date.now()-parsed.timestamp<CATEGORY_CACHE_TTL) return parsed.data; } catch(e){} } const url=parentId===null?'/api/categories':'/api/categories?parent_id='+parentId; const resp=await apiRequest(url); if(!resp) return []; if(!resp.ok) throw new Error('Ошибка загрузки'); const data=await resp.json(); localStorage.setItem(key,JSON.stringify({timestamp:Date.now(),data})); return data; }
-    function shortenCategoryName(n){ const map={'DevOps и инфраструктура':'DevOps','IT и разработка':'IT','Информационная безопасность':'Инфобез','Искусственный интеллект':'AI','Машинное обучение':'ML','Глубокое обучение':'Deep Learning','Компьютерное зрение':'CV','Обработка естественного языка':'NLP','Кибербезопасность':'Кибербез','Разработка ПО':'Разработка','Архитектура ПО':'Архитектура ПО','Базы данных':'БД','Облачные технологии':'Облака','Веб-разработка':'Веб','Мобильная разработка':'Мобильная','Научные исследования':'Наука','Новости и общество':'Новости','Финансы и инвестиции':'Финансы','Экономика':'Экономика','Политика':'Политика','Медицина':'Медицина','Образование':'Образование','Экология':'Экология','Архитектура':'Архитектура','Дизайн':'Дизайн','Фотография':'Фото','Видеопроизводство':'Видео','Искусство':'Искусство','Музыка':'Музыка','Кино и ТВ':'Кино','Спорт':'Спорт','Путешествия':'Путешествия','Еда':'Еда','Дом':'Дом','Сад':'Сад','Семья':'Семья','Саморазвитие':'Саморазвитие','История':'История','Книги':'Книги','Хобби':'Хобби','Религия и философия':'Религия','HR':'HR','Отраслевые технологии':'Отраслевые','Маркетинг':'Маркетинг','Медиа':'Медиа','Мода':'Мода','Красота':'Красота','Игры':'Игры','Киберспорт':'Киберспорт','Автомобили':'Автотехника','Авиация':'Авиация','Морская отрасль':'Морская','Логистика':'Логистика','Сельское хозяйство':'Сельхоз','Энергетика':'Энергетика','Промышленность':'Промышленность','Инженерия':'Инженерия','Строительство':'Строительство','Недвижимость':'Недвижимость','Юриспруденция':'Юриспруденция','Законодательство':'Законодательство','Госуправление':'Госуправление','Международные отношения':'Международные','Геополитика':'Геополитика','Общество':'Общество','Региональные':'Региональные','Национальные':'Национальные','Мировые':'Мировые','Градостроительство':'Градостр.'}; return map[n]||n; }
-    function sortItems(items){ const late=['IT и разработка','DevOps и инфраструктура']; const normal=items.filter(i=>!late.includes(i.name)); const lateItems=items.filter(i=>late.includes(i.name)); const rus=normal.filter(i=>/[а-яё]/i.test(i.name)); const eng=normal.filter(i=>!/[а-яё]/i.test(i.name)); rus.sort((a,b)=>a.name.localeCompare(b.name,'ru')); eng.sort((a,b)=>a.name.localeCompare(b.name,'en')); lateItems.sort((a,b)=>a.name.localeCompare(b.name,'ru')); return[...rus,...eng,...lateItems]; }
-    function toggleCategoryBrowser(){ hapticFeedback(); const b=document.getElementById('categoryBrowser'); if(b.style.display==='block'){ b.style.display='none'; return; } document.querySelectorAll('.add-form,.category-form').forEach(f=>f.style.display='none'); b.style.display='block'; categoryHistory=[]; showLevel(null); }
-    function showLevel(parentId){ const header=document.getElementById('categoryBrowserHeader'); const grid=document.getElementById('categoryGrid'); const back=document.getElementById('categoryBackBtn'); grid.innerHTML='<div style="text-align:center;padding:10px;color:var(--text-secondary);">Загрузка...</div>'; loadCategoryLevel(parentId).then(items=>{ if(!items||items.length===0){ grid.innerHTML='<div style="text-align:center;padding:10px;color:var(--text-secondary);">Нет элементов</div>'; return; } const sorted=sortItems(items); const hasSources=sorted.some(i=>i.url&&i.url.trim()!==''); let hText=parentId===null?'Выберите категорию':(categoryHistory[categoryHistory.length-1]?.name||'Категория')+(hasSources?' — выберите источник':' — выберите подкатегорию'); header.textContent=hText; grid.innerHTML=''; sorted.forEach(i=>{ const name=shortenCategoryName(i.name); const btn=document.createElement('button'); btn.textContent=name; if(i.url){ btn.onclick=function(){ addSourceByType(i.source_type||'rss', i.url, name); }; } else { btn.onclick=function(){ openLevel(i.id, name); }; } grid.appendChild(btn); }); back.style.display=categoryHistory.length>0?'block':'none'; }).catch(err=>{ grid.innerHTML='<div style="text-align:center;padding:10px;color:red;">Ошибка: '+err.message+'</div>'; }); }
+    async function loadCategoryLevel(parentId){ parentId=parentId===undefined?null:parentId; var key=parentId===null?'categories_root':'categories_'+parentId; var cached=localStorage.getItem(key); if(cached){ try{ var parsed=JSON.parse(cached); if(Date.now()-parsed.timestamp<CATEGORY_CACHE_TTL) return parsed.data; } catch(e){} } var url=parentId===null?'/api/categories':'/api/categories?parent_id='+parentId; var resp=await apiRequest(url); if(!resp) return []; if(!resp.ok) throw new Error('Ошибка загрузки'); var data=await resp.json(); localStorage.setItem(key,JSON.stringify({timestamp:Date.now(),data})); return data; }
+    function shortenCategoryName(n){ var map={'DevOps и инфраструктура':'DevOps','IT и разработка':'IT','Информационная безопасность':'Инфобез','Искусственный интеллект':'AI','Машинное обучение':'ML','Глубокое обучение':'Deep Learning','Компьютерное зрение':'CV','Обработка естественного языка':'NLP','Кибербезопасность':'Кибербез','Разработка ПО':'Разработка','Архитектура ПО':'Архитектура ПО','Базы данных':'БД','Облачные технологии':'Облака','Веб-разработка':'Веб','Мобильная разработка':'Мобильная','Научные исследования':'Наука','Новости и общество':'Новости','Финансы и инвестиции':'Финансы','Экономика':'Экономика','Политика':'Политика','Медицина':'Медицина','Образование':'Образование','Экология':'Экология','Архитектура':'Архитектура','Дизайн':'Дизайн','Фотография':'Фото','Видеопроизводство':'Видео','Искусство':'Искусство','Музыка':'Музыка','Кино и ТВ':'Кино','Спорт':'Спорт','Путешествия':'Путешествия','Еда':'Еда','Дом':'Дом','Сад':'Сад','Семья':'Семья','Саморазвитие':'Саморазвитие','История':'История','Книги':'Книги','Хобби':'Хобби','Религия и философия':'Религия','HR':'HR','Отраслевые технологии':'Отраслевые','Маркетинг':'Маркетинг','Медиа':'Медиа','Мода':'Мода','Красота':'Красота','Игры':'Игры','Киберспорт':'Киберспорт','Автомобили':'Автотехника','Авиация':'Авиация','Морская отрасль':'Морская','Логистика':'Логистика','Сельское хозяйство':'Сельхоз','Энергетика':'Энергетика','Промышленность':'Промышленность','Инженерия':'Инженерия','Строительство':'Строительство','Недвижимость':'Недвижимость','Юриспруденция':'Юриспруденция','Законодательство':'Законодательство','Госуправление':'Госуправление','Международные отношения':'Международные','Геополитика':'Геополитика','Общество':'Общество','Региональные':'Региональные','Национальные':'Национальные','Мировые':'Мировые','Градостроительство':'Градостр.'}; return map[n]||n; }
+    function sortItems(items){ var late=['IT и разработка','DevOps и инфраструктура']; var normal=items.filter(function(i){ return !late.includes(i.name); }); var lateItems=items.filter(function(i){ return late.includes(i.name); }); var rus=normal.filter(function(i){ return /[а-яё]/i.test(i.name); }); var eng=normal.filter(function(i){ return !/[а-яё]/i.test(i.name); }); rus.sort(function(a,b){ return a.name.localeCompare(b.name,'ru'); }); eng.sort(function(a,b){ return a.name.localeCompare(b.name,'en'); }); lateItems.sort(function(a,b){ return a.name.localeCompare(b.name,'ru'); }); return rus.concat(eng).concat(lateItems); }
+    function toggleCategoryBrowser(){ hapticFeedback(); var b=document.getElementById('categoryBrowser'); if(b.style.display==='block'){ b.style.display='none'; return; } document.querySelectorAll('.add-form,.category-form').forEach(function(f){ f.style.display='none'; }); b.style.display='block'; categoryHistory=[]; showLevel(null); }
+    function showLevel(parentId){ var header=document.getElementById('categoryBrowserHeader'); var grid=document.getElementById('categoryGrid'); var back=document.getElementById('categoryBackBtn'); grid.innerHTML='<div style="text-align:center;padding:10px;color:var(--text-secondary);">Загрузка...</div>'; loadCategoryLevel(parentId).then(function(items){ if(!items||items.length===0){ grid.innerHTML='<div style="text-align:center;padding:10px;color:var(--text-secondary);">Нет элементов</div>'; return; } var sorted=sortItems(items); var hasSources=sorted.some(function(i){ return i.url&&i.url.trim()!==''; }); var hText=parentId===null?'Выберите категорию':(categoryHistory[categoryHistory.length-1]?.name||'Категория')+(hasSources?' — выберите источник':' — выберите подкатегорию'); header.textContent=hText; grid.innerHTML=''; sorted.forEach(function(i){ var name=shortenCategoryName(i.name); var btn=document.createElement('button'); btn.textContent=name; if(i.url){ btn.onclick=function(){ addSourceByType(i.source_type||'rss', i.url, name); }; } else { btn.onclick=function(){ openLevel(i.id, name); }; } grid.appendChild(btn); }); back.style.display=categoryHistory.length>0?'block':'none'; }).catch(function(err){ grid.innerHTML='<div style="text-align:center;padding:10px;color:red;">Ошибка: '+err.message+'</div>'; }); }
     function openLevel(id,name){ hapticFeedback(); categoryHistory.push({id:id,name:name}); showLevel(id); }
     function goBackLevel(){ hapticFeedback(); if(categoryHistory.length===0){ document.getElementById('categoryBrowser').style.display='none'; return; } categoryHistory.pop(); if(categoryHistory.length===0) showLevel(null); else showLevel(categoryHistory[categoryHistory.length-1].id); }
 
     // === ВРЕМЯ ===
-    function toggleTimePicker(){ hapticFeedback(); if(!isPremium){ alert('⛔ Доступно только для Расширенного тарифа. Оформите подписку.'); return; } const p=document.getElementById('timePicker'); if(p.style.display==='none') openTimePicker(); else closeTimePicker(); }
+    function toggleTimePicker(){ hapticFeedback(); if(!isPremium){ alert('⛔ Доступно только для Расширенного тарифа. Оформите подписку.'); return; } var p=document.getElementById('timePicker'); if(p.style.display==='none') openTimePicker(); else closeTimePicker(); }
     function openTimePicker(){ if(!isPremium) return; document.getElementById('timePicker').style.display='block'; renderTimePicker(); }
     function closeTimePicker(){ document.getElementById('timePicker').style.display='none'; }
-    function renderTimePicker(){ const grid=document.getElementById('timePickerGrid'); grid.innerHTML=''; const cur=currentSendTime?parseInt(currentSendTime.split(':')[0]):-1; for(let h=0;h<24;h++){ const btn=document.createElement('button'); btn.textContent=h.toString().padStart(2,'0')+':00'; if(h===cur) btn.classList.add('selected'); btn.onclick=function(){ setTime(h); }; grid.appendChild(btn); } }
-    async function setTime(hour){ hapticFeedback(); try{ const resp=await apiRequest('/api/webapp/set_time',{ method:'POST', headers:getHeaders(), body:JSON.stringify({hour:hour}) }); if(!resp)return; if(!resp.ok){ const err=await resp.json(); alert('❌ Ошибка: '+err.detail); return; } const data=await resp.json(); currentSendTime=data.send_time; document.getElementById('currentTimeDisplay').textContent=currentSendTime+' MSK'; document.querySelectorAll('#timePickerGrid button').forEach((btn,idx)=>{ btn.classList.toggle('selected',idx===hour); }); alert('✅ Время установлено на '+currentSendTime); closeTimePicker(); await loadSources(); } catch(err){ alert('❌ Ошибка: '+err.message); } }
+    function renderTimePicker(){ var grid=document.getElementById('timePickerGrid'); grid.innerHTML=''; var cur=currentSendTime?parseInt(currentSendTime.split(':')[0]):-1; for(var h=0; h<24; h++){ var btn=document.createElement('button'); btn.textContent=h.toString().padStart(2,'0')+':00'; if(h===cur) btn.classList.add('selected'); btn.onclick=function(){ setTime(h); }; grid.appendChild(btn); } }
+    async function setTime(hour){ hapticFeedback(); try{ var resp=await apiRequest('/api/webapp/set_time',{ method:'POST', headers:getHeaders(), body:JSON.stringify({hour:hour}) }); if(!resp)return; if(!resp.ok){ var err=await resp.json(); alert('❌ Ошибка: '+err.detail); return; } var data=await resp.json(); currentSendTime=data.send_time; document.getElementById('currentTimeDisplay').textContent=currentSendTime+' MSK'; document.querySelectorAll('#timePickerGrid button').forEach(function(btn,idx){ btn.classList.toggle('selected',idx===hour); }); alert('✅ Время установлено на '+currentSendTime); closeTimePicker(); await loadSources(); } catch(err){ alert('❌ Ошибка: '+err.message); } }
 
     // === ТАРИФЫ (ОПЛАТА НЕДОСТУПНА В VK) ===
     function toggleTariffs() {
@@ -714,9 +849,9 @@
                     buttons: [
                         { type: 'default', id: 'ok', text: 'OK' }
                     ]
-                }).then(() => {
+                }).then(function() {
                     console.log('Popup показан');
-                }).catch(err => {
+                }).catch(function(err) {
                     console.error('Ошибка VKWebAppShowPopup:', err);
                     alert('Оплата тарифов в приложении VK недоступна.');
                 });
@@ -738,8 +873,8 @@
     // === ДАЙДЖЕСТ ===
     async function toggleDigest() {
         if (!authToken) { alert('Авторизуйтесь'); return; }
-        const container = document.getElementById('digestContainer');
-        const content = document.getElementById('digestContent');
+        var container = document.getElementById('digestContainer');
+        var content = document.getElementById('digestContent');
         if (digestVisible) {
             container.style.display = 'none';
             digestVisible = false;
@@ -750,64 +885,65 @@
         content.innerHTML = '<div style="text-align:center; padding:20px; color: var(--text-secondary);">⏳ Загрузка...</div>';
 
         try {
-            const resp = await apiRequest('/api/webapp/digest', { headers: getHeaders() });
+            var resp = await apiRequest('/api/webapp/digest', { headers: getHeaders() });
             if (!resp) return;
             if (!resp.ok) {
-                const err = await resp.json();
-                content.innerHTML = `<div style="color: #ff6b6b; text-align:center; padding:20px;">❌ Ошибка: ${err.detail || 'Не удалось загрузить дайджест'}</div>`;
+                var err = await resp.json();
+                content.innerHTML = '<div style="color: #ff6b6b; text-align:center; padding:20px;">❌ Ошибка: ' + (err.detail || 'Не удалось загрузить дайджест') + '</div>';
                 return;
             }
-            const data = await resp.json();
-            let digestHtml = data.digest;
+            var data = await resp.json();
+            var digestHtml = data.digest;
 
             if (!digestHtml || digestHtml.trim() === '' || digestHtml.includes('Дайджест ещё не формировался')) {
-                content.innerHTML = `<div style="text-align:center; padding:20px; color: var(--text-secondary);">📭 Дайджест ещё не формировался. Запустите сбор вручную или дождитесь автоматического.</div>`;
+                content.innerHTML = '<div style="text-align:center; padding:20px; color: var(--text-secondary);">📭 Дайджест ещё не формировался. Запустите сбор вручную или дождитесь автоматического.</div>';
                 return;
             }
 
             digestHtml = digestHtml.replace(/[\x00-\x1F\x7F-\x9F\u200B\u200C\u200D\uFEFF\u2028\u2029\r]/g, '');
 
-            let blocks = digestHtml.split(/(?=\n- <b>)/).filter(b => b.trim().length > 0);
+            var blocks = digestHtml.split(/(?=\n- <b>)/).filter(function(b){ return b.trim().length > 0; });
             if (blocks.length <= 1) {
-                blocks = digestHtml.split(/(?=\n-)/).filter(b => b.trim().length > 0);
+                blocks = digestHtml.split(/(?=\n-)/).filter(function(b){ return b.trim().length > 0; });
             }
             if (blocks.length <= 1) {
-                blocks = digestHtml.split(/(?=- <b>)/).filter(b => b.trim().length > 0);
+                blocks = digestHtml.split(/(?=- <b>)/).filter(function(b){ return b.trim().length > 0; });
                 if (blocks[0] && blocks[0].trim() === '') blocks.shift();
             }
-            blocks = blocks.map(b => b.startsWith('\n') ? b.slice(1) : b);
+            blocks = blocks.map(function(b){ return b.startsWith('\n') ? b.slice(1) : b; });
 
-            let html = '';
-            for (let block of blocks) {
-                let lines = block.split('\n');
-                lines = lines.map(line => line.replace(/^[\s\u00A0]+/, ''));
+            var html = '';
+            for (var i=0; i<blocks.length; i++) {
+                var block = blocks[i];
+                var lines = block.split('\n');
+                lines = lines.map(function(line){ return line.replace(/^[\s\u00A0]+/, ''); });
                 while (lines.length > 0 && lines[0].trim() === '') lines.shift();
                 while (lines.length > 0 && lines[lines.length - 1].trim() === '') lines.pop();
-                let cleanedBlock = lines.join('\n');
+                var cleanedBlock = lines.join('\n');
 
                 // ===== ЭТАЛОННАЯ ОБРАБОТКА СУММАРИЗАЦИЙ =====
-                let isSummary = cleanedBlock.indexOf('<b>Обсуждения в ') !== -1;
+                var isSummary = cleanedBlock.indexOf('<b>Обсуждения в ') !== -1;
                 if (isSummary) {
-                    let summaryStart = cleanedBlock.indexOf('<b>Обсуждения в ');
+                    var summaryStart = cleanedBlock.indexOf('<b>Обсуждения в ');
                     if (summaryStart !== -1) {
-                        let closeBpos = cleanedBlock.indexOf('</b>', summaryStart);
+                        var closeBpos = cleanedBlock.indexOf('</b>', summaryStart);
                         if (closeBpos !== -1) {
-                            let linkStart = cleanedBlock.indexOf('<a href', closeBpos);
+                            var linkStart = cleanedBlock.indexOf('<a href', closeBpos);
                             if (linkStart === -1) linkStart = cleanedBlock.length;
-                            let before = cleanedBlock.slice(0, closeBpos + 4);
-                            let body = cleanedBlock.slice(closeBpos + 4, linkStart);
-                            let after = cleanedBlock.slice(linkStart);
+                            var before = cleanedBlock.slice(0, closeBpos + 4);
+                            var body = cleanedBlock.slice(closeBpos + 4, linkStart);
+                            var after = cleanedBlock.slice(linkStart);
                             body = body.replace(/^\s*\n+/, '').replace(/\n+\s*$/, '');
                             after = after.replace(/^\s*\n+/, '');
-                            let parts = [];
+                            var parts = [];
                             if (body.includes('\n')) {
-                                parts = body.split(/\n\s*-\s+/).filter(p => p.trim() !== '');
+                                parts = body.split(/\n\s*-\s+/).filter(function(p){ return p.trim() !== ''; });
                             } else {
-                                parts = body.split(/\s*-\s+/).filter(p => p.trim() !== '');
+                                parts = body.split(/\s*-\s+/).filter(function(p){ return p.trim() !== ''; });
                             }
-                            let newBody;
+                            var newBody;
                             if (parts.length > 1) {
-                                newBody = parts.map(p => '- ' + p.trim()).join('\n\n');
+                                newBody = parts.map(function(p){ return '- ' + p.trim(); }).join('\n\n');
                             } else {
                                 newBody = body.trim();
                             }
@@ -825,25 +961,22 @@
                 cleanedBlock = cleanedBlock.replace(/\n{3,}/g, '\n\n');
 
                 if (cleanedBlock) {
-                    html += `<div class="status-block">${cleanedBlock}</div>`;
+                    html += '<div class="status-block">' + cleanedBlock + '</div>';
                 }
             }
 
             if (html) {
                 content.innerHTML = html;
-                content.querySelectorAll('a').forEach(link => link.target = '_blank');
+                content.querySelectorAll('a').forEach(function(link){ link.target = '_blank'; });
             } else {
-                content.innerHTML = `<div style="text-align:center; padding:20px; color: var(--text-secondary);">📭 Новости не найдены.</div>`;
+                content.innerHTML = '<div style="text-align:center; padding:20px; color: var(--text-secondary);">📭 Новости не найдены.</div>';
             }
 
         } catch (e) {
             console.error('Ошибка в toggleDigest:', e);
-            content.innerHTML = `<div style="color: #ff6b6b; text-align:center; padding:20px;">❌ Ошибка: ${e.message}</div>`;
+            content.innerHTML = '<div style="color: #ff6b6b; text-align:center; padding:20px;">❌ Ошибка: ' + e.message + '</div>';
         }
     }
-
-    // === ПРЕДЛОЖИТЬ ИСТОЧНИК ===
-    function suggestSource(){ hapticFeedback(); const url='https://t.me/professional_interior_design'; const text='Добрый день. Хочу предложить источник:'; window.open(url+'?text='+encodeURIComponent(text),'_blank'); }
 
     // === ВЫХОД ===
     function logout() {
@@ -853,19 +986,6 @@
             currentSources = [];
             window.location.reload();
         }
-    }
-
-    // === УДАЛЕНИЕ АККАУНТА — ОТКРЫТИЕ СТРАНИЦЫ С ТОКЕНОМ В URL ===
-    function deleteAccount() {
-        if (!authToken) {
-            alert('Вы не авторизованы.');
-            return;
-        }
-        if (!confirm('Вы уверены, что хотите полностью удалить аккаунт и все данные? Это действие необратимо.')) {
-            return;
-        }
-        // Открываем страницу удаления с токеном в параметре
-        window.open('/delete-account?token=' + encodeURIComponent(authToken), '_blank');
     }
 
     // === ЭКСПОРТ ВСЕХ ФУНКЦИЙ В ГЛОБАЛЬНУЮ ОБЛАСТЬ ===
