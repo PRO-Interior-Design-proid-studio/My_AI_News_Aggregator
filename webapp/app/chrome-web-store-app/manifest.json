@@ -6,7 +6,6 @@
   "permissions": [
     "storage",
     "activeTab",
-    "tabs",
     "alarms",
     "contextMenus"
   ],

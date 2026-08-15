@@ -228,15 +228,33 @@ body{font-family:-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, 
 <div id="loginScreen">
 <div class="header"><h1>Мои AI Новости</h1></div>
 <div class="auth-container">
-   <button class="auth-btn max" id="maxLoginBtn"><span class="icon">🚀</span> Войти через MAX</button> <button class="auth-btn vk" id="vkLoginBtn"><span class="icon">🚀</span> Войти через VK</button>
-    <button class="auth-btn yandex" id="yandexLoginBtn"><span class="icon">🚀</span> Войти через Yandex</button></br>
-<p class="small-note">Важно:</p>
-    <p class="small-note">- аккаунт будет привязан к одному методу входа </p>
-<p class="small-note">- Telegram доступен после входа через РФ аккаунт </p>
-    <p class="small-note">- зарубежные методы входа запрещены в РФ </p>
-<p class="small-note">- иногда VPN может мешать авторизации </p>
-    <div class="widget-container" id="widgetContainer"></div>
+   <button class="auth-btn max" id="maxLoginBtn"><span class="icon">🚀</span> Войти через MAX</button>
+   <button class="auth-btn vk" id="vkLoginBtn"><span class="icon">🚀</span> Войти через VK</button>
+   <button class="auth-btn yandex" id="yandexLoginBtn"><span class="icon">🚀</span> Войти через Yandex</button>
 </div>
+
+<!-- ===== НОВЫЙ БЛОК "ВАЖНО" ===== -->
+<div class="status-block" style="margin-top: 40px; max-width: 300px; margin-left: auto; margin-right: auto;">
+    <div class="status-title" style="color: var(--text);">Важно</div>
+    <div style="margin: 8px 0 10px; font-size: 13px; color: var(--text-secondary);">
+        <div style="padding: 6px 0; border-bottom: 1px solid var(--border); text-align: center;">
+            Telegram будет доступен после входа
+        </div>
+        <div style="padding: 6px 0; border-bottom: 1px solid var(--border); text-align: center;">
+            Привязка аккаунта к одному методу входа
+        </div>
+        <div style="padding: 6px 0; border-bottom: 1px solid var(--border); text-align: center;">
+            Зарубежный автовход запрещен в РФ
+        </div>
+        <div style="padding: 6px 0; border-bottom: 1px solid var(--border); text-align: center;">
+            Иногда VPN может мешать авторизации
+        </div>
+        <div style="padding: 6px 0; text-align: center;">
+            Подробнее в нашей <a href="/support" target="_blank" style="color: var(--accent2); text-decoration: none;">Справке</a>
+        </div>
+    </div>
+</div>
+<div class="widget-container" id="widgetContainer"></div>
 </div>
 <div id="appScreen" class="hidden">
 <div class="header"><h1>Мои AI Новости</h1></div>
@@ -396,23 +414,6 @@ body{font-family:-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, 
 </div> <!-- /appScreen -->
 </div>
 </div>
-<div class="footer-wrapper">
-    <div class="footer-inner">
-        <span>© 2026 «Мои AI Новости»</span>
-        <span class="sep">|</span>
-        <a href="/privacy" target="_blank">Политика</a>
-        <span class="sep">|</span>
-        <a href="/offer" target="_blank">Оферта</a>
-        <span class="sep">|</span>
-        <a href="/consent" target="_blank">Согласие</a>
-        <span class="sep">|</span>
-        <a href="/offer#requisites" target="_blank">Реквизиты</a>
-        <span class="sep">|</span>
-        <a href="/support" target="_blank">Помощь</a>
-        <span class="sep">|</span>
-        <span>Создано: <a href="https://proid.studio" target="_blank" class="studio-link">proid.studio</a></span>
-    </div>
-</div>
 <script src="/webapp/categories.js?v=50"></script>
 <script>
 // ===== КОНСТАНТЫ =====
@@ -461,7 +462,25 @@ function hapticFeedback(){if(navigator.vibrate)navigator.vibrate(10);}
 window.history.replaceState({},document.title,window.location.pathname);authToken=t;if(document.readyState==='complete')loadApp();else window.addEventListener('load',function onLoad(){loadApp();window.removeEventListener('load',onLoad);});}})();
 function getHeaders(){return{'Content-Type':'application/json',...(authToken?{'X-Auth-Token':authToken}:{})};}
 function showLoginScreen(){document.getElementById('loginScreen').style.display='block';document.getElementById('appScreen').classList.add('hidden');}
-function showAppScreen(){document.getElementById('loginScreen').style.display='none';document.getElementById('appScreen').classList.remove('hidden');}
+
+// ===== НОВЫЕ ФУНКЦИИ ДЛЯ УПРАВЛЕНИЯ СОГЛАСИЕМ =====
+function showConsentBlock() {
+    document.getElementById('loginScreen').style.display = 'none';
+    document.getElementById('appScreen').classList.remove('hidden');
+    document.getElementById('consentBlock').style.display = 'block';
+    // Скрываем основной контент, оставляем только блок согласия
+    document.getElementById('appContent').style.display = 'none';
+    document.getElementById('appScreen').classList.add('consent-pending');
+}
+
+function showAppContent() {
+    document.getElementById('loginScreen').style.display = 'none';
+    document.getElementById('appScreen').classList.remove('hidden');
+    document.getElementById('consentBlock').style.display = 'none';
+    document.getElementById('appContent').style.display = 'block';
+    document.getElementById('appScreen').classList.remove('consent-pending');
+}
+
 async function apiRequest(url,options={}){try{const resp=await fetch(url,options);if(resp.status===503){alert('⚠️ Сервер временно недоступен. Пожалуйста, обновите страницу через несколько секунд.');return null;}
 return resp;}catch(err){throw err;}}
 
@@ -483,52 +502,45 @@ async function loadApp(){
         if(!resp)return;
         if(!resp.ok){
             if(resp.status === 403){
-                const consentBlock = document.getElementById('consentBlock');
-                const appScreen = document.getElementById('appScreen');
-                consentBlock.style.display = 'block';
-                appScreen.classList.add('consent-pending');
-                consentGiven = false;
                 isTestUser = (authToken === TEST_TOKEN);
                 window.TEST_MODE = isTestUser;
-                showAppScreen();
+                consentGiven = false;
+                showConsentBlock();
+                // Скрываем кнопки управления, если они есть (они уже скрыты через display:none в showConsentBlock)
                 document.getElementById('quickButtons').style.display = 'none';
                 document.getElementById('paymentToggleBtn').style.display = 'none';
                 return;
             }
             if(resp.status === 401){
                 document.getElementById('sourceListContainer').innerHTML='<div class="empty-state"><div class="empty-icon">🔒</div><h3>Ошибка авторизации</h3><p>Попробуйте обновить страницу или перелогиниться.</p></div>';
-                showAppScreen();
+                showAppContent();
                 return;
             }
             const err=await resp.json();throw new Error(err.detail||'Ошибка загрузки');
         }
         const data=await resp.json();
-        showAppScreen();
         currentSources=data.sources||[];
         currentLimit=data.limit||5;
         renderGroupedSources(currentSources);
         document.getElementById('counter').textContent=currentSources.length;
         updateStatus(data);
 
-        const appScreen = document.getElementById('appScreen');
-        const consentBlock = document.getElementById('consentBlock');
         isTestUser = (authToken === TEST_TOKEN);
         consentGiven = data.consent_given === true;
+        window.TEST_MODE = isTestUser;
 
         if (!consentGiven || isTestUser) {
-            consentBlock.style.display = 'block';
-            appScreen.classList.add('consent-pending');
-            window.TEST_MODE = isTestUser;
+            showConsentBlock();
+            document.getElementById('quickButtons').style.display = 'none';
+            document.getElementById('paymentToggleBtn').style.display = 'none';
         } else {
-            consentBlock.style.display = 'none';
-            appScreen.classList.remove('consent-pending');
-            window.TEST_MODE = false;
+            showAppContent();
+            document.getElementById('quickButtons').style.display = 'flex';
+            document.getElementById('paymentToggleBtn').style.display = 'block';
         }
-        document.getElementById('quickButtons').style.display='flex';
-        document.getElementById('paymentToggleBtn').style.display='block';
     }catch(err){
         document.getElementById('sourceListContainer').innerHTML='<div class="empty-state"><div class="empty-icon">⚠️</div><h3>Ошибка загрузки</h3><p>'+err.message+'</p></div>';
-        showAppScreen();
+        showAppContent();
     }
 }
 
@@ -550,11 +562,11 @@ document.addEventListener('DOMContentLoaded', function() {
         });
         btn.addEventListener('click', async function() {
             if (!check.checked) return;
-            const appScreen = document.getElementById('appScreen');
-            const consentBlock = document.getElementById('consentBlock');
             if (window.TEST_MODE) {
-                consentBlock.style.display = 'none';
-                appScreen.classList.remove('consent-pending');
+                // Тестовый режим – просто прячем блок
+                showAppContent();
+                document.getElementById('quickButtons').style.display = 'flex';
+                document.getElementById('paymentToggleBtn').style.display = 'block';
                 return;
             }
             try {
@@ -563,9 +575,11 @@ document.addEventListener('DOMContentLoaded', function() {
                     headers: getHeaders()
                 });
                 if (resp.ok) {
-                    consentBlock.style.display = 'none';
-                    appScreen.classList.remove('consent-pending');
                     consentGiven = true;
+                    showAppContent();
+                    document.getElementById('quickButtons').style.display = 'flex';
+                    document.getElementById('paymentToggleBtn').style.display = 'block';
+                    // Перезагружаем данные, чтобы обновить статус
                     await loadApp();
                 } else {
                     const err = await resp.json();
@@ -577,7 +591,7 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    // ===== ПРИВЯЗКА ОСНОВНЫХ КНОПОК (БЕЗ ДУБЛИРОВАНИЯ) =====
+    // ===== ПРИВЯЗКА ОСНОВНЫХ КНОПОК =====
     // Кнопки входа
     const vkBtn = document.getElementById('vkLoginBtn');
     if (vkBtn) vkBtn.addEventListener('click', startVkAuth);
@@ -596,7 +610,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const logoutEl = document.getElementById('logoutContainer');
     if (logoutEl) logoutEl.addEventListener('click', logout);
 
-    // Кнопки быстрого меню (у них теперь есть id)
+    // Кнопки быстрого меню
     const btnDzen = document.getElementById('btn-dzen');
     if (btnDzen) btnDzen.addEventListener('click', function() { toggleCategoryForm('dzen'); });
     const btnRb = document.getElementById('btn-rb');
@@ -673,7 +687,6 @@ document.addEventListener('DOMContentLoaded', function() {
     // Тарифы
     const paymentToggleBtn = document.getElementById('paymentToggleBtn');
     if (paymentToggleBtn) paymentToggleBtn.addEventListener('click', toggleTariffs);
-    // Кнопки тарифов имеют onclick, addEventListener не навешиваем (нет дублей)
 
     // Время
     const changeTimeBtn = document.getElementById('changeTimeBtn');
@@ -1177,7 +1190,7 @@ async function setTime(hour){ if(!ensureConsent())return; hapticFeedback();
 
 function toggleTariffs(){ if(!ensureConsent())return; hapticFeedback();document.getElementById('tariffBlock').classList.toggle('visible');}
 async function handlePayment(tariffKey){ if(!ensureConsent())return; hapticFeedback();
-    if(!authToken){alert('❌ Вы не авторизованы. Пожалуйста, войдите через Telegram.');return;}
+    if(!authToken){alert('❌ Вы не авторизованы. Пожалуйста, войдите.');return;}
     try{
         const resp=await apiRequest('/api/payment/create-invoice',{
             method:'POST',
@@ -1193,41 +1206,40 @@ async function handlePayment(tariffKey){ if(!ensureConsent())return; hapticFeedb
 }
 
 // ===== ФУНКЦИИ ВХОДА =====
+
+// ----- VK OAuth с серверным хранением code_verifier (новая вкладка) -----
 async function startVkAuth(){
     hapticFeedback();
-    // Генерируем code_verifier и code_challenge
     const verifier = generateCodeVerifier();
     const challenge = await generateCodeChallenge(verifier);
-
-    // Сохраняем verifier в sessionStorage для последующего обмена
-    sessionStorage.setItem('vk_code_verifier', verifier);
-
     const state = Math.random().toString(36).substring(2);
-    sessionStorage.setItem('vk_auth_state', state);
 
-    const redirectUri = window.location.origin + '/pwa';
+    // Сохраняем verifier на сервере
+    try {
+        const resp = await fetch('/api/auth/vk/save-verifier', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ state, code_verifier: verifier })
+        });
+        if (!resp.ok) throw new Error('Не удалось сохранить verifier на сервере');
+    } catch (e) {
+        alert('Ошибка: ' + e.message);
+        return;
+    }
+
+    const redirectUri = 'https://news.proid.studio/pwa';
     const scope = 'vkid.personal_info';
+    const authUrl = `https://id.vk.ru/authorize?client_id=${VK_APP_ID}&redirect_uri=${encodeURIComponent(redirectUri)}&response_type=code&scope=${scope}&state=${state}&code_challenge=${challenge}&code_challenge_method=S256&v=5.199`;
 
-    const authUrl = `https://id.vk.ru/authorize?` +
-        `client_id=${VK_APP_ID}` +
-        `&redirect_uri=${encodeURIComponent(redirectUri)}` +
-        `&response_type=code` +
-        `&scope=${scope}` +
-        `&state=${state}` +
-        `&code_challenge=${challenge}` +
-        `&code_challenge_method=S256` +
-        `&v=5.199`;
-
-    // Закрываем виджет и перенаправляем
     const container = document.getElementById('loginScreen').querySelector('.auth-container');
     if (container) container.style.display = 'none';
     const w = document.getElementById('widgetContainer');
     if (w) w.innerHTML = '<p style="color: var(--text-secondary);">Перенаправление на авторизацию VK...</p>';
 
-    window.location.href = authUrl;
+    window.open(authUrl, '_blank');
 }
 
-// ===== MAX AUTH (восстановлено) =====
+// ----- MAX AUTH (уже был, оставляем как есть) -----
 async function startMaxAuth(){
     hapticFeedback();
     const container = document.getElementById('loginScreen').querySelector('.auth-container');
@@ -1277,50 +1289,33 @@ function startMaxWaiting(token){
     },3000);
 }
 
-// ===== Яндекс ID =====
+// ----- Яндекс ID (теперь открывается в новой вкладке) -----
 function startYandexAuth() {
     hapticFeedback();
-    // Перенаправляем на бэкенд, который запустит OAuth-поток
-    window.location.href = '/api/auth/yandex/login';
+    window.open('/api/auth/yandex/login', '_blank');
 }
 
-// ===== ОБРАБОТКА ВОЗВРАТА ИЗ VK =====
+// ===== ОБРАБОТКА ВОЗВРАТА ИЗ VK (новая вкладка) =====
 (function handleVkCallback() {
     const params = new URLSearchParams(window.location.search);
     const code = params.get('code');
     const state = params.get('state');
     const device_id = params.get('device_id');
 
-    if (code) {
-        const savedState = sessionStorage.getItem('vk_auth_state');
-        if (state && savedState && state !== savedState) {
-            alert('Ошибка: неверный state (защита от CSRF)');
-            sessionStorage.removeItem('vk_auth_state');
+    if (code && state) {
+        // ---- ЗАЩИТА ОТ ПОВТОРНОЙ ОБРАБОТКИ ----
+        if (sessionStorage.getItem('vk_processed_' + state) === 'true') {
+            console.log('VK callback already processed, skipping');
             window.history.replaceState({}, '', '/pwa');
             return;
         }
-        sessionStorage.removeItem('vk_auth_state');
-
-        const verifier = sessionStorage.getItem('vk_code_verifier');
-        if (!verifier) {
-            alert('Ошибка: отсутствует code_verifier. Попробуйте снова.');
-            sessionStorage.removeItem('vk_code_verifier');
-            window.history.replaceState({}, '', '/pwa');
-            showLoginScreen();
-            document.getElementById('loginScreen').querySelector('.auth-container').style.display='block';
-            document.getElementById('widgetContainer').innerHTML='';
-            return;
-        }
-        sessionStorage.removeItem('vk_code_verifier');
+        sessionStorage.setItem('vk_processed_' + state, 'pending');
+        // ----------------------------------------
 
         fetch('/api/auth/vk/callback', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                code: code,
-                device_id: device_id,
-                code_verifier: verifier
-            })
+            body: JSON.stringify({ code, device_id, state })
         })
         .then(r => {
             if (!r.ok) return r.json().then(err => { throw new Error(err.detail || 'Ошибка авторизации') });
@@ -1329,47 +1324,48 @@ function startYandexAuth() {
         .then(data => {
             if (data.token) {
                 localStorage.setItem('auth_token', data.token);
-                authToken = data.token;
-                console.log('✅ VK токен сохранён:', authToken);
-                window.history.replaceState({}, '', '/pwa');
-                fetch('/api/health', {
-                    headers: { 'X-Auth-Token': authToken }
-                })
-                .then(resp => {
-                    if (resp.ok) {
-                        console.log('✅ Токен валидный, загружаем приложение');
-                        loadApp();
-                    } else {
-                        console.error('❌ Токен невалидный, статус:', resp.status);
-                        alert('Ошибка авторизации. Попробуйте снова.');
-                        showLoginScreen();
-                    }
-                })
-                .catch(() => {
-                    alert('Ошибка проверки токена');
-                    showLoginScreen();
-                });
+                sessionStorage.setItem('vk_processed_' + state, 'true');
+                if (window.opener) {
+                    window.close();
+                } else {
+                    location.reload();
+                }
             } else {
                 throw new Error('Токен не получен');
             }
         })
         .catch(err => {
             alert('❌ Ошибка входа через VK: ' + err.message);
+            sessionStorage.removeItem('vk_processed_' + state);
             window.history.replaceState({}, '', '/pwa');
             showLoginScreen();
-            document.getElementById('loginScreen').querySelector('.auth-container').style.display='block';
-            document.getElementById('widgetContainer').innerHTML='';
         });
+    }
+
+    // Обработка Яндекса (если используется)
+    const yandexToken = params.get('auth_token');
+    if (yandexToken) {
+        localStorage.setItem('auth_token', yandexToken);
+        if (window.opener) {
+            window.close();
+        } else {
+            location.reload();
+        }
     }
 })();
 
-// ===== КНОПКА "СМОТРЕТЬ НОВОСТИ" С ПОДРОБНЫМИ ЛОГАМИ =====
+// ===== СЛУШАТЕЛЬ STORAGE ДЛЯ АВТОМАТИЧЕСКОЙ ПЕРЕЗАГРУЗКИ РОДИТЕЛЬСКОЙ ВКЛАДКИ =====
+window.addEventListener('storage', function(e) {
+    if (e.key === 'auth_token' && e.newValue) {
+        console.log('VK/Yandex: auth_token changed, reloading parent');
+        location.reload();
+    }
+});
+
+// ===== КНОПКА "СМОТРЕТЬ НОВОСТИ" =====
 let digestVisible = false;
 async function toggleDigest() {
     console.log('🟢 toggleDigest() вызвана');
-
-    // Проверка согласия
-    console.log('🔍 Проверка ensureConsent()...');
     if (!ensureConsent()) {
         console.warn('⛔ ensureConsent() вернул false, прерываем выполнение');
         return;
@@ -1420,11 +1416,9 @@ async function toggleDigest() {
             return;
         }
 
-        // Очистка от спецсимволов
         digestHtml = digestHtml.replace(/[\x00-\x1F\x7F-\x9F\u200B\u200C\u200D\uFEFF\u2028\u2029\r]/g, '');
         console.log('🧹 После очистки длина:', digestHtml.length);
 
-        // Разбивка на блоки
         let blocks = digestHtml.split(/(?=\n- <b>)/).filter(b => b.trim().length > 0);
         if (blocks.length <= 1) {
             blocks = digestHtml.split(/(?=\n-)/).filter(b => b.trim().length > 0);
@@ -1443,7 +1437,6 @@ async function toggleDigest() {
             while (lines.length > 0 && lines[lines.length - 1].trim() === '') lines.pop();
             let cleanedBlock = lines.join('\n');
 
-            // Обработка суммаризаций
             let isSummary = cleanedBlock.indexOf('<b>Обсуждения в ') !== -1;
             if (isSummary) {
                 let summaryStart = cleanedBlock.indexOf('<b>Обсуждения в ');
@@ -1631,6 +1624,22 @@ if ('serviceWorker' in navigator) {
     }).catch(err => console.log('❌ SW registration failed:', err));
 }
 </script>
-
+<div class="footer-wrapper">
+    <div class="footer-inner">
+        <span>© 2026 «Мои AI Новости»</span>
+        <span class="sep">|</span>
+        <a href="/privacy" target="_blank">Политика</a>
+        <span class="sep">|</span>
+        <a href="/offer" target="_blank">Оферта</a>
+        <span class="sep">|</span>
+        <a href="/consent" target="_blank">Согласие</a>
+        <span class="sep">|</span>
+        <a href="/offer#requisites" target="_blank">Реквизиты</a>
+        <span class="sep">|</span>
+        <a href="/support" target="_blank">Помощь</a>
+        <span class="sep">|</span>
+        <span>Создано: <a href="https://proid.studio" target="_blank" class="studio-link">proid.studio</a></span>
+    </div>
+</div>
 </body>
 </html>
