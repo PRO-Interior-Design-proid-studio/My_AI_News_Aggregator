@@ -1,5 +1,3 @@
-// background.js – универсальный фоновый сервис-воркер
-
 const browserAPI = (() => {
   if (typeof browser !== 'undefined' && browser.runtime) return browser;
   if (typeof chrome !== 'undefined' && chrome.runtime) return chrome;
@@ -8,17 +6,13 @@ const browserAPI = (() => {
 
 browserAPI.action.onClicked.addListener(() => {
   const url = browserAPI.runtime.getURL('app.html');
-  browserAPI.tabs.query({ active: true, currentWindow: true })
-    .then((tabs) => {
-      if (tabs && tabs.length > 0) {
-        browserAPI.tabs.update(tabs[0].id, { url: url });
-      } else {
-        browserAPI.tabs.create({ url: url, active: true });
-      }
-    })
-    .catch(() => {
-      browserAPI.tabs.create({ url: url, active: true });
-    });
+  browserAPI.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+    if (tabs && tabs.length > 0) {
+      browserAPI.tabs.update(tabs[0].id, { url });
+    } else {
+      browserAPI.tabs.create({ url, active: true });
+    }
+  });
 });
 
 browserAPI.runtime.onMessage.addListener((message, sender, sendResponse) => {
@@ -57,7 +51,13 @@ browserAPI.contextMenus.onClicked.addListener((info, tab) => {
       });
     }
   } else if (info.menuItemId === 'openAI') {
-    browserAPI.tabs.create({ url: 'https://news.proid.studio/pwa' });
+    browserAPI.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+      if (tabs && tabs.length > 0) {
+        browserAPI.tabs.update(tabs[0].id, { url: 'https://news.proid.studio/pwa' });
+      } else {
+        browserAPI.tabs.create({ url: 'https://news.proid.studio/pwa', active: true });
+      }
+    });
   }
 });
 

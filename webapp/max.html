@@ -200,6 +200,93 @@
             user-select: auto !important;
         }
         /* ===== КОНЕЦ БЛОКИРОВКИ ===== */
+
+        /* ===== БЛОК ПОГОДЫ (6 колонок: день, иконка, температура, направление ветра, скорость ветра, влажность) ===== */
+        #weatherContent {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+        .weather-day {
+            display: grid;
+            grid-template-columns: minmax(80px, 100px) 24px 1fr 30px 1fr 30px;
+            gap: 4px 6px;
+            padding: 6px 0;
+            border-bottom: 1px solid var(--border);
+            font-size: 14px;
+            color: var(--text-secondary);
+            align-items: center;
+        }
+        .weather-day:last-child {
+            border-bottom: none;
+        }
+        .weather-day .day-name {
+            font-weight: 600;
+            color: var(--text);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .weather-day .weather-icon {
+            font-size: 20px;
+            text-align: center;
+            width: 24px;
+            justify-self: center;
+        }
+        .weather-day .weather-temp {
+            font-weight: 600;
+            color: var(--text);
+            text-align: center;
+            white-space: nowrap;
+            padding-left: 10px;
+        }
+        .weather-day .weather-temp .min {
+            color: var(--text-secondary);
+            font-weight: 400;
+        }
+        .weather-day .weather-wind-dir {
+            font-size: 12px;
+            color: var(--text-secondary);
+            text-align: center;
+            white-space: nowrap;
+        }
+        .weather-day .weather-wind-speed {
+            font-size: 12px;
+            color: var(--text-secondary);
+            text-align: center;
+            white-space: nowrap;
+        }
+        .weather-day .weather-humidity {
+            font-size: 12px;
+            color: var(--text-secondary);
+            text-align: right;
+            white-space: nowrap;
+        }
+        @media (max-width: 480px) {
+            .weather-day {
+                grid-template-columns: minmax(60px, 70px) 20px 1fr 30px 1fr 24px;
+                font-size: 13px;
+                gap: 3px;
+            }
+            .weather-day .weather-icon {
+                width: 20px;
+                font-size: 18px;
+            }
+            .weather-day .weather-wind-dir,
+            .weather-day .weather-wind-speed,
+            .weather-day .weather-humidity {
+                font-size: 11px;
+            }
+            .weather-day .weather-humidity {
+                text-align: right;
+            }
+        }
+        .weather-error {
+            text-align: center;
+            padding: 12px;
+            color: #ff6b6b;
+            font-size: 14px;
+        }
     </style>
 </head>
 <body>
@@ -207,25 +294,25 @@
         <div class="container" id="appContainer">
             <div class="header"><h1>Мои AI Новости</h1></div>
 
-            <!-- ===== БЛОК КОНФИДЕНЦИАЛЬНОСТИ ===== -->
-            <div class="status-block" id="consentBlock" style="display: none;">
-                <div class="status-title">Конфиденциальность</div>
-                <p style="color: var(--text-secondary); font-size: 14px; margin-bottom: 12px; line-height: 1.6;">
-                    Для работы приложения необходимо ваше согласие на обработку персональных данных.
-                    Мы собираем минимальный набор данных (идентификатор в MAX, IP-адрес, технические параметры) для предоставления сервиса.
-                    Ваши данные не передаются третьим лицам и не используются для рекламы.
-                    Подробнее в <a href="/privacy" target="_blank" style="color: var(--accent2);">Политике обработки персональных данных</a>.
-                </p>
-                <div style="display: flex; align-items: flex-start; gap: 12px; margin: 12px 0;">
-                    <input type="checkbox" id="consentCheck" style="width: 20px; height: 20px; margin-top: 2px; flex-shrink: 0; accent-color: var(--accent2); cursor: pointer;">
-                    <label for="consentCheck" style="color: var(--text-secondary); font-size: 14px; line-height: 1.5; cursor: pointer;">
-                        Я ознакомлен(а) и согласен(на) с условиями обработки персональных данных
-                    </label>
-                </div>
-                <button id="consentAcceptBtn" disabled style="width: 100%; padding: 12px; background: linear-gradient(290deg, #d235ff 0%, #a062ff 30%, #3088ff 66%, #61d8ff 100%); border: none; border-radius: 12px; color: #fff; font-weight: 600; font-size: 16px; cursor: pointer; transition: opacity .2s; opacity: 0.5; pointer-events: none;">
-                    Принимаю
-                </button>
-            </div>
+<!-- ===== БЛОК СОГЛАСИЯ ===== -->
+<div class="status-block" id="consentBlock" style="display: none;">
+    <div class="status-title">Конфиденциальность</div>
+    <p style="color: var(--text-secondary); font-size: 14px; margin-bottom: 12px; line-height: 1.6;">
+        Для работы приложения необходимо ваше согласие на обработку персональных данных.
+        Мы собираем минимальный набор данных (идентификатор в MAX, IP-адрес, технические параметры) для предоставления сервиса.
+        Ваши данные не передаются третьим лицам и не используются для рекламы.
+    </p>
+    <div style="display: flex; align-items: flex-start; gap: 12px; margin: 12px 0;">
+        <input type="checkbox" id="consentCheck" style="width: 20px; height: 20px; margin-top: 2px; flex-shrink: 0; accent-color: var(--accent2); cursor: pointer;">
+        <label for="consentCheck" style="color: var(--text-secondary); font-size: 14px; line-height: 1.5; cursor: pointer;">
+            Я ознакомлен(а) с <a href="/consent" target="_blank" style="color: var(--accent2);">Согласием на обработку персональных данных</a> и 
+            <a href="/privacy" target="_blank" style="color: var(--accent2);">Политикой конфиденциальности</a> и даю согласие на обработку моих персональных данных.
+        </label>
+    </div>
+    <button id="consentAcceptBtn" disabled style="width: 100%; padding: 12px; background: linear-gradient(290deg, #d235ff 0%, #a062ff 30%, #3088ff 66%, #61d8ff 100%); border: none; border-radius: 12px; color: #fff; font-weight: 600; font-size: 16px; cursor: pointer; transition: opacity .2s; opacity: 0.5; pointer-events: none;">
+        Соглашаюсь
+    </button>
+</div>
             <!-- ===== КОНЕЦ БЛОКА ===== -->
 
             <!-- Остальной контент (будет заблокирован, если consent-pending) -->
@@ -365,6 +452,17 @@
                     <div id="digestContent"></div>
                 </div>
                 <!-- ============================================ -->
+
+                <!-- ===== БЛОК ПОГОДЫ ===== -->
+                <div class="status-block" id="weatherBlock">
+                    <div class="status-title">Погода в Москве на неделю</div>
+                    <div id="weatherContent">
+                        <div style="text-align:center; padding:10px; color:var(--text-secondary);">⏳ Загрузка прогноза...</div>
+                    </div>
+                    <div style="text-align:center; margin-top:8px; font-size:12px; color:var(--text-secondary); opacity:0.6;">
+                        Данные обновляются каждый час · <span id="weatherUpdateTime">—</span>
+                    </div>
+                </div>
 
                 <div class="section-header">Мои источники (<span id="counter">0</span>)</div>
                 <div id="sourceListContainer"></div>
@@ -533,8 +631,7 @@
                 window.WebApp.showPopup({
                     title:'Открыть ссылку?',
                     message:url,
-                    buttons:[{id:'cancel',type:'cancel',text:'Отмена'},{id:'open',type:'default',text:'Открыть'}]
-                },function(btnId){if(btnId==='open'){if(window.WebApp.openLink)window.WebApp.openLink(url);else window.open(url,'_blank');}});
+                    buttons:[{id:'cancel',type:'cancel',text:'Отмена'},{id:'open',type:'default',text:'Открыть'}]},function(btnId){if(btnId==='open'){if(window.WebApp.openLink)window.WebApp.openLink(url);else window.open(url,'_blank');}});
             }else{if(confirm('Открыть ссылку?\n\n'+url)){if(window.WebApp.openLink)window.WebApp.openLink(url);else window.open(url,'_blank');}}
         }
 
@@ -715,8 +812,7 @@
                 window.WebApp.showPopup({
                     title:'Подтверждение',
                     message:'Удалить источник?',
-                    buttons:[{id:'cancel',type:'cancel',text:'Отмена'},{id:'delete',type:'destructive',text:'Удалить'}]
-                },function(btnId){if(btnId==='delete')deleteSource(id);});
+                    buttons:[{id:'cancel',type:'cancel',text:'Отмена'},{id:'delete',type:'destructive',text:'Удалить'}]},function(btnId){if(btnId==='delete')deleteSource(id);});
             }else{if(confirm('Удалить источник?'))deleteSource(id);}
         }
 
@@ -770,8 +866,7 @@
                 window.WebApp.showPopup({
                     title:'Подтверждение',
                     message:'Добавить источник?\n\n'+name,
-                    buttons:[{id:'cancel',type:'cancel',text:'Отмена'},{id:'add',type:'default',text:'Добавить'}]
-                },function(btnId){if(btnId==='add')addRSSSource(url,name);});
+                    buttons:[{id:'cancel',type:'cancel',text:'Отмена'},{id:'add',type:'default',text:'Добавить'}]},function(btnId){if(btnId==='add')addRSSSource(url,name);});
             }else{if(confirm('Добавить источник?\n\n'+name))addRSSSource(url,name);}
         }
 
@@ -814,8 +909,7 @@
                 window.WebApp.showPopup({
                     title:'Подтверждение',
                     message:'Добавить источник?\n\n'+name,
-                    buttons:[{id:'cancel',type:'cancel',text:'Отмена'},{id:'add',type:'default',text:'Добавить'}]
-                },function(btnId){if(btnId==='add')doAddCategorySource(sourceType,sourceValue,name);});
+                    buttons:[{id:'cancel',type:'cancel',text:'Отмена'},{id:'add',type:'default',text:'Добавить'}]},function(btnId){if(btnId==='add')doAddCategorySource(sourceType,sourceValue,name);});
             }else{if(confirm('Добавить источник?\n\n'+name))doAddCategorySource(sourceType,sourceValue,name);}
         }
 
@@ -935,8 +1029,7 @@
                     window.WebApp.showPopup({
                         title:'Подтверждение',
                         message:'Добавить источник?\n\n'+name,
-                        buttons:[{id:'add',type:'default',text:'Добавить'},{id:'cancel',type:'cancel',text:'Отмена'}]
-                    },function(btnId){if(btnId==='add'){addRSSSource(url,name);document.getElementById('youtubeForm').style.display='none';document.getElementById('youtubeInput').value='';alert('✅ Добавлено: '+name);}});
+                        buttons:[{id:'add',type:'default',text:'Добавить'},{id:'cancel',type:'cancel',text:'Отмена'}]},function(btnId){if(btnId==='add'){addRSSSource(url,name);document.getElementById('youtubeForm').style.display='none';document.getElementById('youtubeInput').value='';alert('✅ Добавлено: '+name);}});
                 }else{if(window.confirm('Добавить источник?\n'+name)){addRSSSource(url,name);document.getElementById('youtubeForm').style.display='none';document.getElementById('youtubeInput').value='';alert('✅ Добавлено: '+name);}}
             }catch(err){alert('Ошибка: '+err.message);}
         }
@@ -993,8 +1086,7 @@
                 window.WebApp.showPopup({
                     title:'Подтверждение',
                     message:'Сгенерирован RSS для Google News:\n'+query,
-                    buttons:[{id:'open',type:'default',text:'Открыть'},{id:'add',type:'default',text:'Добавить'},{id:'cancel',type:'cancel',text:'Отмена'}]
-                },function(btnId){if(btnId==='add')addRSSSource(url,'Google News: '+query);else if(btnId==='open'){if(window.WebApp&&window.WebApp.openLink)window.WebApp.openLink(url);else window.open(url,'_blank');}});
+                    buttons:[{id:'open',type:'default',text:'Открыть'},{id:'add',type:'default',text:'Добавить'},{id:'cancel',type:'cancel',text:'Отмена'}]},function(btnId){if(btnId==='add')addRSSSource(url,'Google News: '+query);else if(btnId==='open'){if(window.WebApp&&window.WebApp.openLink)window.WebApp.openLink(url);else window.open(url,'_blank');}});
             }else{if(confirm('Добавить источник?\nGoogle News: '+query))addRSSSource(url,'Google News: '+query);else if(confirm('Открыть ссылку?\n'+url))window.open(url,'_blank');}
         }
 
@@ -1170,8 +1262,7 @@
                     window.WebApp.showPopup({
                         title:'Доступно только в Расширенном тарифе',
                         message:'Управление временем получения доступно только для Расширенного тарифа. Оформите подписку, чтобы пользоваться этой функцией.',
-                        buttons:[{id:'upgrade',type:'default',text:'Перейти к тарифам'},{id:'cancel',type:'cancel',text:'Закрыть'}]
-                    },function(btnId){if(btnId==='upgrade')toggleTariffs();});
+                        buttons:[{id:'upgrade',type:'default',text:'Перейти к тарифам'},{id:'cancel',type:'cancel',text:'Закрыть'}]},function(btnId){if(btnId==='upgrade')toggleTariffs();});
                 }else alert('Доступно только для Расширенного тарифа. Оформите подписку.');
                 return;
             }
@@ -1368,6 +1459,157 @@
             }
         }
         // ===== КОНЕЦ ВЫХОДА =====
+
+        // ============================================================
+        //  ПОГОДА
+        // ============================================================
+        const WEATHER_API_URL = 'https://api.open-meteo.com/v1/forecast';
+        const WEATHER_LAT = 55.7558;
+        const WEATHER_LON = 37.6173;
+
+        const WEATHER_CODES = {
+            0: { icon: '☀️', desc: 'Ясно' },
+            1: { icon: '🌤️', desc: 'Малооблачно' },
+            2: { icon: '⛅', desc: 'Переменная облачность' },
+            3: { icon: '☁️', desc: 'Пасмурно' },
+            45: { icon: '🌫️', desc: 'Туман' },
+            48: { icon: '🌫️', desc: 'Туман с изморозью' },
+            51: { icon: '🌦️', desc: 'Морось слабая' },
+            53: { icon: '🌦️', desc: 'Морось умеренная' },
+            55: { icon: '🌧️', desc: 'Морось сильная' },
+            56: { icon: '🌨️', desc: 'Ледяная морось слабая' },
+            57: { icon: '🌨️', desc: 'Ледяная морось сильная' },
+            61: { icon: '🌧️', desc: 'Дождь слабый' },
+            63: { icon: '🌧️', desc: 'Дождь умеренный' },
+            65: { icon: '🌧️', desc: 'Дождь сильный' },
+            66: { icon: '🌨️', desc: 'Ледяной дождь слабый' },
+            67: { icon: '🌨️', desc: 'Ледяной дождь сильный' },
+            71: { icon: '🌨️', desc: 'Снег слабый' },
+            73: { icon: '🌨️', desc: 'Снег умеренный' },
+            75: { icon: '❄️', desc: 'Снег сильный' },
+            77: { icon: '🌨️', desc: 'Снежная крупа' },
+            80: { icon: '🌧️', desc: 'Ливень слабый' },
+            81: { icon: '🌧️', desc: 'Ливень умеренный' },
+            82: { icon: '⛈️', desc: 'Ливень сильный' },
+            85: { icon: '🌨️', desc: 'Снегопад слабый' },
+            86: { icon: '❄️', desc: 'Снегопад сильный' },
+            95: { icon: '⛈️', desc: 'Гроза слабая' },
+            96: { icon: '⛈️', desc: 'Гроза с градом слабая' },
+            99: { icon: '⛈️', desc: 'Гроза с градом сильная' },
+        };
+
+        function getWeatherDescription(code) {
+            return WEATHER_CODES[code] || { icon: '🌡️', desc: '—' };
+        }
+
+        function formatDay(dateStr) {
+            const days = ['Вс', 'Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб'];
+            const d = new Date(dateStr + 'T00:00:00');
+            return days[d.getDay()];
+        }
+
+        function formatDate(dateStr) {
+            const d = new Date(dateStr + 'T00:00:00');
+            return d.toLocaleDateString('ru-RU', { day: 'numeric', month: 'short' });
+        }
+
+        async function fetchWeather() {
+            const container = document.getElementById('weatherContent');
+            const timeEl = document.getElementById('weatherUpdateTime');
+
+            const windDirections = [
+                { from: 0, to: 22.5, dir: 'С' },
+                { from: 22.5, to: 67.5, dir: 'СВ' },
+                { from: 67.5, to: 112.5, dir: 'В' },
+                { from: 112.5, to: 157.5, dir: 'ЮВ' },
+                { from: 157.5, to: 202.5, dir: 'Ю' },
+                { from: 202.5, to: 247.5, dir: 'ЮЗ' },
+                { from: 247.5, to: 292.5, dir: 'З' },
+                { from: 292.5, to: 337.5, dir: 'СЗ' },
+                { from: 337.5, to: 360, dir: 'С' }
+            ];
+
+            function getWindDirection(deg) {
+                if (deg == null) return '—';
+                for (let d of windDirections) {
+                    if (deg >= d.from && deg < d.to) return d.dir;
+                }
+                return 'С';
+            }
+
+            try {
+                const params = new URLSearchParams({
+                    latitude: WEATHER_LAT,
+                    longitude: WEATHER_LON,
+                    daily: [
+                        'weather_code',
+                        'temperature_2m_max',
+                        'temperature_2m_min',
+                        'apparent_temperature_max',
+                        'wind_speed_10m_max',
+                        'wind_direction_10m_dominant',
+                        'relative_humidity_2m_max'
+                    ].join(','),
+                    timezone: 'Europe/Moscow',
+                    forecast_days: 7
+                });
+
+                const resp = await fetch(`${WEATHER_API_URL}?${params}`);
+                if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+                const data = await resp.json();
+
+                if (!data.daily || !data.daily.time) {
+                    throw new Error('Некорректный ответ API');
+                }
+
+                const { time, weather_code, temperature_2m_max, temperature_2m_min, apparent_temperature_max, wind_speed_10m_max, wind_direction_10m_dominant, relative_humidity_2m_max } = data.daily;
+
+                let html = '';
+                for (let i = 0; i < time.length; i++) {
+                    const dayName = i === 0 ? 'Сегодня' : formatDay(time[i]);
+                    const dateStr = i === 0 ? '' : ' ' + formatDate(time[i]);
+                    const code = weather_code[i];
+                    const weather = getWeatherDescription(code);
+                    const tMax = Math.round(temperature_2m_max[i]);
+                    const tMin = Math.round(temperature_2m_min[i]);
+                    const feelsLike = Math.round(apparent_temperature_max[i]);
+                    const windSpeed = Math.round(wind_speed_10m_max[i]);
+                    const windDir = getWindDirection(wind_direction_10m_dominant[i]);
+                    const humidity = Math.round(relative_humidity_2m_max[i]);
+
+                    html += `
+                        <div class="weather-day">
+                            <span class="day-name">${dayName}${dateStr}</span>
+                            <span class="weather-icon">${weather.icon}</span>
+                            <span class="weather-temp">
+                                ${tMax}°${feelsLike ? ` (${feelsLike}°)` : ''} 
+                                <span class="min">${tMin}°</span>
+                            </span>
+                            <span class="weather-wind-dir">${windDir}</span>
+                            <span class="weather-wind-speed">${windSpeed} км/ч</span>
+                            <span class="weather-humidity">${humidity}%</span>
+                        </div>
+                    `;
+                }
+
+                container.innerHTML = html;
+                if (timeEl) {
+                    const now = new Date();
+                    timeEl.textContent = now.toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' });
+                }
+
+            } catch (err) {
+                console.error('Weather fetch error:', err);
+                container.innerHTML = `<div class="weather-error">❌ Не удалось загрузить прогноз: ${err.message}</div>`;
+                if (timeEl) timeEl.textContent = '—';
+            }
+        }
+
+        // Загружаем погоду при загрузке страницы и каждые 60 минут
+        if (document.getElementById('weatherBlock')) {
+            fetchWeather();
+            setInterval(fetchWeather, 60 * 60 * 1000);
+        }
 
         (function(){
             const appContainer=document.getElementById('appContainer');

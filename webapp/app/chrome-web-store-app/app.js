@@ -1,518 +1,8 @@
-<!DOCTYPE html>
-<html lang="ru">
-<head>
-<link rel="icon" href="/icons/favicon.ico">
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>Мои AI Новости — персонализированный дайджест с искусственным интеллектом</title>
-<meta name="description" content="Войдите в Мои AI Новости, чтобы получать ежедневные персонализированные дайджесты новостей из ваших любимых источников. Авторизация через VK, MAX или Яндекс ID.">
-<meta name="keywords" content="AI новости, дайджест, персонализированные новости, VK, MAX, Яндекс ID, агрегатор новостей">
-<meta name="robots" content="index, follow">
-<link rel="canonical" href="https://news.proid.studio/pwa">
-<meta property="og:title" content="Вход в Мои AI Новости">
-<meta property="og:description" content="Персонализированный AI-дайджест новостей. Войдите через VK, MAX или Яндекс ID.">
-<meta property="og:type" content="website">
-<meta property="og:url" content="https://news.proid.studio/pwa">
-<meta property="og:image" content="https://news.proid.studio/picture/LOGO.jpg">
-<meta property="og:image:width" content="1200">
-<meta property="og:image:height" content="630">
-<meta property="og:locale" content="ru_RU">
-<meta property="og:site_name" content="Мои AI Новости">
-<meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="Вход в Мои AI Новости">
-<meta name="twitter:description" content="Персонализированный AI-дайджест новостей. Войдите через VK, MAX или Яндекс ID.">
-<meta name="twitter:image" content="https://news.proid.studio/picture/LOGO.jpg">
-<script type="application/ld+json">
-{
-"@context": "https://schema.org",
-"@type": "WebApplication",
-"name": "Мои AI Новости",
-"url": "https://news.proid.studio/",
-"description": "Персонализированный AI-дайджест новостей из выбранных источников.",
-"applicationCategory": "NewsAggregator",
-"operatingSystem": "All",
-"browserRequirements": "Modern browser",
-"offers": {"@type":"Offer","price":"0","priceCurrency":"RUB"}
-}
-</script>
-<link rel="manifest" href="/manifest.json">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<link rel="apple-touch-icon" href="/icons/apple-icon-180x180.png">
-<link rel="apple-touch-icon" sizes="152x152" href="/icons/apple-icon-152x152.png">
-<link rel="apple-touch-icon" sizes="144x144" href="/icons/apple-icon-144x144.png">
-<link rel="apple-touch-icon" sizes="120x120" href="/icons/apple-icon-120x120.png">
-<link rel="apple-touch-icon" sizes="114x114" href="/icons/apple-icon-114x114.png">
-<meta name="theme-color" content="#010715">
-<style>
-*{margin:0;padding:0;box-sizing:border-box;}
-:root{--bg-color:#010715;--footer-bg:#111c40;--text:#fff;--text-secondary:#8a9bb5;--accent:#6c5ce7;--accent2:#3088ff;--card-bg:rgba(255,255,255,0.04);--border:rgba(255,255,255,0.06);--radius:20px;--shadow:0 12px 48px rgba(0,0,0,0.6);}
-html{scroll-behavior:smooth;}
-body{font-family:-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "Fira Sans", "Droid Sans", "Helvetica Neue", Arial, sans-serif;background:var(--footer-bg) linear-gradient(180deg,#020e33 0%,var(--bg-color) 25%,var(--bg-color) 84%,var(--footer-bg) 100%);color:var(--text);line-height:1.6;padding:0;min-height:100vh;-webkit-font-smoothing:antialiased;font-variant-ligatures:none;display:flex;flex-direction:column;}
-.page-wrap{padding:0 20px;flex:1 0 auto;display:flex;flex-direction:column;width:100%;}
-.container{max-width:600px;margin:0 auto;flex:1 0 auto;display:flex;flex-direction:column;width:100%;padding:0 0 20px;}
-.header{display:flex;align-items:center;justify-content:center;padding:100px 0 10px;border-bottom:1px solid var(--border);flex-shrink:0;}
-.header h1{font-size:28px;font-weight:700;background:linear-gradient(290deg,#d235ff 0%,#a062ff 30%,#3088ff 66%,#61d8ff 100%);-webkit-background-clip:text;background-clip:text;color:transparent;letter-spacing:-0.5px;}
-.section-header{text-align:center;font-size:18px;font-weight:600;color:var(--text);margin:20px 0 12px 0;}
-.quick-buttons{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:4px;}
-.quick-buttons button{flex:1 0 calc(33.33% - 6px);padding:10px 8px;border:1px solid var(--border);border-radius:var(--radius);background:var(--card-bg);color:var(--text);font-size:14px;font-weight:500;cursor:pointer;transition:all .2s;text-align:center;backdrop-filter:blur(4px);}
-.quick-buttons button:hover,.quick-buttons button:focus,.quick-buttons button:focus-visible{background:linear-gradient(180deg,rgba(159,103,255,.22),rgba(197,66,255,.35)) padding-box,linear-gradient(var(--bg-color),var(--bg-color)) padding-box,linear-gradient(180deg,rgba(171,78,252,.82) 0%,rgba(108,31,198,.24) 53%,#7C45C2 100%) border-box,linear-gradient(180deg,rgba(159,103,255,.22),rgba(197,66,255,.35)) border-box;border:1px solid transparent;color:#fff;}
-.quick-buttons button:active{background:linear-gradient(180deg,rgba(159,103,255,.22),rgba(197,66,255,.35)) padding-box,linear-gradient(var(--bg-color),var(--bg-color)) padding-box,linear-gradient(180deg,rgba(171,78,252,.82) 0%,rgba(108,31,198,.24) 53%,#7C45C2 100%) border-box,linear-gradient(180deg,rgba(159,103,255,.22),rgba(197,66,255,.35)) border-box;border:1px solid transparent;color:#fff;transform:scale(.97);}
-.suggest-btn{width:100%;padding:10px 8px;border:1px solid var(--border);border-radius:var(--radius);background:var(--card-bg);color:var(--text-secondary);font-size:14px;font-weight:500;cursor:pointer;transition:all .2s;text-align:center;backdrop-filter:blur(4px);margin-top:4px;}
-.suggest-btn:hover,.suggest-btn:focus,.suggest-btn:focus-visible{background:linear-gradient(180deg,rgba(159,103,255,.22),rgba(197,66,255,.35)) padding-box,linear-gradient(var(--bg-color),var(--bg-color)) padding-box,linear-gradient(180deg,rgba(171,78,252,.82) 0%,rgba(108,31,198,.24) 53%,#7C45C2 100%) border-box,linear-gradient(180deg,rgba(159,103,255,.22),rgba(197,66,255,.35)) border-box;border:1px solid transparent;color:#fff;}
-.suggest-btn:active{background:linear-gradient(180deg,rgba(159,103,255,.22),rgba(197,66,255,.35)) padding-box,linear-gradient(var(--bg-color),var(--bg-color)) padding-box,linear-gradient(180deg,rgba(171,78,252,.82) 0%,rgba(108,31,198,.24) 53%,#7C45C2 100%) border-box,linear-gradient(180deg,rgba(159,103,255,.22),rgba(197,66,255,.35)) border-box;border:1px solid transparent;color:#fff;transform:scale(.97);}
-.add-form,.category-form{background:var(--card-bg);padding:16px;border-radius:var(--radius);border:1px solid var(--border);margin-top:8px;margin-bottom:4px;display:none;backdrop-filter:blur(4px);}
-.add-form input{width:100%;padding:12px;margin-bottom:10px;background:rgba(0,0,0,0.3);color:var(--text);border:1px solid var(--border);border-radius:12px;font-size:15px;outline:none;}
-.add-form input:focus{border-color:var(--accent2);}
-.add-form button,.category-form button{width:100%;padding:12px;border:none;border-radius:12px;font-size:16px;font-weight:600;cursor:pointer;transition:all .2s;}
-.btn-primary{background:linear-gradient(290deg,#d235ff 0%,#a062ff 30%,#3088ff 66%,#61d8ff 100%);color:#fff;margin-bottom:8px;}
-.btn-primary:hover{opacity:.9;transform:scale(1.01);}
-.btn-primary:active{opacity:.8;transform:scale(.98);}
-.btn-secondary{background:transparent;color:var(--text-secondary);border:1px solid var(--border);}
-.btn-secondary:hover{background:rgba(255,255,255,0.05);}
-.btn-secondary:active{background:rgba(255,255,255,0.1);}
-.github-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin:8px 0;}
-.github-grid button{padding:8px 0;background:var(--card-bg);border:1px solid var(--border);border-radius:12px;color:var(--text);font-size:14px;font-weight:500;cursor:pointer;transition:all .2s;text-align:center;}
-.github-grid button:hover:not(:disabled){background:linear-gradient(180deg,rgba(159,103,255,.22),rgba(197,66,255,.35)) padding-box,linear-gradient(var(--bg-color),var(--bg-color)) padding-box,linear-gradient(180deg,rgba(171,78,252,.82) 0%,rgba(108,31,198,.24) 53%,#7C45C2 100%) border-box,linear-gradient(180deg,rgba(159,103,255,.22),rgba(197,66,255,.35)) border-box;border:1px solid transparent;color:#fff;}
-.github-grid button:active:not(:disabled){transform:scale(.95);}
-.github-grid button:disabled{opacity:.4;cursor:not-allowed;pointer-events:none;}
-.category-grid{display:flex;flex-wrap:wrap;gap:6px;margin:0px 0;}
-.category-grid button{flex:1 0 calc(50% - 6px);padding:8px 10px;background:var(--card-bg);border:1px solid var(--border);border-radius:12px;color:var(--text);font-size:13px;cursor:pointer;transition:all .2s;text-align:left;backdrop-filter:blur(4px);}
-.category-grid button:hover{background:linear-gradient(180deg,rgba(159,103,255,.22),rgba(197,66,255,.35)) padding-box,linear-gradient(var(--bg-color),var(--bg-color)) padding-box,linear-gradient(180deg,rgba(171,78,252,.82) 0%,rgba(108,31,198,.24) 53%,#7C45C2 100%) border-box,linear-gradient(180deg,rgba(159,103,255,.22),rgba(197,66,255,.35)) border-box;border:1px solid transparent;color:#fff;}
-.category-grid button:active{background:linear-gradient(180deg,rgba(159,103,255,.22),rgba(197,66,255,.35)) padding-box,linear-gradient(var(--bg-color),var(--bg-color)) padding-box,linear-gradient(180deg,rgba(171,78,252,.82) 0%,rgba(108,31,198,.24) 53%,#7C45C2 100%) border-box,linear-gradient(180deg,rgba(159,103,255,.22),rgba(197,66,255,.35)) border-box;border:1px solid transparent;color:#fff;transform:scale(.97);}
-.group-title{font-size:16px;font-weight:600;margin:16px 0 8px 0;color:var(--text-secondary);letter-spacing:.5px;text-transform:uppercase;border-bottom:1px solid var(--border);padding-bottom:4px;text-align:center;}
-.source-list{display:flex;flex-direction:column;gap:8px;margin-top:4px;}
-.source-item{background:var(--card-bg);border-radius:var(--radius);padding:12px 16px;display:flex;align-items:center;justify-content:space-between;border:1px solid var(--border);box-shadow:var(--shadow);cursor:pointer;transition:background .15s;backdrop-filter:blur(4px);}
-.source-item:hover{background:rgba(255,255,255,0.08);}
-.source-info{display:flex;align-items:center;gap:10px;flex:1;min-width:0;}
-.source-icon{width:32px;height:32px;border-radius:8px;flex-shrink:0;}
-.source-value{font-size:15px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:var(--text);}
-.delete-btn{background:none;border:none;color:var(--text-secondary);font-size:18px;cursor:pointer;padding:4px 8px;border-radius:6px;transition:all .2s;opacity:.6;flex-shrink:0;z-index:2;}
-.delete-btn:hover{background:rgba(255,70,70,0.15);color:#ff6b6b;opacity:1;}
-.empty-state{text-align:center;padding:30px 20px;color:var(--text-secondary);background:var(--card-bg);border-radius:var(--radius);border:1px dashed var(--border);backdrop-filter:blur(4px);}
-.empty-icon{font-size:40px;margin-bottom:12px;opacity:.6;}
-.footer-wrapper{width:100%;background:var(--footer-bg);border-top:1px solid var(--border);padding:12px 0;margin-top:auto;flex-shrink:0;}
-.footer-inner{margin:0 auto;display:flex;flex-wrap:wrap;justify-content:center;align-items:center;gap:6px 16px;font-size:13px;color:var(--text-secondary);padding:0 20px;}
-@media(min-width:600px){.footer-inner{flex-wrap:nowrap;gap:8px 20px;}}
-.footer-inner a{color:var(--text-secondary);text-decoration:none;transition:.2s;}
-.footer-inner a:hover{color:var(--text);}
-.footer-inner .docs a{color:var(--accent2);font-weight:500;}
-.footer-inner .docs a:hover{text-decoration:underline;}
-.footer-inner .studio-link{color:#3088ff !important;font-weight:500;}
-.footer-inner .studio-link:hover{text-decoration:underline;}
-.footer-inner .sep{color:var(--text-secondary);opacity:.3;}
-.footer-inner .landing-link{color:var(--accent2);font-weight:500;}
-.footer-inner .landing-link:hover{text-decoration:underline;}
-.disabled-overlay{pointer-events:none;opacity:.6;}
-@media(max-width:480px){.quick-buttons button{flex:1 0 calc(33.33% - 6px);}
-.github-grid{grid-template-columns:repeat(2,1fr);}
-.footer-inner{flex-wrap:wrap;gap:4px 8px;font-size:12px;padding:0 16px;}}
-.payment-toggle-btn{width:100%;padding:14px;font-size:18px;font-weight:700;border-radius:var(--radius);background:linear-gradient(290deg,#d235ff 0%,#a062ff 30%,#3088ff 66%,#61d8ff 100%);color:#fff;border:none;cursor:pointer;transition:all .2s;margin:16px 0 8px;}
-.payment-toggle-btn:hover{opacity:.9;transform:scale(1.01);}
-.payment-toggle-btn:active{transform:scale(.98);}
-.tariff-block{display:none;margin-top:10px;animation:fadeIn .3s ease;}
-.tariff-block.visible{display:block;}
-@keyframes fadeIn{from{opacity:0;transform:translateY(-10px);}to{opacity:1;transform:translateY(0);}}
-.tariff-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin:12px 0 8px;}
-.tariff-card{background:var(--card-bg);border-radius:var(--radius);padding:16px 12px;border:1px solid var(--border);text-align:center;backdrop-filter:blur(4px);transition:.2s;}
-.tariff-card:hover{border-color:var(--accent2);transform:translateY(-2px);}
-.tariff-card .title{font-size:20px;font-weight:700;background:linear-gradient(290deg,#d235ff 0%,#a062ff 30%,#3088ff 66%,#61d8ff 100%);-webkit-background-clip:text;background-clip:text;color:transparent;margin-bottom:8px;}
-.tariff-card .price-btn{display:block;width:100%;padding:10px 0;margin:6px 0;border:1px solid var(--border);border-radius:12px;background:var(--card-bg);color:var(--text);font-size:15px;font-weight:600;cursor:pointer;transition:all .2s;text-align:center;}
-.tariff-card .price-btn:hover{background:linear-gradient(180deg,rgba(159,103,255,.22),rgba(197,66,255,.35)) padding-box,linear-gradient(var(--bg-color),var(--bg-color)) padding-box,linear-gradient(180deg,rgba(171,78,252,.82) 0%,rgba(108,31,198,.24) 53%,#7C45C2 100%) border-box,linear-gradient(180deg,rgba(159,103,255,.22),rgba(197,66,255,.35)) border-box;border:1px solid transparent;color:#fff;}
-.tariff-card .price-btn:active{transform:scale(.97);}
-.tariff-card .price-btn .label{font-size:12px;font-weight:400;color:var(--text-secondary);}
-.tariff-link{text-align:center;margin-top:4px;}
-.tariff-link a{color:var(--accent2);text-decoration:none;font-size:14px;font-weight:500;}
-.tariff-link a:hover{text-decoration:underline;}
-.status-block{background:var(--card-bg);border-radius:var(--radius);padding:16px 18px;margin-top:16px;border:1px solid var(--border);backdrop-filter:blur(4px);}
-.status-title{font-size:16px;font-weight:600;color:var(--text-secondary);margin-bottom:10px;text-align:center;letter-spacing:.5px;}
-.status-row{display:flex;justify-content:space-between;padding:4px 0;font-size:14px;color:var(--text-secondary);border-bottom:1px solid var(--border);}
-.status-row:last-child{border-bottom:none;}
-.status-row span:first-child{color:var(--text-secondary);}
-.status-row span:last-child{color:var(--text);font-weight:500;}
-.time-picker-grid{display:grid;grid-template-columns:repeat(6,1fr);gap:6px;margin-top:10px;}
-.time-picker-grid button{padding:8px 0;background:var(--card-bg);border:1px solid var(--border);border-radius:12px;color:var(--text);font-size:14px;font-weight:500;cursor:pointer;transition:all .2s;text-align:center;}
-.time-picker-grid button:hover{background:linear-gradient(180deg,rgba(159,103,255,.22),rgba(197,66,255,.35)) padding-box,linear-gradient(var(--bg-color),var(--bg-color)) padding-box,linear-gradient(180deg,rgba(171,78,252,.82) 0%,rgba(108,31,198,.24) 53%,#7C45C2 100%) border-box,linear-gradient(180deg,rgba(159,103,255,.22),rgba(197,66,255,.35)) border-box;border:1px solid transparent;color:#fff;}
-.time-picker-grid button:active{transform:scale(.95);}
-.time-picker-grid button.selected{border-color:var(--accent2);background:rgba(48,136,255,0.15);}
-.change-time-btn{background:transparent;border:1px solid var(--border);color:var(--text-secondary);padding:4px 12px;border-radius:12px;font-size:13px;cursor:pointer;transition:.2s;}
-.change-time-btn:hover{background:rgba(255,255,255,0.05);color:var(--text);}
-.change-time-btn:disabled{opacity:.4;cursor:not-allowed;}
-.close-picker-btn{width:100%;padding:8px;background:transparent;border:1px solid var(--border);border-radius:12px;color:var(--text-secondary);font-size:14px;cursor:pointer;margin-top:8px;transition:.2s;}
-.close-picker-btn:hover{background:rgba(255,255,255,0.05);}
-.upgrade-hint{font-size:12px;color:var(--text-secondary);margin-left:8px;}
-.upgrade-hint a{color:var(--accent2);text-decoration:none;}
-.upgrade-hint a:hover{text-decoration:underline;}
-.auth-container{max-width:420px;width:100%;background:transparent;border:none;box-shadow:none;padding:20px 0 0 0;margin:0 auto;text-align:center;}
-.auth-btn{display:flex;align-items:center;justify-content:center;gap:12px;width:300px;margin:0 auto 12px auto;padding:16px 24px;border:1px solid transparent;border-radius:26px;font-size:17px;font-weight:700;line-height:20px;color:#fff;cursor:pointer;transition:transform .2s,box-shadow .2s,opacity .2s;text-decoration:none;background:var(--card-bg);backdrop-filter:blur(4px);}
-.auth-btn.vk{--fill-colors:rgba(13,71,161,.26),rgba(30,136,229,.35);--border-colors:rgba(13,71,161,.82) 0%,rgba(21,101,192,.24) 53%,#1e88e5 100%;background:linear-gradient(180deg,var(--fill-colors)) padding-box,linear-gradient(var(--bg-color),var(--bg-color)) padding-box,linear-gradient(180deg,var(--border-colors)) border-box,linear-gradient(180deg,var(--fill-colors)) border-box;}
-.auth-btn.max{--fill-colors:rgba(159,103,255,.22),rgba(197,66,255,.35);--border-colors:rgba(171,78,252,.82) 0%,rgba(108,31,198,.24) 53%,#7C45C2 100%;background:linear-gradient(180deg,var(--fill-colors)) padding-box,linear-gradient(var(--bg-color),var(--bg-color)) padding-box,linear-gradient(180deg,var(--border-colors)) border-box,linear-gradient(180deg,var(--fill-colors)) border-box;}
-.auth-btn.yandex{--fill-colors:rgba(216,67,21,.26),rgba(245,124,0,.35);--border-colors:rgba(216,67,21,.82) 0%,rgba(245,124,0,.24) 53%,#f57c00 100%;background:linear-gradient(180deg,var(--fill-colors)) padding-box,linear-gradient(var(--bg-color),var(--bg-color)) padding-box,linear-gradient(180deg,var(--border-colors)) border-box,linear-gradient(180deg,var(--fill-colors)) border-box;}
-.auth-btn:hover{transform:scale(1.03);opacity:.9;}
-.auth-btn:active{transform:scale(.97);opacity:.8;}
-.small-note{font-size:12px;color:var(--text-secondary);margin-top:4px;line-height:1.4;}
-.widget-container{margin-top:16px;min-height:60px;display:flex;justify-content:center;align-items:center;flex-direction:column;}
-.loader{display:inline-block;width:24px;height:24px;border:3px solid var(--border);border-top-color:var(--accent2);border-radius:50%;animation:spin .8s linear infinite;}
-@keyframes spin{to{transform:rotate(360deg);}}
-.hidden{display:none !important;}
-.consent-pending #appContent,
-.consent-pending #appContent * {
-    pointer-events: none !important;
-    opacity: 0.5 !important;
-    user-select: none !important;
-}
-.consent-pending #consentBlock,
-.consent-pending #consentBlock * {
-    pointer-events: auto !important;
-    opacity: 1 !important;
-    user-select: auto !important;
-}
-#digestContent .status-block {
-    white-space: pre-wrap;
-    word-wrap: normal;
-    overflow-wrap: normal;
-    hyphens: none;
-    padding: 16px;
-    margin-bottom: 12px;
-    background: var(--card-bg);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    backdrop-filter: blur(4px);
-    list-style: none !important;
-}
-#digestContent .status-block * {
-    list-style: none !important;
-    padding-left: 0 !important;
-    margin-left: 0 !important;
-    text-indent: 0 !important;
-}
-#digestContent .status-block a {
-    background: linear-gradient(290deg, #d235ff 0%, #a062ff 30%, #3088ff 66%, #61d8ff 100%);
-    -webkit-background-clip: text;
-    background-clip: text;
-    color: transparent;
-    text-decoration: none;
-    font-weight: 500;
-}
-#digestContent .status-block a:hover {
-    text-decoration: underline;
-    opacity: 0.8;
-}
-#logoutContainer {
-    text-align: center;
-    margin-top: 12px;
-    font-size: 14px;
-    color: var(--text-secondary);
-    cursor: pointer;
-    text-decoration: none;
-    user-select: none;
-    transition: color 0.2s;
-}
-#logoutContainer:hover {
-    color: var(--text) !important;
-}
+const API_BASE = 'https://news.proid.studio';
 
-/* ===== БЛОК ПОГОДЫ (6 колонок: день, иконка, температура, направление ветра, скорость ветра, влажность) ===== */
-#weatherContent {
-    display: flex;
-    flex-direction: column;
-    gap: 2px;
-}
-.weather-day {
-    display: grid;
-    grid-template-columns: minmax(80px, 100px) 24px 1fr 30px 1fr 30px;
-    gap: 4px 6px;
-    padding: 6px 0;
-    border-bottom: 1px solid var(--border);
-    font-size: 14px;
-    color: var(--text-secondary);
-    align-items: center;
-}
-.weather-day:last-child {
-    border-bottom: none;
-}
-.weather-day .day-name {
-    font-weight: 600;
-    color: var(--text);
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-}
-.weather-day .weather-icon {
-    font-size: 20px;
-    text-align: center;
-    width: 24px;
-    justify-self: center;
-}
-.weather-day .weather-temp {
-    font-weight: 600;
-    color: var(--text);
-    text-align: center;
-    white-space: nowrap;
-    padding-left: 10px;
-}
-.weather-day .weather-temp .min {
-    color: var(--text-secondary);
-    font-weight: 400;
-}
-.weather-day .weather-wind-dir {
-    font-size: 12px;
-    color: var(--text-secondary);
-    text-align: center;
-    white-space: nowrap;
-}
-.weather-day .weather-wind-speed {
-    font-size: 12px;
-    color: var(--text-secondary);
-    text-align: center;
-    white-space: nowrap;
-}
-.weather-day .weather-humidity {
-    font-size: 12px;
-    color: var(--text-secondary);
-    text-align: right;
-    white-space: nowrap;
-}
-@media (max-width: 480px) {
-    .weather-day {
-        grid-template-columns: minmax(60px, 70px) 20px 1fr 30px 1fr 24px;
-        font-size: 13px;
-        gap: 3px;
-    }
-    .weather-day .weather-icon {
-        width: 20px;
-        font-size: 18px;
-    }
-    .weather-day .weather-wind-dir,
-    .weather-day .weather-wind-speed,
-    .weather-day .weather-humidity {
-        font-size: 11px;
-    }
-    .weather-day .weather-humidity {
-        text-align: right;
-    }
-}
-.weather-error {
-    text-align: center;
-    padding: 12px;
-    color: #ff6b6b;
-    font-size: 14px;
-}
-
-</style>
-</head>
-<body>
-<div class="page-wrap">
-<div class="container">
-<div id="loginScreen">
-<div class="header"><h1>Мои AI Новости</h1></div>
-<div class="auth-container">
-   <button class="auth-btn max" id="maxLoginBtn"><span class="icon">🚀</span> Войти через MAX</button>
-   <button class="auth-btn vk" id="vkLoginBtn"><span class="icon">🚀</span> Войти через VK</button>
-   <button class="auth-btn yandex" id="yandexLoginBtn"><span class="icon">🚀</span> Войти через Yandex</button>
-</div>
-
-<!-- ===== БЛОК "ВАЖНО" (ширина 340px) ===== -->
-<div class="status-block" style="margin-top: 40px; max-width: 340px; margin-left: auto; margin-right: auto;">
-    <div class="status-title" style="color: var(--text);">Важно</div>
-    <div style="margin: 8px 0 10px; font-size: 13px; color: var(--text-secondary);">
-        <div style="padding: 6px 0; border-bottom: 1px solid var(--border); text-align: center;">
-            Telegram будет доступен после входа
-        </div>
-        <div style="padding: 6px 0; border-bottom: 1px solid var(--border); text-align: center;">
-            Привязка аккаунта к одному методу входа
-        </div>
-        <div style="padding: 6px 0; border-bottom: 1px solid var(--border); text-align: center;">
-            Зарубежный автовход запрещен в РФ
-        </div>
-        <div style="padding: 6px 0; border-bottom: 1px solid var(--border); text-align: center;">
-            Иногда VPN может мешать авторизации
-        </div>
-        <div style="padding: 6px 0; text-align: center;">
-            Подробнее в нашей <a href="/support" target="_blank" style="color: var(--accent2); text-decoration: none;">Справке</a>
-        </div>
-    </div>
-</div>
-<div class="widget-container" id="widgetContainer"></div>
-</div>
-<div id="appScreen" class="hidden">
-<div class="header"><h1>Мои AI Новости</h1></div>
-
-<!-- ===== БЛОК СОГЛАСИЯ ===== -->
-<div class="status-block" id="consentBlock" style="display: none;">
-    <div class="status-title">Конфиденциальность</div>
-    <p style="color: var(--text-secondary); font-size: 14px; margin-bottom: 12px; line-height: 1.6;">
-        Для работы приложения необходимо ваше согласие на обработку персональных данных.
-        Мы собираем минимальный набор данных (идентификаторы в VK, MAX или Яндекс ID, IP-адрес, технические параметры) для предоставления сервиса.
-        Ваши данные не передаются третьим лицам и не используются для рекламы.
-    </p>
-    <div style="display: flex; align-items: flex-start; gap: 12px; margin: 12px 0;">
-        <input type="checkbox" id="consentCheck" style="width: 20px; height: 20px; margin-top: 2px; flex-shrink: 0; accent-color: var(--accent2); cursor: pointer;">
-        <label for="consentCheck" style="color: var(--text-secondary); font-size: 14px; line-height: 1.5; cursor: pointer;">
-            Я ознакомлен(а) с <a href="/consent" target="_blank" style="color: var(--accent2);">Согласием на обработку персональных данных</a> и 
-            <a href="/privacy" target="_blank" style="color: var(--accent2);">Политикой конфиденциальности</a> и даю согласие на обработку моих персональных данных.
-        </label>
-    </div>
-    <button id="consentAcceptBtn" disabled style="width: 100%; padding: 12px; background: linear-gradient(290deg, #d235ff 0%, #a062ff 30%, #3088ff 66%, #61d8ff 100%); border: none; border-radius: 12px; color: #fff; font-weight: 600; font-size: 16px; cursor: pointer; transition: opacity .2s; opacity: 0.5; pointer-events: none;">
-        Соглашаюсь
-    </button>
-</div>
-
-<!-- Остальной контент -->
-<div id="appContent">
-<div class="section-header">Добавить</div>
-<div class="quick-buttons" id="quickButtons">
-<button id="btn-dzen">Дзен</button>
-<button id="btn-rb">RB.ru</button>
-<button id="btn-habr">Хабр</button>
-<button id="btn-lifehacker">Лайфхакер</button>
-<button id="btn-forbes">Forbes</button>
-<button id="btn-vc">VC.ru</button>
-<button id="btn-add-rss">RSS/HTML</button>
-<button id="btn-add-telegram">Telegram</button>
-<button id="btn-add-vk">VK</button>
-<button id="btn-github">GitHub</button>
-<button id="btn-youtube">YouTube</button>
-<button id="btn-reddit">Reddit</button>
-<button id="btn-bbc">BBC</button>
-<button id="btn-google-news">Google News</button>
-<button id="btn-cnn">CNN</button>
-</div>
-<div class="add-form" id="addForm">
-<div style="font-weight:600;margin-bottom:6px;" id="addFormTitle">Добавить RSS/HTML</div>
-<input id="sourceValue" type="text" placeholder="Введите URL...">
-<button class="btn-primary" id="addSourceSubmitBtn">Добавить</button>
-<button class="btn-secondary" id="closeAddFormBtn">Отмена</button>
-</div>
-<div class="add-form" id="githubForm">
-<div style="font-weight:600;margin-bottom:6px;">GitHub — генератор RSS</div>
-<input id="githubInput" type="text" placeholder="owner/repo или username">
-<div class="github-grid" id="githubGrid">
-<button data-type="releases" id="github-releases">releases</button>
-<button data-type="tags" id="github-tags">tags</button>
-<button data-type="commits" id="github-commits">commits</button>
-<button data-type="main" id="github-main">main</button>
-<button data-type="master" id="github-master">master</button>
-<button data-type="username" id="github-username">username</button>
-</div>
-<button class="btn-secondary" id="closeGitHubFormBtn">Отмена</button>
-</div>
-<div class="add-form" id="youtubeForm">
-<div style="font-weight:600;margin-bottom:6px;">YouTube — генератор RSS</div>
-<input id="youtubeInput" type="text" placeholder="логин канала или channelId">
-<button class="btn-primary" id="generateYouTubeBtn">Сгенерировать</button>
-<button class="btn-secondary" id="closeYouTubeFormBtn">Отмена</button>
-</div>
-<div class="add-form" id="redditForm">
-<div style="font-weight:600;margin-bottom:6px;">Reddit — генератор RSS</div>
-<input id="redditInput" type="text" placeholder="название сабреддита">
-<button class="btn-primary" id="generateRedditBtn">Сгенерировать</button>
-<button class="btn-secondary" id="closeRedditFormBtn">Отмена</button>
-</div>
-<div class="add-form" id="googleNewsForm">
-<div style="font-weight:600;margin-bottom:6px;">Google News — генератор RSS</div>
-<input id="googleNewsInput" type="text" placeholder="ключевое слово или фраза">
-<div style="margin:8px 0 10px;font-size:13px;color:var(--text-secondary);">
-<div style="display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid var(--border);font-weight:600;color:var(--text);"><span>пример</span><span>значение</span></div>
-<div style="display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid var(--border);"><span style="color:var(--text-secondary);">Forbes технологии</span><span style="color:var(--text-secondary);">поиск нескольких слов</span></div>
-<div style="display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid var(--border);"><span style="color:var(--text-secondary);">"точная фраза"</span><span style="color:var(--text-secondary);">точное совпадение</span></div>
-<div style="display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid var(--border);"><span style="color:var(--text-secondary);">технологии OR роботы</span><span style="color:var(--text-secondary);">одно из слов</span></div>
-<div style="display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid var(--border);"><span style="color:var(--text-secondary);">intitle:слово</span><span style="color:var(--text-secondary);">поиск в заголовке</span></div>
-<div style="display:flex;justify-content:space-between;padding:4px 0;"><span style="color:var(--text-secondary);">allintext:текст</span><span style="color:var(--text-secondary);">поиск в тексте</span></div>
-</div>
-<button class="btn-primary" id="generateGoogleNewsBtn">Сгенерировать</button>
-<button class="btn-secondary" id="closeGoogleNewsFormBtn">Отмена</button>
-</div>
-<div class="category-form" id="bbcForm"><div style="font-weight:600;margin-bottom:8px;">BBC — выберите категорию</div><div class="category-grid" id="bbcGrid"></div></div>
-<div class="category-form" id="cnnForm"><div style="font-weight:600;margin-bottom:8px;">CNN — выберите категорию</div><div class="category-grid" id="cnnGrid"></div></div>
-<div class="category-form" id="dzenForm"><div style="font-weight:600;margin-bottom:8px;">Дзен — выберите категорию</div><div class="category-grid" id="dzenGrid"></div></div>
-<div class="category-form" id="rbForm"><div style="font-weight:600;margin-bottom:8px;">Russian Business — выберите категорию</div><div class="category-grid" id="rbGrid"></div></div>
-<div class="category-form" id="habrForm"><div style="font-weight:600;margin-bottom:8px;">Хабр — выберите хаб</div><div class="category-grid" id="habrGrid"></div></div>
-<div class="category-form" id="lifehackerForm"><div style="font-weight:600;margin-bottom:8px;">Лайфхакер — выберите категорию</div><div class="category-grid" id="lifehackerGrid"></div></div>
-<div class="category-form" id="vcForm"><div style="font-weight:600;margin-bottom:8px;">VC.ru — выберите категорию</div><div class="category-grid" id="vcGrid"></div></div>
-<div style="display:flex;gap:8px;margin-bottom:8px;margin-top:0px;">
-<button class="suggest-btn" style="flex:1;color:var(--text);" id="categoryBrowserBtn">Категории</button>
-<button class="suggest-btn" style="flex:1;color:var(--text-secondary);" id="suggestSourceBtn">Предложить своё</button>
-</div>
-<div class="category-form" id="categoryBrowser" style="display:none;">
-<div class="category-form-header" style="font-weight:600;margin-bottom:8px;color:var(--text-secondary);text-align:center;" id="categoryBrowserHeader">Выберите категорию</div>
-<div class="category-grid" id="categoryGrid"></div>
-<button class="btn-secondary" id="categoryBackBtn" style="display:none;margin-top:8px;width:100%;">← Назад</button>
-</div>
-
-<!-- Кнопка "Смотреть новости" -->
-<button class="payment-toggle-btn" id="digestToggleBtn">📰 Смотреть новости</button>
-<div id="digestContainer" style="display: none; margin-top: 0;">
-    <div id="digestContent"></div>
-</div>
-
-<!-- ===== БЛОК ПОГОДЫ ===== -->
-<div class="status-block" id="weatherBlock">
-    <div class="status-title">Погода в Москве на неделю</div>
-    <div id="weatherContent">
-        <div style="text-align:center; padding:10px; color:var(--text-secondary);">⏳ Загрузка прогноза...</div>
-    </div>
-    <div style="text-align:center; margin-top:8px; font-size:12px; color:var(--text-secondary); opacity:0.6;">
-        Данные обновляются каждый час · <span id="weatherUpdateTime">—</span>
-    </div>
-</div>
-
-<div class="section-header">Мои источники (<span id="counter">0</span>)</div>
-<div id="sourceListContainer"></div>
-<button class="payment-toggle-btn" id="paymentToggleBtn">💰 Оплатить тариф</button>
-<div class="tariff-block" id="tariffBlock">
-<div class="tariff-grid">
-<div class="tariff-card"><div class="title">Базовый</div><button class="price-btn" onclick="handlePayment('basic_month')">190 ₽ <span class="label">/ мес</span></button><button class="price-btn" onclick="handlePayment('basic_year')">1 900 ₽ <span class="label">/ год</span></button></div>
-<div class="tariff-card"><div class="title">Расширенный</div><button class="price-btn" onclick="handlePayment('premium_month')">490 ₽ <span class="label">/ мес</span></button><button class="price-btn" onclick="handlePayment('premium_year')">4 900 ₽ <span class="label">/ год</span></button></div>
-</div>
-<div class="tariff-link"><a href="https://news.proid.studio/#pricing" target="_blank">Описание тарифов</a></div>
-</div>
-<div class="status-block" id="userStatus">
-<div class="status-title">Текущий статус</div>
-<div class="status-row"><span>Тариф:</span> <span id="statusTariff">—</span></div>
-<div class="status-row"><span>Мои источники:</span> <span id="statusSources">0</span></div>
-<div class="status-row"><span>Лимит источников:</span> <span id="statusLimit">5</span></div>
-<div class="status-row"><span>Автополучение:</span> <span id="statusAutoSend">✅</span></div>
-<div class="status-row"><span>Получили:</span> <span id="statusLastSent">—</span></div>
-<div class="status-row"><span>Оплачено до:</span> <span id="statusExpires">—</span></div>
-</div>
-<div class="status-block" id="timeBlock">
-<div class="status-title">Время получения</div>
-<div class="status-row" style="border-bottom:none;padding-bottom:0;">
-<span>Текущее время:</span>
-<span id="currentTimeDisplay">—</span>
-<button class="change-time-btn" id="changeTimeBtn">Изменить</button>
-<span class="upgrade-hint" id="upgradeHint" style="display:none;">🔒 <a href="#" onclick="toggleTariffs(); return false;">Доступно в Расширенном тарифе</a></span>
-</div>
-<div id="timePicker" style="display:none;margin-top:10px;">
-<div class="time-picker-grid" id="timePickerGrid"></div>
-<button class="close-picker-btn" id="closeTimePickerBtn">Закрыть</button>
-</div>
-</div>
-
-<!-- ===== ССЫЛКИ НА БОТОВ ===== -->
-<div style="display:flex; justify-content:center; gap:12px; margin:12px 0; color:var(--text-secondary); font-size:14px; flex-wrap:wrap;">
-    <a href="https://max.ru/id772609477460_bot" target="_blank" style="color:var(--text-secondary); text-decoration:none;">Открыть в MAX</a>
-    <span class="sep">|</span>
-    <a href="https://t.me/My_AI_News_Aggregator_bot" target="_blank" style="color:var(--text-secondary); text-decoration:none;">Открыть в Telegram</a>
-    <span class="sep">|</span>
-    <a href="https://vk.ru/app54717257" target="_blank" style="color:var(--text-secondary); text-decoration:none;">Открыть в VK</a>
-</div>
-
-<div id="logoutContainer">Выход (сброс кэша)</div>
-</div> <!-- /appContent -->
-</div> <!-- /appScreen -->
-</div>
-</div>
-
-<!-- ===== ПОДКЛЮЧАЕМ CATEGORIES.JS ===== -->
-<script src="/webapp/categories.js?v=50"></script>
-
-<script>
 // ===== КОНСТАНТЫ =====
 const TEST_TOKEN = 'vol7Js5SZnjPuaTfkk46zea3I-k_vsInqyqQPho_dF0';
 const VK_APP_ID = '54718264';
-const API_BASE = 'https://news.proid.studio';
 
 // ===== PKCE ДЛЯ VK ID OAuth 2.1 =====
 function generateCodeVerifier() {
@@ -1306,6 +796,39 @@ async function handlePayment(tariffKey){ if(!ensureConsent())return; hapticFeedb
 
 // ===== ФУНКЦИИ ВХОДА =====
 
+// ----- ПОЛЛИНГ ТОКЕНА ПО STATE (для Яндекс) -----
+function pollForToken(state, onSuccess) {
+    let attempts = 0;
+    const maxAttempts = 60;
+    const interval = setInterval(async () => {
+        attempts++;
+        try {
+            const resp = await apiRequest(`/api/auth/get-token-by-state?state=${state}`);
+            if (resp && resp.ok) {
+                const data = await resp.json();
+                if (data.token) {
+                    clearInterval(interval);
+                    authToken = data.token;
+                    localStorage.setItem('auth_token', authToken);
+                    alert('✅ Аккаунт привязан!');
+                    if (onSuccess) onSuccess();
+                    return;
+                }
+            }
+        } catch (e) {
+            // ignore
+        }
+        if (attempts >= maxAttempts) {
+            clearInterval(interval);
+            alert('⏰ Время истекло. Попробуйте снова.');
+            const container = document.querySelector('#loginScreen .auth-container');
+            if (container) container.style.display = 'block';
+            const w = document.getElementById('widgetContainer');
+            if (w) w.innerHTML = '';
+        }
+    }, 3000);
+}
+
 // ----- VK OAuth с серверным хранением code_verifier (новая вкладка) -----
 async function startVkAuth(){
     hapticFeedback();
@@ -1336,6 +859,7 @@ async function startVkAuth(){
     if (w) w.innerHTML = '<p style="color: var(--text-secondary);">Перенаправление на авторизацию VK...</p>';
 
     window.open(authUrl, '_blank');
+    // Для VK поллинг не нужен, т.к. обработка через callback в родительской вкладке
 }
 
 // ----- MAX AUTH -----
@@ -1388,10 +912,16 @@ function startMaxWaiting(token){
     },3000);
 }
 
-// ----- Яндекс ID (теперь открывается в новой вкладке) -----
+// ----- Яндекс ID (исправленный) -----
 function startYandexAuth() {
     hapticFeedback();
-    window.open('/api/auth/yandex/login', '_blank');
+    const state = Math.random().toString(36).substring(2);
+    const container = document.querySelector('#loginScreen .auth-container');
+    if (container) container.style.display = 'none';
+    const w = document.getElementById('widgetContainer');
+    if (w) w.innerHTML = '<p style="color: var(--text-secondary);">Перенаправление на авторизацию Яндекс...</p>';
+    window.open(API_BASE + `/api/auth/yandex/login?state=${encodeURIComponent(state)}`, '_blank');
+    pollForToken(state, loadApp);
 }
 
 // ===== ОБРАБОТКА ВОЗВРАТА ИЗ VK (новая вкладка) =====
@@ -1701,6 +1231,7 @@ window.toggleDigest = toggleDigest;
 window.suggestSource = window.suggestSource;
 window.ensureConsent = ensureConsent;
 window.logout = logout;
+window.pollForToken = pollForToken;  // на случай, если понадобится
 
 // ===== ПОГОДА =====
 const WEATHER_API_URL = 'https://api.open-meteo.com/v1/forecast';
@@ -1746,11 +1277,6 @@ function formatDay(dateStr) {
     const days = ['Вс', 'Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб'];
     const d = new Date(dateStr + 'T00:00:00');
     return days[d.getDay()];
-}
-
-function formatDate(dateStr) {
-    const d = new Date(dateStr + 'T00:00:00');
-    return d.toLocaleDateString('ru-RU', { day: 'numeric', month: 'short' });
 }
 
 function formatDate(dateStr) {
@@ -1855,26 +1381,3 @@ if (document.getElementById('weatherBlock')) {
     fetchWeather();
     setInterval(fetchWeather, 60 * 60 * 1000);
 }
-</script>
-
-<!-- ===== ФУТЕР ===== -->
-<div class="footer-wrapper">
-    <div class="footer-inner">
-        <span>© 2026 «Мои AI Новости»</span>
-        <span class="sep">|</span>
-        <a href="/privacy" target="_blank">Политика</a>
-        <span class="sep">|</span>
-        <a href="/offer" target="_blank">Оферта</a>
-        <span class="sep">|</span>
-        <a href="/consent" target="_blank">Согласие</a>
-        <span class="sep">|</span>
-        <a href="/offer#requisites" target="_blank">Реквизиты</a>
-        <span class="sep">|</span>
-        <a href="/support" target="_blank">Помощь</a>
-        <span class="sep">|</span>
-        <span>Создано: <a href="https://proid.studio" target="_blank" class="studio-link">proid.studio</a></span>
-    </div>
-</div>
-
-</body>
-</html>
