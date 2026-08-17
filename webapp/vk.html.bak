@@ -741,17 +741,18 @@
                 defaultSendHour = data.default_send_hour || 18;
 
                 renderGroupedSources(currentSources);
-                document.getElementById('counter').textContent = currentSources.length;
-                updateStatus(data);
+        document.getElementById('counter').textContent=currentSources.length;
+        updateStatus(data);
 
-                var consentBlock = document.getElementById('consentBlock');
-                var appContainer = document.getElementById('appContainer');
-                if (!consentGiven) {
-                    consentBlock.style.display = 'block';
-                    appContainer.classList.add('consent-pending');
-                    document.getElementById('quickButtons').style.display = 'none';
-                    document.getElementById('paymentToggleBtn').style.display = 'none';
-                } else {
+        isTestUser = (authToken === TEST_TOKEN);
+        consentGiven = data.consent_given === true;
+        window.TEST_MODE = isTestUser;
+
+        if (!consentGiven || isTestUser) {
+            showConsentBlock();
+            document.getElementById('quickButtons').style.display = 'none';
+            document.getElementById('paymentToggleBtn').style.display = 'none';
+        } else {
                     consentBlock.style.display = 'none';
                     appContainer.classList.remove('consent-pending');
                     document.getElementById('quickButtons').style.display = 'flex';
@@ -824,100 +825,35 @@
     function getSourceUrl(s){ var u=s.value; if(s.type==='telegram')u='https://t.me/'+u.replace(/^@/,''); else if(s.type==='vk')u='https://vk.com/'+u.replace(/^@/,''); return u; }
     function getIconGradient(t){ switch(t){ case'telegram':return'linear-gradient(290deg,#d235ff 0%,#a062ff 30%,#3088ff 66%,#61d8ff 100%)'; case'vk':return'linear-gradient(290deg,#0d47a1 0%,#1565c0 30%,#1e88e5 66%,#64b5f6 100%)'; case'rss':return'linear-gradient(290deg,#d84315 0%,#f57c00 30%,#f9a825 66%,#ffee58 100%)'; default:return'linear-gradient(290deg,#d235ff 0%,#a062ff 30%,#3088ff 66%,#61d8ff 100%)'; } }
 
-    // ===== НОВАЯ ЭТАЛОННАЯ ФУНКЦИЯ RENDERGROUPEDSOURCES =====
-    function renderGroupedSources(sources) {
+    function renderGroupedSources(sources){
         console.log('renderGroupedSources called with', sources);
         var container = document.getElementById('sourceListContainer');
-        if (!container) return;
-        container.innerHTML = '';
-        if (!sources || sources.length === 0) {
-            container.innerHTML = '<div class="empty-state"><div class="empty-icon">📭</div><h3>Нет источников</h3><p>Добавьте свой первый источник</p></div>';
-            return;
+        if(!sources||sources.length===0){ container.innerHTML='<div class="empty-state"><div class="empty-icon">📭</div><h3>Нет источников</h3><p>Добавьте свой первый источник</p></div>'; return; }
+        var sorted=[...sources].sort(function(a,b){ return a.value.toLowerCase().localeCompare(b.value.toLowerCase()); });
+        var groups={'rss':[],'telegram':[],'vk':[],'max':[]};
+        sorted.forEach(function(s){ if(groups[s.type]) groups[s.type].push(s); else groups[s.type]=[s]; });
+        var html='';
+        var order=['telegram','vk','max','rss'];
+        for(var i=0; i<order.length; i++){
+            var type=order[i];
+            var items=groups[type];
+            if(items&&items.length>0){
+                html+='<div class="group-title">'+getTypeLabel(type)+'</div>';
+                html+='<div class="source-list">';
+                items.forEach(function(s){
+                    var f=formatSourceValue(s);
+                    var v=truncate(f,50);
+                    var u=getSourceUrl(s);
+                    var g=getIconGradient(s.type);
+                    html+='<div class="source-item" data-url="'+u+'" data-id="'+s.id+'"><div class="source-info"><div class="source-icon" style="background:'+g+';"></div><span class="source-value" title="'+f+'">'+v+'</span></div><button class="delete-btn" onclick="event.stopPropagation(); confirmDelete('+s.id+')">✕</button></div>';
+                });
+                html+='</div>';
+            }
         }
-        var sorted = [...sources].sort(function(a,b){ return a.value.toLowerCase().localeCompare(b.value.toLowerCase()); });
-        var groups = {'rss':[], 'telegram':[], 'vk':[], 'max':[]};
-        sorted.forEach(function(s){ if (groups[s.type]) groups[s.type].push(s); else groups[s.type] = [s]; });
-        var order = ['telegram','vk','max','rss'];
-        var totalIndex = 0;
-        order.forEach(function(type){
-            var items = groups[type];
-            if (!items || items.length === 0) return;
-            var groupDiv = document.createElement('div');
-            groupDiv.className = 'source-group';
-            var title = document.createElement('div');
-            title.className = 'group-title';
-            title.textContent = getTypeLabel(type);
-            groupDiv.appendChild(title);
-            var list = document.createElement('div');
-            list.className = 'source-list';
-            items.forEach(function(s){
-                var f = formatSourceValue(s);
-                var v = truncate(f, 50);
-                var u = getSourceUrl(s);
-                var g = getIconGradient(s.type);
-                var item = document.createElement('div');
-                item.className = 'source-item';
-                item.dataset.index = totalIndex++;
-                item.onclick = function(){ askOpenLink(u); };
-                var info = document.createElement('div');
-                info.className = 'source-info';
-                var icon = document.createElement('div');
-                icon.className = 'source-icon';
-                icon.style.background = g;
-                var valueSpan = document.createElement('span');
-                valueSpan.className = 'source-value';
-                valueSpan.textContent = v;
-                valueSpan.title = f;
-                info.appendChild(icon);
-                info.appendChild(valueSpan);
-                var delBtn = document.createElement('button');
-                delBtn.className = 'delete-btn';
-                delBtn.textContent = '✕';
-                delBtn.onclick = function(e){ e.stopPropagation(); hapticFeedback(); confirmDelete(s.id); };
-                item.appendChild(info);
-                item.appendChild(delBtn);
-                list.appendChild(item);
-            });
-            groupDiv.appendChild(list);
-            container.appendChild(groupDiv);
+        container.innerHTML=html;
+        container.querySelectorAll('.source-item').forEach(function(el){
+            el.addEventListener('click',function(e){ if(e.target.classList.contains('delete-btn'))return; var url=this.dataset.url; if(url) askOpenLink(url); });
         });
-
-        if (sources.length > 5) {
-            var btn = document.createElement('button');
-            btn.className = 'change-time-btn';
-            btn.textContent = 'Ещё';
-            btn.style.marginTop = '12px';
-            btn.style.width = '100%';
-            btn.onclick = function() {
-                var groups = container.querySelectorAll('.source-group');
-                var hiddenItems = container.querySelectorAll('.source-item.hidden');
-                if (hiddenItems.length) {
-                    groups.forEach(function(g){ g.style.display = ''; });
-                    container.querySelectorAll('.source-item.hidden').forEach(function(el){ el.classList.remove('hidden'); });
-                    btn.textContent = 'Скрыть';
-                } else {
-                    var allItems = container.querySelectorAll('.source-item');
-                    allItems.forEach(function(el, idx){ if (idx >= 5) el.classList.add('hidden'); });
-                    groups.forEach(function(g){
-                        var visibleItems = g.querySelectorAll('.source-item:not(.hidden)');
-                        if (visibleItems.length === 0) {
-                            g.style.display = 'none';
-                        }
-                    });
-                    btn.textContent = 'Ещё';
-                }
-            };
-            container.appendChild(btn);
-            var allItems = container.querySelectorAll('.source-item');
-            allItems.forEach(function(el, idx){ if (idx >= 5) el.classList.add('hidden'); });
-            var groups = container.querySelectorAll('.source-group');
-            groups.forEach(function(g){
-                var visibleItems = g.querySelectorAll('.source-item:not(.hidden)');
-                if (visibleItems.length === 0) {
-                    g.style.display = 'none';
-                }
-            });
-        }
     }
 
     function confirmDelete(id){ hapticFeedback(); var s=currentSources.find(function(s){ return s.id===id; }); if(!s){ alert('Источник не найден'); return; } var f=formatSourceValue(s); if(confirm('Удалить источник?\n\n'+f+'\n\nЭто действие нельзя отменить.')) deleteSource(id); }
