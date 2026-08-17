@@ -122,7 +122,7 @@
         .time-picker-grid button:hover{background:linear-gradient(180deg,rgba(159,103,255,.22),rgba(197,66,255,.35)) padding-box,linear-gradient(var(--bg-color),var(--bg-color)) padding-box,linear-gradient(180deg,rgba(171,78,252,.82) 0%,rgba(108,31,198,.24) 53%,#7C45C2 100%) border-box,linear-gradient(180deg,rgba(159,103,255,.22),rgba(197,66,255,.35)) border-box;border:1px solid transparent;color:#fff;}
         .time-picker-grid button:active{transform:scale(.95);}
         .time-picker-grid button.selected{border-color:var(--accent2);background:rgba(48,136,255,0.15);}
-        .change-time-btn{background:transparent;border:1px solid var(--border);color:var(--text-secondary);padding:4px 12px;border-radius:12px;font-size:13px;cursor:pointer;transition:.2s;}
+        .change-time-btn{background:transparent;border:1px solid var(--border);color:var(--text-secondary);padding:4px 12px;border-radius:12px;font-size:13px;cursor:pointer;transition:.2s;display:inline-block;box-sizing:border-box;line-height:normal;font-family:inherit;}
         .change-time-btn:hover{background:rgba(255,255,255,0.05);color:var(--text);}
         .change-time-btn:disabled{opacity:.4;cursor:not-allowed;}
         .close-picker-btn{width:100%;padding:8px;background:transparent;border:1px solid var(--border);border-radius:12px;color:var(--text-secondary);font-size:14px;cursor:pointer;margin-top:8px;transition:.2s;}
@@ -375,27 +375,27 @@
                     <div style="font-weight:600; margin-bottom:6px;">Google News — генератор RSS</div>
                     <input id="googleNewsInput" type="text" placeholder="ключевое слово или фраза" />
                     <div style="margin: 8px 0 10px; font-size: 13px; color: var(--text-secondary);">
-                        <div style="display: flex; justify-content: space-between; padding: 4px 0; border-bottom: 1px solid var(--border); font-weight: 600; color: var(--text);">
+                        <div style="display: flex; justify-content: space-between; padding: 0; border-bottom: 1px solid var(--border); font-weight: 600; color: var(--text);">
                             <span>пример</span>
                             <span>значение</span>
                         </div>
-                        <div style="display: flex; justify-content: space-between; padding: 4px 0; border-bottom: 1px solid var(--border);">
+                        <div style="display: flex; justify-content: space-between; padding: 0; border-bottom: 1px solid var(--border);">
                             <span style="color: var(--text-secondary);">Forbes технологии</span>
                             <span style="color: var(--text-secondary);">поиск нескольких слов</span>
                         </div>
-                        <div style="display: flex; justify-content: space-between; padding: 4px 0; border-bottom: 1px solid var(--border);">
+                        <div style="display: flex; justify-content: space-between; padding: 0; border-bottom: 1px solid var(--border);">
                             <span style="color: var(--text-secondary);">"точная фраза"</span>
                             <span style="color: var(--text-secondary);">точное совпадение</span>
                         </div>
-                        <div style="display: flex; justify-content: space-between; padding: 4px 0; border-bottom: 1px solid var(--border);">
+                        <div style="display: flex; justify-content: space-between; padding: 0; border-bottom: 1px solid var(--border);">
                             <span style="color: var(--text-secondary);">технологии OR роботы</span>
                             <span style="color: var(--text-secondary);">одно из слов</span>
                         </div>
-                        <div style="display: flex; justify-content: space-between; padding: 4px 0; border-bottom: 1px solid var(--border);">
+                        <div style="display: flex; justify-content: space-between; padding: 0; border-bottom: 1px solid var(--border);">
                             <span style="color: var(--text-secondary);">intitle:слово</span>
                             <span style="color: var(--text-secondary);">поиск в заголовке</span>
                         </div>
-                        <div style="display: flex; justify-content: space-between; padding: 4px 0;">
+                        <div style="display: flex; justify-content: space-between; padding: 0;">
                             <span style="color: var(--text-secondary);">allintext:текст</span>
                             <span style="color: var(--text-secondary);">поиск в тексте</span>
                         </div>
@@ -455,7 +455,7 @@
 
                 <!-- ===== БЛОК ПОГОДЫ ===== -->
                 <div class="status-block" id="weatherBlock">
-                    <div class="status-title">Погода в Москве на неделю</div>
+                    <div class="status-title">Погода в Москве</div>
                     <div id="weatherContent">
                         <div style="text-align:center; padding:10px; color:var(--text-secondary);">⏳ Загрузка прогноза...</div>
                     </div>
@@ -520,11 +520,15 @@
                         <button class="close-picker-btn" onclick="closeTimePicker()">Закрыть</button>
                     </div>
                 </div>
-<div style="text-align: center; margin-top: 16px;">
-    <a href="/pwa" target="_blank" style="color: var(--text-secondary); text-decoration: none; font-size: 14px;">Открыть приложение в браузере</a>
+<div class="status-block" style="padding: 8px 8px; cursor: pointer;" onclick="alert('❤️ Спасибо! Расскажите про нас друзьям.' )"><div class="status-row" style="border-bottom: none; justify-content: center; padding: 0;"><span style="color: var(--text-secondary); font-size: 14px;">❤️ Сделано с любовью к людям</span></div></div>
+
+
+<div style="display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; margin: 12px 0;">
+    <a href="/pwa" target="_blank" class="change-time-btn" style="display: inline-block; text-decoration: none;">Открыть приложение в браузере</a>
 </div>
-                <!-- ===== КНОПКА ВЫХОДА ===== -->
-                <div id="logoutContainer" onclick="logout()">Выход (сброс кэша)</div>
+<div style="display: flex; justify-content: center; margin-top: 8px;">
+    <div id="logoutContainer" class="change-time-btn" style="cursor: pointer; text-decoration: none; padding: 4px 12px; display: inline-block;" onclick="logout()">Выход (сброс кэша)</div>
+</div>
                 <!-- ======================== -->
             </div> <!-- /appContent -->
         </div>
@@ -532,7 +536,7 @@
 
     <div class="footer-wrapper">
             <div class="footer-inner">
-        <span>© 2026 «Мои AI Новости»</span>
+        <a href="/" style="text-decoration: none; color: inherit;">© 2026 «Мои AI Новости»</a>
         <span class="sep">|</span>
         <a href="/privacy" target="_blank">Политика</a>
         <span class="sep">|</span>
@@ -777,33 +781,103 @@
             }
         });
 
-        function renderGroupedSources(sources){
-            const container=document.getElementById('sourceListContainer');
-            if(!sources||sources.length===0){container.innerHTML='<div class="empty-state"><div class="empty-icon">📭</div><h3>Нет источников</h3><p>Добавьте свой первый источник</p></div>';return;}
-            const sorted=[...sources].sort((a,b)=>a.value.toLowerCase().localeCompare(b.value.toLowerCase()));
-            const groups={'rss':[],'telegram':[],'vk':[],'max':[]};
-            sorted.forEach(s=>{if(groups[s.type])groups[s.type].push(s);else groups[s.type]=[s];});
-            let html='';
-            const order=['telegram','vk','max','rss'];
-            for(const type of order){
-                const items=groups[type];
-                if(items&&items.length>0){
-                    html+='<div class="group-title">'+getTypeLabel(type)+'</div>';
-                    html+='<div class="source-list">';
-                    items.forEach(s=>{
-                        const f=formatSourceValue(s);
-                        const v=truncate(f,50);
-                        const u=getSourceUrl(s);
-                        const g=getIconGradient(s.type);
-                        html+='<div class="source-item" data-url="'+u+'" data-id="'+s.id+'"><div class="source-info"><div class="source-icon" style="background:'+g+';"></div><span class="source-value" title="'+f+'">'+v+'</span></div><button class="delete-btn" onclick="event.stopPropagation(); confirmDelete('+s.id+')">✕</button></div>';
-                    });
-                    html+='</div>';
-                }
+        // ===== НОВАЯ ЭТАЛОННАЯ ФУНКЦИЯ RENDERGROUPEDSOURCES =====
+        function renderGroupedSources(sources) {
+            const container = document.getElementById('sourceListContainer');
+            if (!container) return;
+            container.innerHTML = '';
+            if (!sources || sources.length === 0) {
+                container.innerHTML = '<div class="empty-state"><div class="empty-icon">📭</div><h3>Нет источников</h3><p>Добавьте свой первый источник</p></div>';
+                return;
             }
-            container.innerHTML=html;
-            container.querySelectorAll('.source-item').forEach(el=>{
-                el.addEventListener('click',function(e){if(e.target.classList.contains('delete-btn'))return;const url=this.dataset.url;if(url)askOpenLink(url);});
+            const sorted = [...sources].sort((a,b) => a.value.toLowerCase().localeCompare(b.value.toLowerCase()));
+            const groups = {'rss':[], 'telegram':[], 'vk':[], 'max':[]};
+            sorted.forEach(s => { if (groups[s.type]) groups[s.type].push(s); else groups[s.type] = [s]; });
+            const order = ['telegram','vk','max','rss'];
+            let totalIndex = 0;
+            order.forEach(type => {
+                const items = groups[type];
+                if (!items || items.length === 0) return;
+                const groupDiv = document.createElement('div');
+                groupDiv.className = 'source-group';
+                const title = document.createElement('div');
+                title.className = 'group-title';
+                title.textContent = getTypeLabel(type);
+                groupDiv.appendChild(title);
+                const list = document.createElement('div');
+                list.className = 'source-list';
+                items.forEach(s => {
+                    const f = formatSourceValue(s);
+                    const v = truncate(f, 50);
+                    const u = getSourceUrl(s);
+                    const g = getIconGradient(s.type);
+                    const item = document.createElement('div');
+                    item.className = 'source-item';
+                    item.dataset.index = totalIndex++;
+                    item.onclick = function() { askOpenLink(u); };
+                    const info = document.createElement('div');
+                    info.className = 'source-info';
+                    const icon = document.createElement('div');
+                    icon.className = 'source-icon';
+                    icon.style.background = g;
+                    const valueSpan = document.createElement('span');
+                    valueSpan.className = 'source-value';
+                    valueSpan.textContent = v;
+                    valueSpan.title = f;
+                    info.appendChild(icon);
+                    info.appendChild(valueSpan);
+                    const delBtn = document.createElement('button');
+                    delBtn.className = 'delete-btn';
+                    delBtn.textContent = '✕';
+                    delBtn.onclick = function(e) { e.stopPropagation(); hapticFeedback(); confirmDelete(s.id); };
+                    item.appendChild(info);
+                    item.appendChild(delBtn);
+                    list.appendChild(item);
+                });
+                groupDiv.appendChild(list);
+                container.appendChild(groupDiv);
             });
+
+            if (sources.length > 5) {
+                const btn = document.createElement('button');
+                btn.className = 'change-time-btn';
+                btn.textContent = 'Ещё';
+                btn.style.marginTop = '12px';
+                btn.style.width = '100%';
+                btn.onclick = function() {
+                    const groups = container.querySelectorAll('.source-group');
+                    const hiddenItems = container.querySelectorAll('.source-item.hidden');
+                    if (hiddenItems.length) {
+                        groups.forEach(g => g.style.display = '');
+                        container.querySelectorAll('.source-item.hidden').forEach(el => el.classList.remove('hidden'));
+                        btn.textContent = 'Скрыть';
+                    } else {
+                        const allItems = container.querySelectorAll('.source-item');
+                        allItems.forEach((el, idx) => {
+                            if (idx >= 5) el.classList.add('hidden');
+                        });
+                        groups.forEach(g => {
+                            const visibleItems = g.querySelectorAll('.source-item:not(.hidden)');
+                            if (visibleItems.length === 0) {
+                                g.style.display = 'none';
+                            }
+                        });
+                        btn.textContent = 'Ещё';
+                    }
+                };
+                container.appendChild(btn);
+                const allItems = container.querySelectorAll('.source-item');
+                allItems.forEach((el, idx) => {
+                    if (idx >= 5) el.classList.add('hidden');
+                });
+                const groups = container.querySelectorAll('.source-group');
+                groups.forEach(g => {
+                    const visibleItems = g.querySelectorAll('.source-item:not(.hidden)');
+                    if (visibleItems.length === 0) {
+                        g.style.display = 'none';
+                    }
+                });
+            }
         }
 
         function confirmDelete(id){
