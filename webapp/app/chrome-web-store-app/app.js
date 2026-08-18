@@ -40,12 +40,131 @@ let defaultSendHour = 18;
 let authToken = localStorage.getItem('auth_token') || null;
 let isTestUser = false;
 let consentGiven = false;
+let authWindow = null;
+let maxPollingTimer = null;
+
+// ===== ПОЛЛИНГ ТОКЕНА ПО STATE (ДЛЯ ЯНДЕКСА И VK) =====
+let yandexPollingState = null;
+
+function pollForToken(state, onSuccess, source) {
+    console.log('🔍 pollForToken запущен для state:', state, 'source:', source);
+
+    if (yandexPollingState === state) {
+        console.warn('⏭️ pollForToken уже выполняется для state:', state);
+        return;
+    }
+    yandexPollingState = state;
+
+    let attempts = 0;
+    const maxAttempts = 120;
+
+    const poll = async () => {
+        attempts++;
+        console.log(`🔄 Попытка ${attempts}/${maxAttempts} для state ${state}`);
+
+        try {
+            const resp = await apiRequest(
+                `/api/auth/get-token-by-state?state=${encodeURIComponent(state)}`
+            );
+
+            if (resp && resp.ok) {
+                const data = await resp.json();
+                console.log('📦 Ответ от сервера:', data);
+
+                if (data.token) {
+                    yandexPollingState = null;
+                    authToken = data.token;
+                    localStorage.setItem('auth_token', authToken);
+
+                    console.log('✅ Токен получен! Источник:', source);
+
+                    setTimeout(() => {
+                        if (source === 'telegram') {
+                            alert('✅ Нажмите ОК для входа! Чтобы привязать Telegram-бота вернитесь в приложение Telegram.');
+                        } else {
+                            alert('✅ Вы успешно вошли! Чтобы получать уведомления необходимо открыть бота в Telegram, VK или MAX.');
+                        }
+                        if (onSuccess) onSuccess();
+                    }, 100);
+
+                    return;
+                }
+            }
+        } catch (e) {
+            console.error('❌ Ошибка в pollForToken:', e);
+        }
+
+        if (attempts >= maxAttempts) {
+            yandexPollingState = null;
+            console.error('⏰ Время истекло для state', state);
+            alert('⏰ Время истекло. Попробуйте снова.');
+
+            const container = document.querySelector('#loginScreen .auth-container');
+            if (container) container.style.display = 'block';
+
+            const w = document.getElementById('widgetContainer');
+            if (w) w.innerHTML = '';
+
+            return;
+        }
+
+        setTimeout(poll, 3000);
+    };
+
+    poll();
+}
+
+// ===== СЛУШАТЕЛЬ POSTMESSAGE ОТ САЙТА (ЗАПАСНОЙ МЕХАНИЗМ) =====
+window.addEventListener('message', function(event) {
+    if (event.origin !== 'https://news.proid.studio') return;
+    const data = event.data;
+    if (data && data.type === 'auth_token' && data.token) {
+        console.log('📩 Токен получен через postMessage (запасной)');
+        localStorage.setItem('auth_token', data.token);
+        authToken = data.token;
+        if (authWindow && !authWindow.closed) {
+            authWindow.close();
+            authWindow = null;
+        }
+        alert('✅ Аккаунт привязан!');
+        loadApp();
+    }
+});
 
 function hapticFeedback(){if(navigator.vibrate)navigator.vibrate(10);}
-(function(){const p=new URLSearchParams(window.location.search);const t=p.get('auth_token');if(t){try{localStorage.setItem('auth_token',t);}catch(e){sessionStorage.setItem('auth_token',t);}
-window.history.replaceState({},document.title,window.location.pathname);authToken=t;if(document.readyState==='complete')loadApp();else window.addEventListener('load',function onLoad(){loadApp();window.removeEventListener('load',onLoad);});}})();
-function getHeaders(){return{'Content-Type':'application/json',...(authToken?{'X-Auth-Token':authToken}:{})};}
-function showLoginScreen(){document.getElementById('loginScreen').style.display='block';document.getElementById('appScreen').classList.add('hidden');}
+(function(){
+    const p = new URLSearchParams(window.location.search);
+    const t = p.get('auth_token');
+    if (t) {
+        try {
+            localStorage.setItem('auth_token', t);
+        } catch(e) {
+            sessionStorage.setItem('auth_token', t);
+        }
+        window.history.replaceState({}, document.title, window.location.pathname);
+        authToken = t;
+        if (document.readyState === 'complete') {
+            loadApp();
+        } else {
+            window.addEventListener('load', function onLoad(){
+                loadApp();
+                window.removeEventListener('load', onLoad);
+            });
+        }
+    }
+})();
+
+function getHeaders(){
+    return {
+        'Content-Type': 'application/json',
+        ...(authToken ? {'X-Auth-Token': authToken} : {})
+    };
+}
+
+function showLoginScreen(){
+    document.getElementById('loginScreen').style.display = 'block';
+    document.getElementById('appScreen').classList.add('hidden');
+}
 
 // ===== УПРАВЛЕНИЕ СОГЛАСИЕМ =====
 function showConsentBlock() {
@@ -64,7 +183,7 @@ function showAppContent() {
     document.getElementById('appScreen').classList.remove('consent-pending');
 }
 
-// ===== ИСПРАВЛЕННАЯ APIREQUEST (добавляет API_BASE) =====
+// ===== ИСПРАВЛЕННАЯ APIREQUEST =====
 async function apiRequest(url, options = {}) {
     const fullUrl = url.startsWith('http') ? url : API_BASE + url;
     try {
@@ -90,13 +209,16 @@ function ensureConsent() {
 
 // ===== ЗАГРУЗКА ПРИЛОЖЕНИЯ =====
 async function loadApp(){
-    if(!authToken){showLoginScreen();return;}
-    const headers=getHeaders();
-    try{
-        const resp=await apiRequest('/api/webapp/sources',{headers});
-        if(!resp)return;
-        if(!resp.ok){
-            if(resp.status === 403){
+    if (!authToken) {
+        showLoginScreen();
+        return;
+    }
+    const headers = getHeaders();
+    try {
+        const resp = await apiRequest('/api/webapp/sources', {headers});
+        if (!resp) return;
+        if (!resp.ok) {
+            if (resp.status === 403) {
                 isTestUser = (authToken === TEST_TOKEN);
                 window.TEST_MODE = isTestUser;
                 consentGiven = false;
@@ -105,18 +227,19 @@ async function loadApp(){
                 document.getElementById('paymentToggleBtn').style.display = 'none';
                 return;
             }
-            if(resp.status === 401){
-                document.getElementById('sourceListContainer').innerHTML='<div class="empty-state"><div class="empty-icon">🔒</div><h3>Ошибка авторизации</h3><p>Попробуйте обновить страницу или перелогиниться.</p></div>';
+            if (resp.status === 401) {
+                document.getElementById('sourceListContainer').innerHTML = '<div class="empty-state"><div class="empty-icon">🔒</div><h3>Ошибка авторизации</h3><p>Попробуйте обновить страницу или перелогиниться.</p></div>';
                 showAppContent();
                 return;
             }
-            const err=await resp.json();throw new Error(err.detail||'Ошибка загрузки');
+            const err = await resp.json();
+            throw new Error(err.detail || 'Ошибка загрузки');
         }
-        const data=await resp.json();
-        currentSources=data.sources||[];
-        currentLimit=data.limit||5;
+        const data = await resp.json();
+        currentSources = data.sources || [];
+        currentLimit = data.limit || 5;
         renderGroupedSources(currentSources);
-        document.getElementById('counter').textContent=currentSources.length;
+        document.getElementById('counter').textContent = currentSources.length;
         updateStatus(data);
 
         isTestUser = (authToken === TEST_TOKEN);
@@ -132,27 +255,22 @@ async function loadApp(){
             document.getElementById('quickButtons').style.display = 'flex';
             document.getElementById('paymentToggleBtn').style.display = 'block';
         }
-    }catch(err){
-        document.getElementById('sourceListContainer').innerHTML='<div class="empty-state"><div class="empty-icon">⚠️</div><h3>Ошибка загрузки</h3><p>'+err.message+'</p></div>';
+    } catch(err) {
+        document.getElementById('sourceListContainer').innerHTML = '<div class="empty-state"><div class="empty-icon">⚠️</div><h3>Ошибка загрузки</h3><p>'+err.message+'</p></div>';
         showAppContent();
     }
 }
 
-// ===== ОБРАБОТЧИК КНОПКИ "ПРИНИМАЮ" =====
+// ===== ЕДИНЫЙ ОБРАБОТЧИК DOMContentLoaded =====
 document.addEventListener('DOMContentLoaded', function() {
+    // ---- Кнопка согласия ----
     const check = document.getElementById('consentCheck');
     const btn = document.getElementById('consentAcceptBtn');
     if (check && btn) {
         check.addEventListener('change', function() {
-            if (this.checked) {
-                btn.disabled = false;
-                btn.style.opacity = '1';
-                btn.style.pointerEvents = 'auto';
-            } else {
-                btn.disabled = true;
-                btn.style.opacity = '0.5';
-                btn.style.pointerEvents = 'none';
-            }
+            btn.disabled = !this.checked;
+            btn.style.opacity = this.checked ? '1' : '0.5';
+            btn.style.pointerEvents = this.checked ? 'auto' : 'none';
         });
         btn.addEventListener('click', async function() {
             if (!check.checked) return;
@@ -183,7 +301,15 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    // ===== ПРИВЯЗКА ОСНОВНЫХ КНОПОК =====
+    // ---- Кнопки оплаты (data-tariff) ----
+    document.querySelectorAll('.price-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const tariff = this.dataset.tariff;
+            if (tariff) handlePayment(tariff);
+        });
+    });
+
+    // ---- Основные кнопки ----
     const vkBtn = document.getElementById('vkLoginBtn');
     if (vkBtn) vkBtn.addEventListener('click', startVkAuth);
 
@@ -199,7 +325,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const logoutEl = document.getElementById('logoutContainer');
     if (logoutEl) logoutEl.addEventListener('click', logout);
 
-    // Быстрое меню
+    // ---- Быстрое меню ----
     const btnDzen = document.getElementById('btn-dzen');
     if (btnDzen) btnDzen.addEventListener('click', function() { toggleCategoryForm('dzen'); });
     const btnRb = document.getElementById('btn-rb');
@@ -231,7 +357,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const btnCnn = document.getElementById('btn-cnn');
     if (btnCnn) btnCnn.addEventListener('click', function() { toggleCategoryForm('cnn'); });
 
-    // Формы
+    // ---- Формы ----
     const addSourceSubmitBtn = document.getElementById('addSourceSubmitBtn');
     if (addSourceSubmitBtn) addSourceSubmitBtn.addEventListener('click', addSourceSubmit);
     const closeAddFormBtn = document.getElementById('closeAddFormBtn');
@@ -251,21 +377,18 @@ document.addEventListener('DOMContentLoaded', function() {
     const closeGoogleNewsFormBtn = document.getElementById('closeGoogleNewsFormBtn');
     if (closeGoogleNewsFormBtn) closeGoogleNewsFormBtn.addEventListener('click', closeGoogleNewsForm);
 
-    // GitHub grid
-    const githubReleases = document.getElementById('github-releases');
-    if (githubReleases) githubReleases.addEventListener('click', function() { generateGitHubRSS('releases'); });
-    const githubTags = document.getElementById('github-tags');
-    if (githubTags) githubTags.addEventListener('click', function() { generateGitHubRSS('tags'); });
-    const githubCommits = document.getElementById('github-commits');
-    if (githubCommits) githubCommits.addEventListener('click', function() { generateGitHubRSS('commits'); });
-    const githubMain = document.getElementById('github-main');
-    if (githubMain) githubMain.addEventListener('click', function() { generateGitHubRSS('main'); });
-    const githubMaster = document.getElementById('github-master');
-    if (githubMaster) githubMaster.addEventListener('click', function() { generateGitHubRSS('master'); });
-    const githubUsername = document.getElementById('github-username');
-    if (githubUsername) githubUsername.addEventListener('click', function() { generateGitHubRSS('username'); });
+    // ---- GitHub grid ----
+    const githubGrid = document.getElementById('githubGrid');
+    if (githubGrid) {
+        githubGrid.querySelectorAll('button').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const type = this.dataset.type;
+                if (type) generateGitHubRSS(type);
+            });
+        });
+    }
 
-    // Категории
+    // ---- Категории ----
     const categoryBrowserBtn = document.getElementById('categoryBrowserBtn');
     if (categoryBrowserBtn) categoryBrowserBtn.addEventListener('click', toggleCategoryBrowser);
     const categoryBackBtn = document.getElementById('categoryBackBtn');
@@ -273,20 +396,31 @@ document.addEventListener('DOMContentLoaded', function() {
     const suggestSourceBtn = document.getElementById('suggestSourceBtn');
     if (suggestSourceBtn) suggestSourceBtn.addEventListener('click', suggestSource);
 
-    // Тарифы
+    // ---- Тарифы ----
     const paymentToggleBtn = document.getElementById('paymentToggleBtn');
     if (paymentToggleBtn) paymentToggleBtn.addEventListener('click', toggleTariffs);
 
-    // Время
+    // ---- Время ----
     const changeTimeBtn = document.getElementById('changeTimeBtn');
     if (changeTimeBtn) changeTimeBtn.addEventListener('click', toggleTimePicker);
     const closeTimePickerBtn = document.getElementById('closeTimePickerBtn');
     if (closeTimePickerBtn) closeTimePickerBtn.addEventListener('click', closeTimePicker);
     const upgradeLink = document.getElementById('upgradeLink');
-    if (upgradeLink) upgradeLink.addEventListener('click', function(e) { e.preventDefault(); toggleTariffs(); });
+    if (upgradeLink) upgradeLink.addEventListener('click', function(e) {
+        e.preventDefault();
+        toggleTariffs();
+    });
+
+    // ---- Блок "Сделано с любовью" ----
+    const loveBlock = document.getElementById('loveBlock');
+    if (loveBlock) {
+        loveBlock.addEventListener('click', function() {
+            alert('❤️ Спасибо! Расскажите про нас друзьям.');
+        });
+    }
 });
 
-// ===== ОСТАЛЬНЫЕ ФУНКЦИИ =====
+// ===== ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ =====
 function getTypeLabel(t){const m={'rss':'RSS/HTML','telegram':'Telegram','vk':'VK','max':'MAX'};return m[t]||t;}
 function truncate(s,l){l=l||40;return s.length>l?s.slice(0,l)+'…':s;}
 function safeDecodeUrl(u){try{return decodeURIComponent(u);}catch(e){return u;}}
@@ -308,13 +442,16 @@ function renderGroupedSources(sources) {
     const groups = {'rss':[], 'telegram':[], 'vk':[], 'max':[]};
     sorted.forEach(s => { if (groups[s.type]) groups[s.type].push(s); else groups[s.type] = [s]; });
     const order = ['telegram','vk','max','rss'];
+    let totalIndex = 0;
     order.forEach(type => {
         const items = groups[type];
         if (!items || items.length === 0) return;
+        const groupDiv = document.createElement('div');
+        groupDiv.className = 'source-group';
         const title = document.createElement('div');
         title.className = 'group-title';
         title.textContent = getTypeLabel(type);
-        container.appendChild(title);
+        groupDiv.appendChild(title);
         const list = document.createElement('div');
         list.className = 'source-list';
         items.forEach(s => {
@@ -324,6 +461,7 @@ function renderGroupedSources(sources) {
             const g = getIconGradient(s.type);
             const item = document.createElement('div');
             item.className = 'source-item';
+            item.dataset.index = totalIndex++;
             item.onclick = function() { askOpenLink(u); };
             const info = document.createElement('div');
             info.className = 'source-info';
@@ -344,15 +482,59 @@ function renderGroupedSources(sources) {
             item.appendChild(delBtn);
             list.appendChild(item);
         });
-        container.appendChild(list);
+        groupDiv.appendChild(list);
+        container.appendChild(groupDiv);
     });
+
+    if (sources.length > 5) {
+        const btn = document.createElement('button');
+        btn.className = 'change-time-btn';
+        btn.textContent = 'Ещё';
+        btn.style.marginTop = '12px';
+        btn.style.width = '100%';
+        btn.onclick = function() {
+            const groups = container.querySelectorAll('.source-group');
+            const hiddenItems = container.querySelectorAll('.source-item.hidden');
+            if (hiddenItems.length) {
+                groups.forEach(g => g.style.display = '');
+                container.querySelectorAll('.source-item.hidden').forEach(el => el.classList.remove('hidden'));
+                btn.textContent = 'Скрыть';
+            } else {
+                const allItems = container.querySelectorAll('.source-item');
+                allItems.forEach((el, idx) => {
+                    if (idx >= 5) el.classList.add('hidden');
+                });
+                groups.forEach(g => {
+                    const visibleItems = g.querySelectorAll('.source-item:not(.hidden)');
+                    if (visibleItems.length === 0) {
+                        g.style.display = 'none';
+                    }
+                });
+                btn.textContent = 'Ещё';
+            }
+        };
+        container.appendChild(btn);
+        const allItems = container.querySelectorAll('.source-item');
+        allItems.forEach((el, idx) => {
+            if (idx >= 5) el.classList.add('hidden');
+        });
+        const groups = container.querySelectorAll('.source-group');
+        groups.forEach(g => {
+            const visibleItems = g.querySelectorAll('.source-item:not(.hidden)');
+            if (visibleItems.length === 0) {
+                g.style.display = 'none';
+            }
+        });
+    }
 }
 
 function getIconGradient(t){switch(t){case'telegram':return'linear-gradient(290deg,#d235ff 0%,#a062ff 30%,#3088ff 66%,#61d8ff 100%)';case'vk':return'linear-gradient(290deg,#0d47a1 0%,#1565c0 30%,#1e88e5 66%,#64b5f6 100%)';case'rss':return'linear-gradient(290deg,#d84315 0%,#f57c00 30%,#f9a825 66%,#ffee58 100%)';default:return'linear-gradient(290deg,#d235ff 0%,#a062ff 30%,#3088ff 66%,#61d8ff 100%)';}}
+
 function updateStatus(d){document.getElementById('statusTariff').textContent=d.tariff_name||'—';document.getElementById('statusSources').textContent=d.used||0;document.getElementById('statusLimit').textContent=d.limit||5;document.getElementById('statusAutoSend').textContent='✅';document.getElementById('statusLastSent').textContent=d.last_sent||'—';document.getElementById('statusExpires').textContent=d.expires_at||'—';isPremium=d.is_premium||false;defaultSendHour=d.default_send_hour||18;currentSendTime=d.send_time||null;const display=currentSendTime?currentSendTime:(defaultSendHour.toString().padStart(2,'0')+':00');document.getElementById('currentTimeDisplay').textContent=display+' MSK';const btn=document.getElementById('changeTimeBtn');const hint=document.getElementById('upgradeHint');if(isPremium){btn.style.display='inline-block';btn.disabled=false;hint.style.display='none';}else{btn.style.display='none';hint.style.display='inline-block';if(document.getElementById('timePicker').style.display!=='none')closeTimePicker();}}
 
 function confirmDelete(id){hapticFeedback();const s=currentSources.find(s=>s.id===id);if(!s){alert('Источник не найден');return;}
 const f=formatSourceValue(s);if(window.confirm('Удалить источник?\n\n'+f+'\n\nЭто действие нельзя отменить.'))deleteSource(id);}
+
 async function deleteSource(id){if(!ensureConsent())return; try{const resp=await apiRequest('/api/webapp/delete',{method:'POST',headers:getHeaders(),body:JSON.stringify({source_id:id})});if(!resp)return;if(!resp.ok){const err=await resp.json();alert('❌ Ошибка удаления: '+err.detail);return;}
 await loadApp();alert('✅ Источник удалён');}catch(err){alert('❌ Ошибка: '+err.message);}}
 
@@ -564,6 +746,7 @@ function updateGitHubButtons(v){
         else btn.disabled=!(hasSlash&&v.trim());
     });
 }
+
 function generateGitHubRSS(t){ if(!ensureConsent())return; hapticFeedback();
     const input=document.getElementById('githubInput');
     let raw=input.value.trim();
@@ -660,6 +843,7 @@ async function loadCategoryLevel(parentId=null){
     localStorage.setItem(key,JSON.stringify({timestamp:Date.now(),data}));
     return data;
 }
+
 function shortenCategoryName(n){
     const map={
         'DevOps и инфраструктура':'DevOps','IT и разработка':'IT','Информационная безопасность':'Инфобез',
@@ -685,6 +869,7 @@ function shortenCategoryName(n){
     };
     return map[n]||n;
 }
+
 function sortItems(items){
     const late=['IT и разработка','DevOps и инфраструктура'];
     const normal=items.filter(i=>!late.includes(i.name));
@@ -696,6 +881,7 @@ function sortItems(items){
     lateItems.sort((a,b)=>a.name.localeCompare(b.name,'ru'));
     return[...rus,...eng,...lateItems];
 }
+
 function toggleCategoryBrowser(){ if(!ensureConsent())return; hapticFeedback();
     const b=document.getElementById('categoryBrowser');
     if(b.style.display==='block'){b.style.display='none';return;}
@@ -704,6 +890,7 @@ function toggleCategoryBrowser(){ if(!ensureConsent())return; hapticFeedback();
     categoryHistory=[];
     showLevel(null);
 }
+
 function showLevel(parentId){
     const header=document.getElementById('categoryBrowserHeader');
     const grid=document.getElementById('categoryGrid');
@@ -730,6 +917,7 @@ function showLevel(parentId){
         back.style.display = categoryHistory.length > 0 ? 'block' : 'none';
     }).catch(err=>{grid.innerHTML='<div style="text-align:center;padding:10px;color:red;">Ошибка: '+err.message+'</div>';});
 }
+
 function openLevel(id,name){hapticFeedback();categoryHistory.push({id:id,name:name});showLevel(id);}
 function goBackLevel(){ if(!ensureConsent())return; hapticFeedback();
     if(categoryHistory.length===0){document.getElementById('categoryBrowser').style.display='none';return;}
@@ -744,8 +932,10 @@ function toggleTimePicker(){ if(!ensureConsent())return; hapticFeedback();
     if(p.style.display==='none')openTimePicker();
     else closeTimePicker();
 }
+
 function openTimePicker(){if(!isPremium)return;document.getElementById('timePicker').style.display='block';renderTimePicker();}
 function closeTimePicker(){document.getElementById('timePicker').style.display='none';}
+
 function renderTimePicker(){
     const grid=document.getElementById('timePickerGrid');
     grid.innerHTML='';
@@ -758,6 +948,7 @@ function renderTimePicker(){
         grid.appendChild(btn);
     }
 }
+
 async function setTime(hour){ if(!ensureConsent())return; hapticFeedback();
     try{
         const resp=await apiRequest('/api/webapp/set_time',{
@@ -778,65 +969,49 @@ async function setTime(hour){ if(!ensureConsent())return; hapticFeedback();
 }
 
 function toggleTariffs(){ if(!ensureConsent())return; hapticFeedback();document.getElementById('tariffBlock').classList.toggle('visible');}
-async function handlePayment(tariffKey){ if(!ensureConsent())return; hapticFeedback();
-    if(!authToken){alert('❌ Вы не авторизованы. Пожалуйста, войдите.');return;}
-    try{
-        const resp=await apiRequest('/api/payment/create-invoice',{
-            method:'POST',
-            headers:getHeaders(),
-            body:JSON.stringify({tariff:tariffKey})
+
+// ===== ИСПРАВЛЕННАЯ ОПЛАТА =====
+async function handlePayment(tariffKey){ 
+    if(!ensureConsent()) return; 
+    hapticFeedback();
+    if(!authToken){
+        alert('❌ Вы не авторизованы. Пожалуйста, войдите.');
+        return;
+    }
+    try {
+        const resp = await apiRequest('/api/payment/create-invoice', {
+            method: 'POST',
+            headers: getHeaders(),
+            body: JSON.stringify({ tariff: tariffKey })
         });
-        if(!resp)return;
-        if(!resp.ok){const err=await resp.json();alert('❌ Ошибка: '+err.detail);return;}
-        const data=await resp.json();
-        if(data.payment_url){window.open(data.payment_url,'_blank');alert('🔗 Переход к оплате...');}
-        else{alert('❌ Не удалось получить ссылку на оплату');}
-    }catch(err){alert('❌ Ошибка: '+err.message);}
+        if (!resp) return;
+        if (!resp.ok) {
+            const err = await resp.json();
+            alert('❌ Ошибка: ' + err.detail);
+            return;
+        }
+        const data = await resp.json();
+        if (data.payment_url) {
+            // Открываем страницу оплаты в новой вкладке
+            window.open(data.payment_url, '_blank');
+            alert('🔗 Переход к оплате...');
+        } else {
+            alert('❌ Не удалось получить ссылку на оплату');
+        }
+    } catch(err) {
+        alert('❌ Ошибка: ' + err.message);
+    }
 }
 
 // ===== ФУНКЦИИ ВХОДА =====
 
-// ----- ПОЛЛИНГ ТОКЕНА ПО STATE (для Яндекс) -----
-function pollForToken(state, onSuccess) {
-    let attempts = 0;
-    const maxAttempts = 60;
-    const interval = setInterval(async () => {
-        attempts++;
-        try {
-            const resp = await apiRequest(`/api/auth/get-token-by-state?state=${state}`);
-            if (resp && resp.ok) {
-                const data = await resp.json();
-                if (data.token) {
-                    clearInterval(interval);
-                    authToken = data.token;
-                    localStorage.setItem('auth_token', authToken);
-                    alert('✅ Аккаунт привязан!');
-                    if (onSuccess) onSuccess();
-                    return;
-                }
-            }
-        } catch (e) {
-            // ignore
-        }
-        if (attempts >= maxAttempts) {
-            clearInterval(interval);
-            alert('⏰ Время истекло. Попробуйте снова.');
-            const container = document.querySelector('#loginScreen .auth-container');
-            if (container) container.style.display = 'block';
-            const w = document.getElementById('widgetContainer');
-            if (w) w.innerHTML = '';
-        }
-    }, 3000);
-}
-
-// ----- VK OAuth с серверным хранением code_verifier (новая вкладка) -----
+// ----- VK OAuth с pollForToken (как Яндекс) -----
 async function startVkAuth(){
     hapticFeedback();
     const verifier = generateCodeVerifier();
     const challenge = await generateCodeChallenge(verifier);
-    const state = Math.random().toString(36).substring(2);
+    const state = 'vk_' + Math.random().toString(36).substring(2);
 
-    // Сохраняем verifier на сервере
     try {
         const resp = await apiRequest('/api/auth/vk/save-verifier', {
             method: 'POST',
@@ -851,18 +1026,19 @@ async function startVkAuth(){
 
     const redirectUri = 'https://news.proid.studio/pwa';
     const scope = 'vkid.personal_info';
-    const authUrl = `https://id.vk.ru/authorize?client_id=${VK_APP_ID}&redirect_uri=${encodeURIComponent(redirectUri)}&response_type=code&scope=${scope}&state=${state}&code_challenge=${challenge}&code_challenge_method=S256&v=5.199`;
+    const authUrl = `https://id.vk.ru/authorize?client_id=${VK_APP_ID}&redirect_uri=${encodeURIComponent(redirectUri)}&response_type=code&scope=${scope}&state=${state}&code_challenge=${challenge}&code_challenge_method=S256&v=5.199&from_extension=1`;
 
     const container = document.getElementById('loginScreen').querySelector('.auth-container');
     if (container) container.style.display = 'none';
     const w = document.getElementById('widgetContainer');
     if (w) w.innerHTML = '<p style="color: var(--text-secondary);">Перенаправление на авторизацию VK...</p>';
 
-    window.open(authUrl, '_blank');
-    // Для VK поллинг не нужен, т.к. обработка через callback в родительской вкладке
+    authWindow = window.open(authUrl, '_blank');
+
+    pollForToken(state, loadApp, 'vk');
 }
 
-// ----- MAX AUTH -----
+// ----- MAX AUTH с опросом /api/auth/max-status -----
 async function startMaxAuth(){
     hapticFeedback();
     const container = document.getElementById('loginScreen').querySelector('.auth-container');
@@ -870,128 +1046,101 @@ async function startMaxAuth(){
     const w = document.getElementById('widgetContainer');
     w.innerHTML = '<div class="loader"></div>';
     try{
-        const resp=await apiRequest('/api/auth/max-token');
-        if(!resp){container.style.display='block';w.innerHTML='';return;}
-        if(!resp.ok)throw new Error('Не удалось получить токен');
-        const data=await resp.json();
-        const token=data.token;
-        const botUsername=data.bot_username||'id772609477460_bot';
-        localStorage.setItem('max_auth_token',token);
+        const resp = await apiRequest('/api/auth/max-token?source=telegram');
+        if(!resp){ container.style.display='block'; w.innerHTML=''; return; }
+        if(!resp.ok) throw new Error('Не удалось получить токен');
+        const data = await resp.json();
+        const token = data.token;
+        const botUsername = data.bot_username || 'id772609477460_bot';
+        localStorage.setItem('max_auth_token', token);
         startMaxWaiting(token);
-        window.open('https://max.ru/'+botUsername+'?start='+encodeURIComponent(token),'_blank');
-        w.innerHTML='<p style="color: var(--text-secondary);">Ожидаем подтверждения в MAX...</p>';
-    }catch(err){
-        alert('❌ Ошибка: '+err.message);
-        container.style.display='block';
-        w.innerHTML='';
+        window.open('https://max.ru/' + botUsername + '?start=' + encodeURIComponent(token), '_blank');
+        w.innerHTML = '<p style="color: var(--text-secondary);">Ожидаем подтверждения в MAX...</p>';
+    } catch(err){
+        alert('❌ Ошибка: ' + err.message);
+        container.style.display = 'block';
+        w.innerHTML = '';
     }
 }
 
 function startMaxWaiting(token){
-    let attempts=0;
-    const maxAttempts=60;
-    const timer=setInterval(async()=>{
+    if (maxPollingTimer) clearInterval(maxPollingTimer);
+    let attempts = 0;
+    const maxAttempts = 60;
+    maxPollingTimer = setInterval(async () => {
         attempts++;
         try{
-            const resp=await apiRequest('/api/auth/max-status/'+token);
-            if(!resp)return;
-            const data=await resp.json();
-            if(data.ready&&data.auth_token){
-                clearInterval(timer);
-                alert('✅ Аккаунт привязан, перенаправляем...');
-                window.location.href='/pwa?auth_token='+encodeURIComponent(data.auth_token);
+            const resp = await apiRequest('/api/auth/max-status/' + token);
+            if (!resp) return;
+            if (!resp.ok) {
+                if (resp.status === 404) {
+                    // ещё не готово
+                } else {
+                    console.warn('MAX status error:', resp.status);
+                }
+                if (attempts >= maxAttempts) {
+                    clearInterval(maxPollingTimer);
+                    maxPollingTimer = null;
+                    alert('⏰ Время истекло. Попробуйте снова.');
+                    document.getElementById('loginScreen').querySelector('.auth-container').style.display = 'block';
+                    document.getElementById('widgetContainer').innerHTML = '';
+                }
                 return;
             }
-            if(attempts>=maxAttempts){
-                clearInterval(timer);
-                alert('⏰ Время истекло. Попробуйте снова.');
-                document.getElementById('loginScreen').querySelector('.auth-container').style.display='block';
-                document.getElementById('widgetContainer').innerHTML='';
+            const data = await resp.json();
+            if (data.ready && data.auth_token) {
+                clearInterval(maxPollingTimer);
+                maxPollingTimer = null;
+                // Сохраняем токен и обновляем интерфейс
+                authToken = data.auth_token;
+                localStorage.setItem('auth_token', authToken);
+                alert('✅ Аккаунт привязан!');
+                loadApp();
+                // Закрываем окно MAX, если оно ещё открыто
+                if (authWindow && !authWindow.closed) {
+                    authWindow.close();
+                    authWindow = null;
+                }
+                return;
             }
-        }catch(e){}
-    },3000);
+            if (attempts >= maxAttempts) {
+                clearInterval(maxPollingTimer);
+                maxPollingTimer = null;
+                alert('⏰ Время истекло. Попробуйте снова.');
+                document.getElementById('loginScreen').querySelector('.auth-container').style.display = 'block';
+                document.getElementById('widgetContainer').innerHTML = '';
+            }
+        } catch(e) {
+            console.error('MAX polling error:', e);
+        }
+    }, 3000);
 }
 
-// ----- Яндекс ID (исправленный) -----
+// ----- Яндекс ID (с абсолютным URL) -----
 function startYandexAuth() {
     hapticFeedback();
-    const state = Math.random().toString(36).substring(2);
+    console.log('🔹 startYandexAuth() вызвана');
+
+    const isTelegram = window.Telegram && window.Telegram.WebApp;
+    const prefix = isTelegram ? 'telegram_' : 'pwa_';
+    const state = prefix + Math.random().toString(36).substring(2);
+    console.log('🔑 Сгенерирован state:', state);
+    console.log('📤 source для pollForToken:', prefix === 'telegram_' ? 'telegram' : 'pwa');
+
     const container = document.querySelector('#loginScreen .auth-container');
     if (container) container.style.display = 'none';
     const w = document.getElementById('widgetContainer');
     if (w) w.innerHTML = '<p style="color: var(--text-secondary);">Перенаправление на авторизацию Яндекс...</p>';
-    window.open(API_BASE + `/api/auth/yandex/login?state=${encodeURIComponent(state)}`, '_blank');
-    pollForToken(state, loadApp);
+
+    // ИСПРАВЛЕНО: используем абсолютный URL
+    let authUrl = API_BASE + '/api/auth/yandex/login?state=' + encodeURIComponent(state);
+    authUrl += '&from_extension=1';
+    console.log('🌐 Открываем URL:', authUrl);
+    authWindow = window.open(authUrl, '_blank');
+
+    console.log('⏳ Запускаем pollForToken с state:', state);
+    pollForToken(state, loadApp, prefix === 'telegram_' ? 'telegram' : 'pwa');
 }
-
-// ===== ОБРАБОТКА ВОЗВРАТА ИЗ VK (новая вкладка) =====
-(function handleVkCallback() {
-    const params = new URLSearchParams(window.location.search);
-    const code = params.get('code');
-    const state = params.get('state');
-    const device_id = params.get('device_id');
-
-    if (code && state) {
-        if (sessionStorage.getItem('vk_processed_' + state) === 'true') {
-            console.log('VK callback already processed, skipping');
-            window.history.replaceState({}, '', '/pwa');
-            return;
-        }
-        sessionStorage.setItem('vk_processed_' + state, 'pending');
-
-        apiRequest('/api/auth/vk/callback', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ code, device_id, state })
-        })
-        .then(async r => {
-            if (!r) return;
-            if (!r.ok) {
-                const err = await r.json();
-                throw new Error(err.detail || 'Ошибка авторизации');
-            }
-            return r.json();
-        })
-        .then(data => {
-            if (data.token) {
-                localStorage.setItem('auth_token', data.token);
-                sessionStorage.setItem('vk_processed_' + state, 'true');
-                if (window.opener) {
-                    window.close();
-                } else {
-                    location.reload();
-                }
-            } else {
-                throw new Error('Токен не получен');
-            }
-        })
-        .catch(err => {
-            alert('❌ Ошибка входа через VK: ' + err.message);
-            sessionStorage.removeItem('vk_processed_' + state);
-            window.history.replaceState({}, '', '/pwa');
-            showLoginScreen();
-        });
-    }
-
-    // Обработка Яндекса (если используется)
-    const yandexToken = params.get('auth_token');
-    if (yandexToken) {
-        localStorage.setItem('auth_token', yandexToken);
-        if (window.opener) {
-            window.close();
-        } else {
-            location.reload();
-        }
-    }
-})();
-
-// ===== СЛУШАТЕЛЬ STORAGE =====
-window.addEventListener('storage', function(e) {
-    if (e.key === 'auth_token' && e.newValue) {
-        console.log('VK/Yandex: auth_token changed, reloading parent');
-        location.reload();
-    }
-});
 
 // ===== КНОПКА "СМОТРЕТЬ НОВОСТИ" =====
 let digestVisible = false;
@@ -1121,7 +1270,7 @@ async function toggleDigest() {
     }
 }
 
-// ===== ВЫХОД ИЗ АККАУНТА =====
+// ===== ВЫХОД =====
 function logout() {
     const confirmLogout = () => {
         localStorage.removeItem('auth_token');
@@ -1166,18 +1315,18 @@ function logout() {
     }
 }
 
-window.suggestSource = function(){
+function suggestSource() {
     if (!ensureConsent()) return;
     hapticFeedback();
-    const url='https://t.me/professional_interior_design';
-    const text='Добрый день. Хочу предложить источник:';
-    window.open(url+'?text='+encodeURIComponent(text),'_blank');
-};
+    const url = 'https://t.me/professional_interior_design';
+    const text = 'Добрый день. Хочу предложить источник:';
+    window.open(url + '?text=' + encodeURIComponent(text), '_blank');
+}
 
 // ---- ИНИЦИАЛИЗАЦИЯ ----
 (function init(){
-    if(authToken){
-        if(document.getElementById('sourceListContainer').children.length===0)loadApp();
+    if (authToken) {
+        if (document.getElementById('sourceListContainer').children.length === 0) loadApp();
     } else {
         showLoginScreen();
         const container = document.getElementById('loginScreen').querySelector('.auth-container');
@@ -1228,10 +1377,10 @@ window.generateRedditRSS = generateRedditRSS;
 window.generateGoogleNewsRSS = generateGoogleNewsRSS;
 window.addRSSSource = addRSSSource;
 window.toggleDigest = toggleDigest;
-window.suggestSource = window.suggestSource;
+window.suggestSource = suggestSource;
 window.ensureConsent = ensureConsent;
 window.logout = logout;
-window.pollForToken = pollForToken;  // на случай, если понадобится
+window.pollForToken = pollForToken;
 
 // ===== ПОГОДА =====
 const WEATHER_API_URL = 'https://api.open-meteo.com/v1/forecast';

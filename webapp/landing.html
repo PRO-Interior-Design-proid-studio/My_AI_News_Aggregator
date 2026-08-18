@@ -24,7 +24,7 @@
     <meta name="twitter:image" content="https://news.proid.studio/picture/LOGO.jpg">
 
     <link rel="icon" href="/icons/favicon.ico">
-    
+    <meta name="yandex-verification" content="303f5886e6cd5be2" />
     <script type="application/ld+json">
     {
         "@context": "https://schema.org",
@@ -270,9 +270,15 @@
         @keyframes pulse-logo { 0%{transform:translateY(0);opacity:.7}50%{transform:translateY(-12px);opacity:1}100%{transform:translateY(0);opacity:.7} }
 
         @media(max-width:640px){
-            header { flex-direction:column; align-items:stretch; gap:10px; }
+            /* ===== ДОБАВЛЯЕМ ОТСТУП СВЕРХУ НАД ШАПКОЙ ===== */
+            header {
+                padding-top: 100px;   /* ← именно здесь */
+                flex-direction: column;
+                align-items: stretch;
+                gap: 10px;
+            }
             .nav { justify-content:center; gap:14px; }
-            .hero { padding:30px 0 10px; }
+            .hero { padding:30px 0 10px; }  /* возвращаем исходный отступ */
             .hero-glow { width:100vw; height:100vw; top:-10%; }
             section { padding:30px 0; }
             .grid-2,.grid-3,.grid-pricing,.grid-tech { grid-template-columns:1fr; }
