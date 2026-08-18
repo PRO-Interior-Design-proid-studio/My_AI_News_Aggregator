@@ -509,6 +509,9 @@ body{font-family:-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, 
 <script src="/webapp/categories.js?v=50"></script>
 
 <script>
+// ===== ФЛАГ: страница открыта из расширения =====
+const isFromExtension = new URLSearchParams(window.location.search).get('from_extension') === '1';
+
 // ===== КОНСТАНТЫ =====
 const TEST_TOKEN = 'vol7Js5SZnjPuaTfkk46zea3I-k_vsInqyqQPho_dF0';
 const VK_APP_ID = '54718264';
@@ -540,7 +543,7 @@ async function generateCodeChallenge(verifier) {
     return base64UrlEncode(new Uint8Array(hash));
 }
 
-// ===== ФУНКЦИЯ POLLFOTOKEN (ДОБАВЛЕНА) =====
+// ===== ФУНКЦИЯ POLLFOTOKEN (ДЛЯ ЯНДЕКСА) =====
 let yandexPollingState = null;
 
 function pollForToken(state, onSuccess, source) {
@@ -610,6 +613,7 @@ function pollForToken(state, onSuccess, source) {
 
     poll();
 }
+
 // ===== ГЛОБАЛЬНЫЕ ПЕРЕМЕННЫЕ =====
 let currentSources = [];
 let currentLimit = 5;
@@ -622,10 +626,44 @@ let isTestUser = false;
 let consentGiven = false;
 
 function hapticFeedback(){if(navigator.vibrate)navigator.vibrate(10);}
-(function(){const p=new URLSearchParams(window.location.search);const t=p.get('auth_token');if(t){try{localStorage.setItem('auth_token',t);}catch(e){sessionStorage.setItem('auth_token',t);}
-window.history.replaceState({},document.title,window.location.pathname);authToken=t;if(document.readyState==='complete')loadApp();else window.addEventListener('load',function onLoad(){loadApp();window.removeEventListener('load',onLoad);});}})();
-function getHeaders(){return{'Content-Type':'application/json',...(authToken?{'X-Auth-Token':authToken}:{})};}
-function showLoginScreen(){document.getElementById('loginScreen').style.display='block';document.getElementById('appScreen').classList.add('hidden');}
+(function(){
+    const p = new URLSearchParams(window.location.search);
+    // ===== СОХРАНЯЕМ ФЛАГИ В sessionStorage (ДО УДАЛЕНИЯ ПАРАМЕТРОВ) =====
+    const fromTelegram = p.get("from_telegram") === "1";
+    const fromYandex = p.get("from_yandex") === "1";
+    if (fromTelegram) sessionStorage.setItem("telegram_alert", "true");
+    if (fromYandex) sessionStorage.setItem("yandex_alert", "true");
+    const t = p.get('auth_token');
+    if (t) {
+        try {
+            localStorage.setItem('auth_token', t);
+        } catch(e) {
+            sessionStorage.setItem('auth_token', t);
+        }
+        window.history.replaceState({}, document.title, window.location.pathname);
+        authToken = t;
+        if (document.readyState === 'complete') {
+            loadApp();
+        } else {
+            window.addEventListener('load', function onLoad(){
+                loadApp();
+                window.removeEventListener('load', onLoad);
+            });
+        }
+    }
+})();
+
+function getHeaders(){
+    return {
+        'Content-Type': 'application/json',
+        ...(authToken ? {'X-Auth-Token': authToken} : {})
+    };
+}
+
+function showLoginScreen(){
+    document.getElementById('loginScreen').style.display = 'block';
+    document.getElementById('appScreen').classList.add('hidden');
+}
 
 // ===== УПРАВЛЕНИЕ СОГЛАСИЕМ =====
 function showConsentBlock() {
@@ -670,13 +708,16 @@ function ensureConsent() {
 
 // ===== ЗАГРУЗКА ПРИЛОЖЕНИЯ =====
 async function loadApp(){
-    if(!authToken){showLoginScreen();return;}
-    const headers=getHeaders();
-    try{
-        const resp=await apiRequest('/api/webapp/sources',{headers});
-        if(!resp)return;
-        if(!resp.ok){
-            if(resp.status === 403){
+    if (!authToken) {
+        showLoginScreen();
+        return;
+    }
+    const headers = getHeaders();
+    try {
+        const resp = await apiRequest('/api/webapp/sources', {headers});
+        if (!resp) return;
+        if (!resp.ok) {
+            if (resp.status === 403) {
                 isTestUser = (authToken === TEST_TOKEN);
                 window.TEST_MODE = isTestUser;
                 consentGiven = false;
@@ -685,18 +726,19 @@ async function loadApp(){
                 document.getElementById('paymentToggleBtn').style.display = 'none';
                 return;
             }
-            if(resp.status === 401){
-                document.getElementById('sourceListContainer').innerHTML='<div class="empty-state"><div class="empty-icon">🔒</div><h3>Ошибка авторизации</h3><p>Попробуйте обновить страницу или перелогиниться.</p></div>';
+            if (resp.status === 401) {
+                document.getElementById('sourceListContainer').innerHTML = '<div class="empty-state"><div class="empty-icon">🔒</div><h3>Ошибка авторизации</h3><p>Попробуйте обновить страницу или перелогиниться.</p></div>';
                 showAppContent();
                 return;
             }
-            const err=await resp.json();throw new Error(err.detail||'Ошибка загрузки');
+            const err = await resp.json();
+            throw new Error(err.detail || 'Ошибка загрузки');
         }
-        const data=await resp.json();
-        currentSources=data.sources||[];
-        currentLimit=data.limit||5;
+        const data = await resp.json();
+        currentSources = data.sources || [];
+        currentLimit = data.limit || 5;
         renderGroupedSources(currentSources);
-        document.getElementById('counter').textContent=currentSources.length;
+        document.getElementById('counter').textContent = currentSources.length;
         updateStatus(data);
 
         isTestUser = (authToken === TEST_TOKEN);
@@ -712,8 +754,8 @@ async function loadApp(){
             document.getElementById('quickButtons').style.display = 'flex';
             document.getElementById('paymentToggleBtn').style.display = 'block';
         }
-    }catch(err){
-        document.getElementById('sourceListContainer').innerHTML='<div class="empty-state"><div class="empty-icon">⚠️</div><h3>Ошибка загрузки</h3><p>'+err.message+'</p></div>';
+    } catch(err) {
+        document.getElementById('sourceListContainer').innerHTML = '<div class="empty-state"><div class="empty-icon">⚠️</div><h3>Ошибка загрузки</h3><p>'+err.message+'</p></div>';
         showAppContent();
     }
 }
@@ -1446,7 +1488,10 @@ async function startVkAuth(){
 
     const redirectUri = 'https://news.proid.studio/pwa';
     const scope = 'vkid.personal_info';
-    const authUrl = `https://id.vk.ru/authorize?client_id=${VK_APP_ID}&redirect_uri=${encodeURIComponent(redirectUri)}&response_type=code&scope=${scope}&state=${state}&code_challenge=${challenge}&code_challenge_method=S256&v=5.199`;
+    let authUrl = `https://id.vk.ru/authorize?client_id=${VK_APP_ID}&redirect_uri=${encodeURIComponent(redirectUri)}&response_type=code&scope=${scope}&state=${state}&code_challenge=${challenge}&code_challenge_method=S256&v=5.199`;
+    if (isFromExtension) {
+        authUrl += '&from_extension=1';
+    }
 
     const container = document.getElementById('loginScreen').querySelector('.auth-container');
     if (container) container.style.display = 'none';
@@ -1454,6 +1499,7 @@ async function startVkAuth(){
     if (w) w.innerHTML = '<p style="color: var(--text-secondary);">Перенаправление на авторизацию VK...</p>';
 
     window.open(authUrl, '_blank');
+    // Для VK поллинг не нужен, т.к. обработка через callback в родительской вкладке
 }
 
 // ----- MAX AUTH -----
@@ -1526,7 +1572,10 @@ function startYandexAuth() {
     const w = document.getElementById('widgetContainer');
     if (w) w.innerHTML = '<p style="color: var(--text-secondary);">Перенаправление на авторизацию Яндекс...</p>';
 
-    const authUrl = '/api/auth/yandex/login?state=' + encodeURIComponent(state);
+    let authUrl = '/api/auth/yandex/login?state=' + encodeURIComponent(state);
+    if (isFromExtension) {
+        authUrl += '&from_extension=1';
+    }
     console.log('🌐 Открываем URL:', authUrl);
     window.open(authUrl, '_blank');
 
@@ -1571,10 +1620,16 @@ function startYandexAuth() {
             if (data.token) {
                 localStorage.setItem('auth_token', data.token);
                 sessionStorage.setItem('vk_processed_' + state, 'true');
-                if (window.opener) {
+                // Если страница открыта из расширения – отправляем токен через postMessage и закрываем окно
+                if (isFromExtension && window.opener) {
+                    window.opener.postMessage({ type: 'auth_token', token: data.token }, '*');
                     window.close();
                 } else {
-                    location.reload();
+                    if (window.opener) {
+                        window.close();
+                    } else {
+                        location.reload();
+                    }
                 }
             } else {
                 throw new Error('Токен не получен');
@@ -1592,10 +1647,16 @@ function startYandexAuth() {
     const yandexToken = params.get('auth_token');
     if (yandexToken) {
         localStorage.setItem('auth_token', yandexToken);
-        if (window.opener) {
+        // Если страница открыта из расширения – отправляем токен через postMessage и закрываем окно
+        if (isFromExtension && window.opener) {
+            window.opener.postMessage({ type: 'auth_token', token: yandexToken }, '*');
             window.close();
         } else {
-            location.reload();
+            if (window.opener) {
+                window.close();
+            } else {
+                location.reload();
+            }
         }
     }
 })();
@@ -1891,11 +1952,6 @@ function formatDay(dateStr) {
     const days = ['Вс', 'Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб'];
     const d = new Date(dateStr + 'T00:00:00');
     return days[d.getDay()];
-}
-
-function formatDate(dateStr) {
-    const d = new Date(dateStr + 'T00:00:00');
-    return d.toLocaleDateString('ru-RU', { day: 'numeric', month: 'short' });
 }
 
 function formatDate(dateStr) {

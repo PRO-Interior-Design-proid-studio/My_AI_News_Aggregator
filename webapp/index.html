@@ -32,6 +32,10 @@
     <meta name="theme-color" content="#010715">
     <style>
         *{margin:0;padding:0;box-sizing:border-box;}
+html, body {
+    overflow-x: hidden;
+    max-width: 100%;
+}
         :root{--bg-color:#010715;--footer-bg:#111c40;--text:#fff;--text-secondary:#8a9bb5;--accent:#6c5ce7;--accent2:#3088ff;--card-bg:rgba(255,255,255,0.04);--border:rgba(255,255,255,0.06);--radius:20px;--shadow:0 12px 48px rgba(0,0,0,0.6);}
         html{scroll-behavior:smooth;}
         body{font-family:-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "Fira Sans", "Droid Sans", "Helvetica Neue", Arial, sans-serif;background:var(--footer-bg) linear-gradient(180deg,#020e33 0%,var(--bg-color) 25%,var(--bg-color) 84%,var(--footer-bg) 100%);color:var(--text);line-height:1.6;padding:0;min-height:100vh;-webkit-font-smoothing:antialiased;font-variant-ligatures:none;display:flex;flex-direction:column;}
@@ -102,8 +106,34 @@
         .delete-btn:hover{background:rgba(255,70,70,0.15);color:#ff6b6b;opacity:1;}
         .empty-state{text-align:center;padding:30px 20px;color:var(--text-secondary);background:var(--card-bg);border-radius:var(--radius);border:1px dashed var(--border);backdrop-filter:blur(4px);}
         .empty-icon{font-size:40px;margin-bottom:12px;opacity:.6;}
-        .footer-wrapper{width:100%;background:var(--footer-bg);border-top:1px solid var(--border);padding:12px 0;margin-top:auto;flex-shrink:0;}
-        .footer-inner{margin:0 auto;display:flex;flex-wrap:wrap;justify-content:center;align-items:center;gap:6px 16px;font-size:13px;color:var(--text-secondary);padding:0 20px;}
+
+        /* ===== ИСПРАВЛЕННЫЙ ФУТЕР ===== */
+        .footer-wrapper {
+            width: 100vw;
+            max-width: 100vw;
+            margin-left: calc(50% - 50vw);
+            margin-right: calc(50% - 50vw);
+            background: var(--footer-bg);
+            border-top: 1px solid var(--border);
+            padding: 12px 0;
+            flex-shrink: 0;
+            box-sizing: border-box;
+        }
+        .footer-inner {
+            width: 100%;
+            margin: 0 auto;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            align-items: center;
+            gap: 6px 16px;
+            font-size: 13px;
+            color: var(--text-secondary);
+            padding: 0 20px;
+            box-sizing: border-box;
+        }
+        /* ===== КОНЕЦ ИСПРАВЛЕНИЯ ===== */
+
         @media(min-width:600px){.footer-inner{flex-wrap:nowrap;gap:8px 20px;}}
         .footer-inner a{color:var(--text-secondary);text-decoration:none;transition:.2s;}
         .footer-inner a:hover{color:var(--text);}

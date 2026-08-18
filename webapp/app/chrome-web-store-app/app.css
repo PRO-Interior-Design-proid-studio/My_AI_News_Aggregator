@@ -1,4 +1,8 @@
 *{margin:0;padding:0;box-sizing:border-box;}
+html, body {
+    overflow-x: hidden;
+    max-width: 100%;
+}
 :root{--bg-color:#010715;--footer-bg:#111c40;--text:#fff;--text-secondary:#8a9bb5;--accent:#6c5ce7;--accent2:#3088ff;--card-bg:rgba(255,255,255,0.04);--border:rgba(255,255,255,0.06);--radius:20px;--shadow:0 12px 48px rgba(0,0,0,0.6);}
 html{scroll-behavior:smooth;}
 body{font-family:-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "Fira Sans", "Droid Sans", "Helvetica Neue", Arial, sans-serif;background:var(--footer-bg) linear-gradient(180deg,#020e33 0%,var(--bg-color) 25%,var(--bg-color) 84%,var(--footer-bg) 100%);color:var(--text);line-height:1.6;padding:0;min-height:100vh;-webkit-font-smoothing:antialiased;font-variant-ligatures:none;display:flex;flex-direction:column;}
@@ -88,7 +92,7 @@ body{font-family:-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, 
 .time-picker-grid button:hover{background:linear-gradient(180deg,rgba(159,103,255,.22),rgba(197,66,255,.35)) padding-box,linear-gradient(var(--bg-color),var(--bg-color)) padding-box,linear-gradient(180deg,rgba(171,78,252,.82) 0%,rgba(108,31,198,.24) 53%,#7C45C2 100%) border-box,linear-gradient(180deg,rgba(159,103,255,.22),rgba(197,66,255,.35)) border-box;border:1px solid transparent;color:#fff;}
 .time-picker-grid button:active{transform:scale(.95);}
 .time-picker-grid button.selected{border-color:var(--accent2);background:rgba(48,136,255,0.15);}
-.change-time-btn{background:transparent;border:1px solid var(--border);color:var(--text-secondary);padding:4px 12px;border-radius:12px;font-size:13px;cursor:pointer;transition:.2s;}
+.change-time-btn{background:transparent;border:1px solid var(--border);color:var(--text-secondary);padding:4px 12px;border-radius:12px;font-size:13px;cursor:pointer;transition:.2s;display:inline-block;box-sizing:border-box;line-height:normal;font-family:inherit;}
 .change-time-btn:hover{background:rgba(255,255,255,0.05);color:var(--text);}
 .change-time-btn:disabled{opacity:.4;cursor:not-allowed;}
 .close-picker-btn{width:100%;padding:8px;background:transparent;border:1px solid var(--border);border-radius:12px;color:var(--text-secondary);font-size:14px;cursor:pointer;margin-top:8px;transition:.2s;}

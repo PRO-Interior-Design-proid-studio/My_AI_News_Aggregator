@@ -135,7 +135,7 @@ body{font-family:-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, 
 .time-picker-grid button:hover{background:linear-gradient(180deg,rgba(159,103,255,.22),rgba(197,66,255,.35)) padding-box,linear-gradient(var(--bg-color),var(--bg-color)) padding-box,linear-gradient(180deg,rgba(171,78,252,.82) 0%,rgba(108,31,198,.24) 53%,#7C45C2 100%) border-box,linear-gradient(180deg,rgba(159,103,255,.22),rgba(197,66,255,.35)) border-box;border:1px solid transparent;color:#fff;}
 .time-picker-grid button:active{transform:scale(.95);}
 .time-picker-grid button.selected{border-color:var(--accent2);background:rgba(48,136,255,0.15);}
-.change-time-btn{background:transparent;border:1px solid var(--border);color:var(--text-secondary);padding:4px 12px;border-radius:12px;font-size:13px;cursor:pointer;transition:.2s;}
+.change-time-btn{background:transparent;border:1px solid var(--border);color:var(--text-secondary);padding:4px 12px;border-radius:12px;font-size:13px;cursor:pointer;transition:.2s;display:inline-block;box-sizing:border-box;line-height:normal;font-family:inherit;}
 .change-time-btn:hover{background:rgba(255,255,255,0.05);color:var(--text);}
 .change-time-btn:disabled{opacity:.4;cursor:not-allowed;}
 .close-picker-btn{width:100%;padding:8px;background:transparent;border:1px solid var(--border);border-radius:12px;color:var(--text-secondary);font-size:14px;cursor:pointer;margin-top:8px;transition:.2s;}
@@ -448,7 +448,7 @@ body{font-family:-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, 
 
 <!-- ===== БЛОК ПОГОДЫ ===== -->
 <div class="status-block" id="weatherBlock">
-    <div class="status-title">Погода в Москве на неделю</div>
+    <div class="status-title">Погода в Москве</div>
     <div id="weatherContent">
         <div style="text-align:center; padding:10px; color:var(--text-secondary);">⏳ Загрузка прогноза...</div>
     </div>
@@ -490,17 +490,16 @@ body{font-family:-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, 
 </div>
 </div>
 
-<div style="text-align:center; margin-top: 16px; color: var(--text-secondary); font-size: 14px;">❤️ Сделано с любовью к людям</div>
+<div class="status-block" style="padding: 8px 8px; cursor: pointer;" onclick="alert('❤️ Спасибо! Расскажите про нас друзьям.' )"><div class="status-row" style="border-bottom: none; justify-content: center; padding: 0;"><span style="color: var(--text-secondary); font-size: 14px;">❤️ Сделано с любовью к людям</span></div></div>
 <!-- ===== ССЫЛКИ НА БОТОВ ===== -->
-<div style="display:flex; justify-content:center; gap:12px; margin:12px 0; color:var(--text-secondary); font-size:14px; flex-wrap:wrap;">
-    <a href="https://max.ru/id772609477460_bot" target="_blank" style="color:var(--text-secondary); text-decoration:none;">Открыть в MAX</a>
-    <span class="sep">|</span>
-    <a href="https://t.me/My_AI_News_Aggregator_bot" target="_blank" style="color:var(--text-secondary); text-decoration:none;">Открыть в Telegram</a>
-    <span class="sep">|</span>
-    <a href="https://vk.ru/app54717257" target="_blank" style="color:var(--text-secondary); text-decoration:none;">Открыть в VK</a>
+<div style="display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; margin: 12px 0;">
+    <a href="https://max.ru/id772609477460_bot" target="_blank" class="change-time-btn" style="display: inline-block; text-decoration: none;">Открыть в MAX</a>
+    <a href="https://t.me/My_AI_News_Aggregator_bot" target="_blank" class="change-time-btn" style="display: inline-block; text-decoration: none;">Открыть в Telegram</a>
+    <a href="https://vk.ru/app54717257" target="_blank" class="change-time-btn" style="display: inline-block; text-decoration: none;">Открыть в VK</a>
 </div>
-
-<div id="logoutContainer">Выход (сброс кэша)</div>
+<div style="display: flex; justify-content: center; margin-top: 8px;">
+    <div id="logoutContainer" class="change-time-btn" style="cursor: pointer; text-decoration: none; padding: 4px 12px; display: inline-block;">Выход (сброс кэша)</div>
+</div>
 </div> <!-- /appContent -->
 </div> <!-- /appScreen -->
 </div>
@@ -510,6 +509,9 @@ body{font-family:-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, 
 <script src="/webapp/categories.js?v=50"></script>
 
 <script>
+// ===== ФЛАГ: страница открыта из расширения =====
+const isFromExtension = new URLSearchParams(window.location.search).get('from_extension') === '1';
+
 // ===== КОНСТАНТЫ =====
 const TEST_TOKEN = 'vol7Js5SZnjPuaTfkk46zea3I-k_vsInqyqQPho_dF0';
 const VK_APP_ID = '54718264';
@@ -541,55 +543,75 @@ async function generateCodeChallenge(verifier) {
     return base64UrlEncode(new Uint8Array(hash));
 }
 
-// ===== ФУНКЦИЯ POLLFOTOKEN (ДОБАВЛЕНА) =====
+// ===== ФУНКЦИЯ POLLFOTOKEN (ДЛЯ ЯНДЕКСА) =====
+let yandexPollingState = null;
+
 function pollForToken(state, onSuccess, source) {
     console.log('🔍 pollForToken запущен для state:', state, 'source:', source);
+
+    if (yandexPollingState === state) {
+        console.warn('⏭️ pollForToken уже выполняется для state:', state);
+        return;
+    }
+    yandexPollingState = state;
+
     let attempts = 0;
-    const maxAttempts = 60;
-    const interval = setInterval(async () => {
+    const maxAttempts = 120;
+
+    const poll = async () => {
         attempts++;
         console.log(`🔄 Попытка ${attempts}/${maxAttempts} для state ${state}`);
+
         try {
-            const resp = await apiRequest(`/api/auth/get-token-by-state?state=${state}`);
+            const resp = await apiRequest(
+                `/api/auth/get-token-by-state?state=${encodeURIComponent(state)}`
+            );
+
             if (resp && resp.ok) {
                 const data = await resp.json();
                 console.log('📦 Ответ от сервера:', data);
+
                 if (data.token) {
-                    clearInterval(interval);
+                    yandexPollingState = null;
                     authToken = data.token;
                     localStorage.setItem('auth_token', authToken);
+
                     console.log('✅ Токен получен! Источник:', source);
 
-                    // Показываем нужное сообщение
                     setTimeout(() => {
-                        if (source === 'pwa') {
-                            alert('✅ Вы успешно вошли! Чтобы получать уведомления необходимо открыть бота в Telegram, VK или MAX.');
-                        } else if (source === 'telegram') {
+                        if (source === 'telegram') {
                             alert('✅ Нажмите ОК для входа! Чтобы привязать Telegram-бота вернитесь в приложение Telegram.');
+                        } else {
+                            alert('✅ Вы успешно вошли! Чтобы получать уведомления необходимо открыть бота в Telegram, VK или MAX.');
                         }
                         if (onSuccess) onSuccess();
                     }, 100);
+
                     return;
-                } else {
-                    console.log('⏳ Токен ещё не готов');
                 }
-            } else {
-                console.warn('⚠️ Ошибка ответа от сервера:', resp ? resp.status : 'нет ответа');
             }
         } catch (e) {
             console.error('❌ Ошибка в pollForToken:', e);
         }
 
         if (attempts >= maxAttempts) {
-            clearInterval(interval);
+            yandexPollingState = null;
             console.error('⏰ Время истекло для state', state);
             alert('⏰ Время истекло. Попробуйте снова.');
+
             const container = document.querySelector('#loginScreen .auth-container');
             if (container) container.style.display = 'block';
+
             const w = document.getElementById('widgetContainer');
             if (w) w.innerHTML = '';
+
+            return;
         }
-    }, 3000);
+
+        setTimeout(poll, 3000);
+    };
+
+    poll();
 }
 
 // ===== ГЛОБАЛЬНЫЕ ПЕРЕМЕННЫЕ =====
@@ -604,10 +626,39 @@ let isTestUser = false;
 let consentGiven = false;
 
 function hapticFeedback(){if(navigator.vibrate)navigator.vibrate(10);}
-(function(){const p=new URLSearchParams(window.location.search);const t=p.get('auth_token');if(t){try{localStorage.setItem('auth_token',t);}catch(e){sessionStorage.setItem('auth_token',t);}
-window.history.replaceState({},document.title,window.location.pathname);authToken=t;if(document.readyState==='complete')loadApp();else window.addEventListener('load',function onLoad(){loadApp();window.removeEventListener('load',onLoad);});}})();
-function getHeaders(){return{'Content-Type':'application/json',...(authToken?{'X-Auth-Token':authToken}:{})};}
-function showLoginScreen(){document.getElementById('loginScreen').style.display='block';document.getElementById('appScreen').classList.add('hidden');}
+(function(){
+    const p = new URLSearchParams(window.location.search);
+    const t = p.get('auth_token');
+    if (t) {
+        try {
+            localStorage.setItem('auth_token', t);
+        } catch(e) {
+            sessionStorage.setItem('auth_token', t);
+        }
+        window.history.replaceState({}, document.title, window.location.pathname);
+        authToken = t;
+        if (document.readyState === 'complete') {
+            loadApp();
+        } else {
+            window.addEventListener('load', function onLoad(){
+                loadApp();
+                window.removeEventListener('load', onLoad);
+            });
+        }
+    }
+})();
+
+function getHeaders(){
+    return {
+        'Content-Type': 'application/json',
+        ...(authToken ? {'X-Auth-Token': authToken} : {})
+    };
+}
+
+function showLoginScreen(){
+    document.getElementById('loginScreen').style.display = 'block';
+    document.getElementById('appScreen').classList.add('hidden');
+}
 
 // ===== УПРАВЛЕНИЕ СОГЛАСИЕМ =====
 function showConsentBlock() {
@@ -652,13 +703,16 @@ function ensureConsent() {
 
 // ===== ЗАГРУЗКА ПРИЛОЖЕНИЯ =====
 async function loadApp(){
-    if(!authToken){showLoginScreen();return;}
-    const headers=getHeaders();
-    try{
-        const resp=await apiRequest('/api/webapp/sources',{headers});
-        if(!resp)return;
-        if(!resp.ok){
-            if(resp.status === 403){
+    if (!authToken) {
+        showLoginScreen();
+        return;
+    }
+    const headers = getHeaders();
+    try {
+        const resp = await apiRequest('/api/webapp/sources', {headers});
+        if (!resp) return;
+        if (!resp.ok) {
+            if (resp.status === 403) {
                 isTestUser = (authToken === TEST_TOKEN);
                 window.TEST_MODE = isTestUser;
                 consentGiven = false;
@@ -667,18 +721,19 @@ async function loadApp(){
                 document.getElementById('paymentToggleBtn').style.display = 'none';
                 return;
             }
-            if(resp.status === 401){
-                document.getElementById('sourceListContainer').innerHTML='<div class="empty-state"><div class="empty-icon">🔒</div><h3>Ошибка авторизации</h3><p>Попробуйте обновить страницу или перелогиниться.</p></div>';
+            if (resp.status === 401) {
+                document.getElementById('sourceListContainer').innerHTML = '<div class="empty-state"><div class="empty-icon">🔒</div><h3>Ошибка авторизации</h3><p>Попробуйте обновить страницу или перелогиниться.</p></div>';
                 showAppContent();
                 return;
             }
-            const err=await resp.json();throw new Error(err.detail||'Ошибка загрузки');
+            const err = await resp.json();
+            throw new Error(err.detail || 'Ошибка загрузки');
         }
-        const data=await resp.json();
-        currentSources=data.sources||[];
-        currentLimit=data.limit||5;
+        const data = await resp.json();
+        currentSources = data.sources || [];
+        currentLimit = data.limit || 5;
         renderGroupedSources(currentSources);
-        document.getElementById('counter').textContent=currentSources.length;
+        document.getElementById('counter').textContent = currentSources.length;
         updateStatus(data);
 
         isTestUser = (authToken === TEST_TOKEN);
@@ -694,8 +749,8 @@ async function loadApp(){
             document.getElementById('quickButtons').style.display = 'flex';
             document.getElementById('paymentToggleBtn').style.display = 'block';
         }
-    }catch(err){
-        document.getElementById('sourceListContainer').innerHTML='<div class="empty-state"><div class="empty-icon">⚠️</div><h3>Ошибка загрузки</h3><p>'+err.message+'</p></div>';
+    } catch(err) {
+        document.getElementById('sourceListContainer').innerHTML = '<div class="empty-state"><div class="empty-icon">⚠️</div><h3>Ошибка загрузки</h3><p>'+err.message+'</p></div>';
         showAppContent();
     }
 }
@@ -858,6 +913,7 @@ return v;}
 function getSourceUrl(s){let u=s.value;if(s.type==='telegram')u='https://t.me/'+u.replace(/^@/,'');else if(s.type==='vk')u='https://vk.com/'+u.replace(/^@/,'');return u;}
 function askOpenLink(u){hapticFeedback();if(window.confirm('Открыть ссылку?\n\n'+u))window.open(u,'_blank');}
 
+// ===== НОВАЯ ЭТАЛОННАЯ ФУНКЦИЯ RENDERGROUPEDSOURCES =====
 function renderGroupedSources(sources) {
     const container = document.getElementById('sourceListContainer');
     if (!container) return;
@@ -870,13 +926,16 @@ function renderGroupedSources(sources) {
     const groups = {'rss':[], 'telegram':[], 'vk':[], 'max':[]};
     sorted.forEach(s => { if (groups[s.type]) groups[s.type].push(s); else groups[s.type] = [s]; });
     const order = ['telegram','vk','max','rss'];
+    let totalIndex = 0;
     order.forEach(type => {
         const items = groups[type];
         if (!items || items.length === 0) return;
+        const groupDiv = document.createElement('div');
+        groupDiv.className = 'source-group';
         const title = document.createElement('div');
         title.className = 'group-title';
         title.textContent = getTypeLabel(type);
-        container.appendChild(title);
+        groupDiv.appendChild(title);
         const list = document.createElement('div');
         list.className = 'source-list';
         items.forEach(s => {
@@ -886,6 +945,7 @@ function renderGroupedSources(sources) {
             const g = getIconGradient(s.type);
             const item = document.createElement('div');
             item.className = 'source-item';
+            item.dataset.index = totalIndex++;
             item.onclick = function() { askOpenLink(u); };
             const info = document.createElement('div');
             info.className = 'source-info';
@@ -906,8 +966,50 @@ function renderGroupedSources(sources) {
             item.appendChild(delBtn);
             list.appendChild(item);
         });
-        container.appendChild(list);
+        groupDiv.appendChild(list);
+        container.appendChild(groupDiv);
     });
+
+    if (sources.length > 5) {
+        const btn = document.createElement('button');
+        btn.className = 'change-time-btn';
+        btn.textContent = 'Ещё';
+        btn.style.marginTop = '12px';
+        btn.style.width = '100%';
+        btn.onclick = function() {
+            const groups = container.querySelectorAll('.source-group');
+            const hiddenItems = container.querySelectorAll('.source-item.hidden');
+            if (hiddenItems.length) {
+                groups.forEach(g => g.style.display = '');
+                container.querySelectorAll('.source-item.hidden').forEach(el => el.classList.remove('hidden'));
+                btn.textContent = 'Скрыть';
+            } else {
+                const allItems = container.querySelectorAll('.source-item');
+                allItems.forEach((el, idx) => {
+                    if (idx >= 5) el.classList.add('hidden');
+                });
+                groups.forEach(g => {
+                    const visibleItems = g.querySelectorAll('.source-item:not(.hidden)');
+                    if (visibleItems.length === 0) {
+                        g.style.display = 'none';
+                    }
+                });
+                btn.textContent = 'Ещё';
+            }
+        };
+        container.appendChild(btn);
+        const allItems = container.querySelectorAll('.source-item');
+        allItems.forEach((el, idx) => {
+            if (idx >= 5) el.classList.add('hidden');
+        });
+        const groups = container.querySelectorAll('.source-group');
+        groups.forEach(g => {
+            const visibleItems = g.querySelectorAll('.source-item:not(.hidden)');
+            if (visibleItems.length === 0) {
+                g.style.display = 'none';
+            }
+        });
+    }
 }
 
 function getIconGradient(t){switch(t){case'telegram':return'linear-gradient(290deg,#d235ff 0%,#a062ff 30%,#3088ff 66%,#61d8ff 100%)';case'vk':return'linear-gradient(290deg,#0d47a1 0%,#1565c0 30%,#1e88e5 66%,#64b5f6 100%)';case'rss':return'linear-gradient(290deg,#d84315 0%,#f57c00 30%,#f9a825 66%,#ffee58 100%)';default:return'linear-gradient(290deg,#d235ff 0%,#a062ff 30%,#3088ff 66%,#61d8ff 100%)';}}
@@ -1381,7 +1483,10 @@ async function startVkAuth(){
 
     const redirectUri = 'https://news.proid.studio/pwa';
     const scope = 'vkid.personal_info';
-    const authUrl = `https://id.vk.ru/authorize?client_id=${VK_APP_ID}&redirect_uri=${encodeURIComponent(redirectUri)}&response_type=code&scope=${scope}&state=${state}&code_challenge=${challenge}&code_challenge_method=S256&v=5.199`;
+    let authUrl = `https://id.vk.ru/authorize?client_id=${VK_APP_ID}&redirect_uri=${encodeURIComponent(redirectUri)}&response_type=code&scope=${scope}&state=${state}&code_challenge=${challenge}&code_challenge_method=S256&v=5.199`;
+    if (isFromExtension) {
+        authUrl += '&from_extension=1';
+    }
 
     const container = document.getElementById('loginScreen').querySelector('.auth-container');
     if (container) container.style.display = 'none';
@@ -1389,6 +1494,7 @@ async function startVkAuth(){
     if (w) w.innerHTML = '<p style="color: var(--text-secondary);">Перенаправление на авторизацию VK...</p>';
 
     window.open(authUrl, '_blank');
+    // Для VK поллинг не нужен, т.к. обработка через callback в родительской вкладке
 }
 
 // ----- MAX AUTH -----
@@ -1461,7 +1567,10 @@ function startYandexAuth() {
     const w = document.getElementById('widgetContainer');
     if (w) w.innerHTML = '<p style="color: var(--text-secondary);">Перенаправление на авторизацию Яндекс...</p>';
 
-    const authUrl = '/api/auth/yandex/login?state=' + encodeURIComponent(state);
+    let authUrl = '/api/auth/yandex/login?state=' + encodeURIComponent(state);
+    if (isFromExtension) {
+        authUrl += '&from_extension=1';
+    }
     console.log('🌐 Открываем URL:', authUrl);
     window.open(authUrl, '_blank');
 
@@ -1506,10 +1615,16 @@ function startYandexAuth() {
             if (data.token) {
                 localStorage.setItem('auth_token', data.token);
                 sessionStorage.setItem('vk_processed_' + state, 'true');
-                if (window.opener) {
+                // Если страница открыта из расширения – отправляем токен через postMessage и закрываем окно
+                if (isFromExtension && window.opener) {
+                    window.opener.postMessage({ type: 'auth_token', token: data.token }, '*');
                     window.close();
                 } else {
-                    location.reload();
+                    if (window.opener) {
+                        window.close();
+                    } else {
+                        location.reload();
+                    }
                 }
             } else {
                 throw new Error('Токен не получен');
@@ -1527,10 +1642,16 @@ function startYandexAuth() {
     const yandexToken = params.get('auth_token');
     if (yandexToken) {
         localStorage.setItem('auth_token', yandexToken);
-        if (window.opener) {
+        // Если страница открыта из расширения – отправляем токен через postMessage и закрываем окно
+        if (isFromExtension && window.opener) {
+            window.opener.postMessage({ type: 'auth_token', token: yandexToken }, '*');
             window.close();
         } else {
-            location.reload();
+            if (window.opener) {
+                window.close();
+            } else {
+                location.reload();
+            }
         }
     }
 })();
@@ -1833,11 +1954,6 @@ function formatDate(dateStr) {
     return d.toLocaleDateString('ru-RU', { day: 'numeric', month: 'short' });
 }
 
-function formatDate(dateStr) {
-    const d = new Date(dateStr + 'T00:00:00');
-    return d.toLocaleDateString('ru-RU', { day: 'numeric', month: 'short' });
-}
-
 async function fetchWeather() {
     const container = document.getElementById('weatherContent');
     const timeEl = document.getElementById('weatherUpdateTime');
@@ -1960,12 +2076,33 @@ if (document.getElementById('weatherBlock')) {
 })();
 // ===== КОНЕЦ БЛОКА =====
 
+// ===== ДОПОЛНИТЕЛЬНЫЙ ОБРАБОТЧИК ДЛЯ POSTMESSAGE (родительское окно) =====
+window.addEventListener('message', function(event) {
+    // Проверяем, что сообщение пришло с нашего же origin
+    if (event.origin !== window.location.origin) return;
+    const data = event.data;
+    if (data && data.type === 'yandex_auth' && data.token) {
+        console.log('📩 Токен получен через postMessage');
+        const token = data.token;
+        authToken = token;
+        localStorage.setItem('auth_token', token);
+        const msg = '✅ Вы успешно вошли! Чтобы получать уведомления необходимо открыть бота в Telegram, VK или MAX.';
+        if (typeof showNotification === 'function') {
+            showNotification(msg);
+        } else {
+            alert(msg);
+        }
+        loadApp();
+    }
+});
+// ===== КОНЕЦ ОБРАБОТЧИКА =====
+
 </script>
 
 <!-- ===== ФУТЕР ===== -->
 <div class="footer-wrapper">
     <div class="footer-inner">
-        <span>© 2026 «Мои AI Новости»</span>
+        <a href="/" style="text-decoration: none; color: inherit;">© 2026 «Мои AI Новости»</a>
         <span class="sep">|</span>
         <a href="/privacy" target="_blank">Политика</a>
         <span class="sep">|</span>

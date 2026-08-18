@@ -32,6 +32,10 @@
     <meta name="theme-color" content="#010715">
     <style>
         *{margin:0;padding:0;box-sizing:border-box;}
+html, body {
+    overflow-x: hidden;
+    max-width: 100%;
+}
         :root{--bg-color:#010715;--footer-bg:#111c40;--text:#fff;--text-secondary:#8a9bb5;--accent:#6c5ce7;--accent2:#3088ff;--card-bg:rgba(255,255,255,0.04);--border:rgba(255,255,255,0.06);--radius:20px;--shadow:0 12px 48px rgba(0,0,0,0.6);}
         html{scroll-behavior:smooth;}
         body{font-family:-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "Fira Sans", "Droid Sans", "Helvetica Neue", Arial, sans-serif;background:var(--footer-bg) linear-gradient(180deg,#020e33 0%,var(--bg-color) 25%,var(--bg-color) 84%,var(--footer-bg) 100%);color:var(--text);line-height:1.6;padding:0;min-height:100vh;-webkit-font-smoothing:antialiased;font-variant-ligatures:none;display:flex;flex-direction:column;}
@@ -102,8 +106,34 @@
         .delete-btn:hover{background:rgba(255,70,70,0.15);color:#ff6b6b;opacity:1;}
         .empty-state{text-align:center;padding:30px 20px;color:var(--text-secondary);background:var(--card-bg);border-radius:var(--radius);border:1px dashed var(--border);backdrop-filter:blur(4px);}
         .empty-icon{font-size:40px;margin-bottom:12px;opacity:.6;}
-        .footer-wrapper{width:100%;background:var(--footer-bg);border-top:1px solid var(--border);padding:12px 0;margin-top:auto;flex-shrink:0;}
-        .footer-inner{margin:0 auto;display:flex;flex-wrap:wrap;justify-content:center;align-items:center;gap:6px 16px;font-size:13px;color:var(--text-secondary);padding:0 20px;}
+
+        /* ===== ИСПРАВЛЕННЫЙ ФУТЕР ===== */
+        .footer-wrapper {
+            width: 100vw;
+            max-width: 100vw;
+            margin-left: calc(50% - 50vw);
+            margin-right: calc(50% - 50vw);
+            background: var(--footer-bg);
+            border-top: 1px solid var(--border);
+            padding: 12px 0;
+            flex-shrink: 0;
+            box-sizing: border-box;
+        }
+        .footer-inner {
+            width: 100%;
+            margin: 0 auto;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            align-items: center;
+            gap: 6px 16px;
+            font-size: 13px;
+            color: var(--text-secondary);
+            padding: 0 20px;
+            box-sizing: border-box;
+        }
+        /* ===== КОНЕЦ ИСПРАВЛЕНИЯ ===== */
+
         @media(min-width:600px){.footer-inner{flex-wrap:nowrap;gap:8px 20px;}}
         .footer-inner a{color:var(--text-secondary);text-decoration:none;transition:.2s;}
         .footer-inner a:hover{color:var(--text);}
@@ -983,17 +1013,16 @@ async function startVkAuth(){
             log('loadApp: all conditions satisfied, showing main app');
             showAppContent();
             renderGroupedSources(currentSources);
-        document.getElementById('counter').textContent=currentSources.length;
-        updateStatus(data);
+            document.getElementById('counter').textContent = currentSources.length;
+            updateStatus(data);
+            document.getElementById('quickButtons').style.display = 'flex';
+            document.getElementById('paymentToggleBtn').style.display = 'block';
+            document.getElementById('appContent').classList.remove('consent-pending');
 
-        isTestUser = (authToken === TEST_TOKEN);
-        consentGiven = data.consent_given === true;
-        window.TEST_MODE = isTestUser;
-
-        if (!consentGiven || isTestUser) {
-            showConsentBlock();
-            document.getElementById('quickButtons').style.display = 'none';
-            document.getElementById('paymentToggleBtn').style.display = 'none';
+        } catch(err) {
+            console.error(err);
+            document.getElementById('sourceListContainer').innerHTML = '<div class="empty-state"><div class="empty-icon">⚠️</div><h3>Ошибка загрузки</h3><p>'+err.message+'</p></div>';
+            showAppContent();
         }
     }
 
@@ -1082,7 +1111,106 @@ async function startVkAuth(){
     function getSourceUrl(s){ let u=s.value; if(s.type==='telegram')u='https://t.me/'+u.replace(/^@/,''); else if(s.type==='vk')u='https://vk.com/'+u.replace(/^@/,''); return u; }
     function askOpenLink(u){ hapticFeedback(); if(!tg){ if(confirm('Открыть ссылку?\n\n'+u))window.open(u,'_blank'); return; } if(tg.showPopup){ tg.showPopup({title:'Открыть ссылку?',message:u,buttons:[{id:'cancel',type:'cancel',text:'Отмена'},{id:'open',type:'default',text:'Открыть'}]},function(btnId){ if(btnId==='open'){ if(tg.openLink)tg.openLink(u); else window.open(u,'_blank'); } }); } else { if(confirm('Открыть ссылку?\n\n'+u)){ if(tg.openLink)tg.openLink(u); else window.open(u,'_blank'); } } }
     function getIconGradient(t){ switch(t){ case'telegram':return'linear-gradient(290deg,#d235ff 0%,#a062ff 30%,#3088ff 66%,#61d8ff 100%)'; case'vk':return'linear-gradient(290deg,#0d47a1 0%,#1565c0 30%,#1e88e5 66%,#64b5f6 100%)'; case'rss':return'linear-gradient(290deg,#d84315 0%,#f57c00 30%,#f9a825 66%,#ffee58 100%)'; default:return'linear-gradient(290deg,#d235ff 0%,#a062ff 30%,#3088ff 66%,#61d8ff 100%)'; } }
-    function renderGroupedSources(sources){ const container=document.getElementById('sourceListContainer'); if(!container)return; container.innerHTML=''; if(!sources||sources.length===0){ container.innerHTML='<div class="empty-state"><div class="empty-icon">📭</div><h3>Нет источников</h3><p>Добавьте свой первый источник</p></div>'; return; } const sorted=[...sources].sort((a,b)=>a.value.toLowerCase().localeCompare(b.value.toLowerCase())); const groups={'rss':[],'telegram':[],'vk':[],'max':[]}; sorted.forEach(s=>{ if(groups[s.type])groups[s.type].push(s); else groups[s.type]=[s]; }); const order=['telegram','vk','max','rss']; order.forEach(type=>{ const items=groups[type]; if(!items||items.length===0)return; const title=document.createElement('div'); title.className='group-title'; title.textContent=getTypeLabel(type); container.appendChild(title); const list=document.createElement('div'); list.className='source-list'; items.forEach(s=>{ const f=formatSourceValue(s); const v=truncate(f,50); const u=getSourceUrl(s); const g=getIconGradient(s.type); const item=document.createElement('div'); item.className='source-item'; item.onclick=function(){askOpenLink(u);}; const info=document.createElement('div'); info.className='source-info'; const icon=document.createElement('div'); icon.className='source-icon'; icon.style.background=g; const valueSpan=document.createElement('span'); valueSpan.className='source-value'; valueSpan.textContent=v; valueSpan.title=f; info.appendChild(icon); info.appendChild(valueSpan); const delBtn=document.createElement('button'); delBtn.className='delete-btn'; delBtn.textContent='✕'; delBtn.onclick=function(e){e.stopPropagation();hapticFeedback();confirmDelete(s.id);}; item.appendChild(info); item.appendChild(delBtn); list.appendChild(item); }); container.appendChild(list); }); }
+
+    // ===== НОВАЯ ФУНКЦИЯ С source-group и кнопкой "Ещё" =====
+    function renderGroupedSources(sources) {
+        const container = document.getElementById('sourceListContainer');
+        if (!container) return;
+        container.innerHTML = '';
+        if (!sources || sources.length === 0) {
+            container.innerHTML = '<div class="empty-state"><div class="empty-icon">📭</div><h3>Нет источников</h3><p>Добавьте свой первый источник</p></div>';
+            return;
+        }
+        const sorted = [...sources].sort((a,b) => a.value.toLowerCase().localeCompare(b.value.toLowerCase()));
+        const groups = {'rss':[], 'telegram':[], 'vk':[], 'max':[]};
+        sorted.forEach(s => { if (groups[s.type]) groups[s.type].push(s); else groups[s.type] = [s]; });
+        const order = ['telegram','vk','max','rss'];
+        let totalIndex = 0;
+        order.forEach(type => {
+            const items = groups[type];
+            if (!items || items.length === 0) return;
+            const groupDiv = document.createElement('div');
+            groupDiv.className = 'source-group';
+            const title = document.createElement('div');
+            title.className = 'group-title';
+            title.textContent = getTypeLabel(type);
+            groupDiv.appendChild(title);
+            const list = document.createElement('div');
+            list.className = 'source-list';
+            items.forEach(s => {
+                const f = formatSourceValue(s);
+                const v = truncate(f, 50);
+                const u = getSourceUrl(s);
+                const g = getIconGradient(s.type);
+                const item = document.createElement('div');
+                item.className = 'source-item';
+                item.dataset.index = totalIndex++;
+                item.onclick = function() { askOpenLink(u); };
+                const info = document.createElement('div');
+                info.className = 'source-info';
+                const icon = document.createElement('div');
+                icon.className = 'source-icon';
+                icon.style.background = g;
+                const valueSpan = document.createElement('span');
+                valueSpan.className = 'source-value';
+                valueSpan.textContent = v;
+                valueSpan.title = f;
+                info.appendChild(icon);
+                info.appendChild(valueSpan);
+                const delBtn = document.createElement('button');
+                delBtn.className = 'delete-btn';
+                delBtn.textContent = '✕';
+                delBtn.onclick = function(e) { e.stopPropagation(); hapticFeedback(); confirmDelete(s.id); };
+                item.appendChild(info);
+                item.appendChild(delBtn);
+                list.appendChild(item);
+            });
+            groupDiv.appendChild(list);
+            container.appendChild(groupDiv);
+        });
+
+        if (sources.length > 5) {
+            const btn = document.createElement('button');
+            btn.className = 'change-time-btn';
+            btn.textContent = 'Ещё';
+            btn.style.marginTop = '12px';
+            btn.style.width = '100%';
+            btn.onclick = function() {
+                const groups = container.querySelectorAll('.source-group');
+                const hiddenItems = container.querySelectorAll('.source-item.hidden');
+                if (hiddenItems.length) {
+                    groups.forEach(g => g.style.display = '');
+                    container.querySelectorAll('.source-item.hidden').forEach(el => el.classList.remove('hidden'));
+                    btn.textContent = 'Скрыть';
+                } else {
+                    const allItems = container.querySelectorAll('.source-item');
+                    allItems.forEach((el, idx) => {
+                        if (idx >= 5) el.classList.add('hidden');
+                    });
+                    groups.forEach(g => {
+                        const visibleItems = g.querySelectorAll('.source-item:not(.hidden)');
+                        if (visibleItems.length === 0) {
+                            g.style.display = 'none';
+                        }
+                    });
+                    btn.textContent = 'Ещё';
+                }
+            };
+            container.appendChild(btn);
+            const allItems = container.querySelectorAll('.source-item');
+            allItems.forEach((el, idx) => {
+                if (idx >= 5) el.classList.add('hidden');
+            });
+            const groups = container.querySelectorAll('.source-group');
+            groups.forEach(g => {
+                const visibleItems = g.querySelectorAll('.source-item:not(.hidden)');
+                if (visibleItems.length === 0) {
+                    g.style.display = 'none';
+                }
+            });
+        }
+    }
+
     function updateStatus(data){ document.getElementById('statusTariff').textContent=data.tariff_name||'—'; document.getElementById('statusSources').textContent=data.used||0; document.getElementById('statusLimit').textContent=data.limit||5; document.getElementById('statusAutoSend').textContent='✅'; document.getElementById('statusLastSent').textContent=data.last_sent||'—'; document.getElementById('statusExpires').textContent=data.expires_at||'—'; isPremium=data.is_premium||false; defaultSendHour=data.default_send_hour||18; currentSendTime=data.send_time||null; const display=currentSendTime?currentSendTime:(defaultSendHour.toString().padStart(2,'0')+':00'); document.getElementById('currentTimeDisplay').textContent=display+' MSK'; const btn=document.getElementById('changeTimeBtn'); const hint=document.getElementById('upgradeHint'); if(isPremium){ btn.style.display='inline-block'; btn.disabled=false; hint.style.display='none'; } else { btn.style.display='none'; hint.style.display='inline-block'; if(document.getElementById('timePicker').style.display!=='none')closeTimePicker(); } }
     function confirmDelete(id){ hapticFeedback(); const s=currentSources.find(s=>s.id===id); if(!s){ alert('Источник не найден'); return; } const f=formatSourceValue(s); if(tg&&tg.showPopup){ tg.showPopup({title:'Подтверждение',message:'Удалить источник?\n\n'+f,buttons:[{id:'cancel',type:'cancel',text:'Отмена'},{id:'delete',type:'destructive',text:'Удалить'}]},function(btnId){ if(btnId==='delete')deleteSource(id); }); } else { if(confirm('Удалить источник?\n\n'+f+'\n\nЭто действие нельзя отменить.'))deleteSource(id); } }
     async function deleteSource(id){ if(!ensureConsent())return; try{ const resp=await apiRequest('/api/webapp/delete',{method:'POST',headers:getHeaders(),body:JSON.stringify({source_id:id})}); if(!resp)return; if(!resp.ok){ const err=await resp.json(); alert('❌ Ошибка удаления: '+err.detail); return; } await loadApp(); alert('✅ Источник удалён'); } catch(err){ alert('❌ Ошибка: '+err.message); } }
