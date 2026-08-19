@@ -6,12 +6,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Моя АнтиСоцсеть (VK)</title>
     <script src="https://unpkg.com/@vkontakte/vk-bridge/dist/browser.min.js"></script>
-    <meta name="description" content="Войдите в Моя АнтиСоцсеть, чтобы получать ежедневные персонализированные дайджесты новостей из ваших любимых источников. Авторизация через VK.">
-    <meta name="keywords" content="AI новости, дайджест, персонализированные новости, VK бот, агрегатор новостей">
+    <meta name="description" content="Войдите в Моя АнтиСоцсеть, чтобы получать ежедневные персонализированные лентаы новостей из ваших любимых источников. Авторизация через VK.">
+    <meta name="keywords" content="AI новости, лента, персонализированные новости, VK бот, агрегатор новостей">
     <meta name="robots" content="index, follow">
     <link rel="canonical" href="https://news.proid.studio/pwa">
-    <meta property="og:title" content="Моя АнтиСоцсеть — персонализированный дайджест">
-    <meta property="og:description" content="Персонализированный AI-дайджест новостей. Войдите через VK.">
+    <meta property="og:title" content="Моя АнтиСоцсеть — персонализированный лента">
+    <meta property="og:description" content="Персонализированный AI-лента новостей. Войдите через VK.">
     <meta property="og:type" content="website">
     <meta property="og:url" content="https://news.proid.studio/pwa">
     <meta property="og:image" content="https://news.proid.studio/picture/LOGO.jpg">
@@ -20,8 +20,8 @@
     <meta property="og:locale" content="ru_RU">
     <meta property="og:site_name" content="Моя АнтиСоцсеть">
     <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" content="Моя АнтиСоцсеть — персонализированный дайджест">
-    <meta name="twitter:description" content="Персонализированный AI-дайджест новостей. Войдите через VK.">
+    <meta name="twitter:title" content="Моя АнтиСоцсеть — персонализированный лента">
+    <meta name="twitter:description" content="Персонализированный AI-лента новостей. Войдите через VK.">
     <meta name="twitter:image" content="https://news.proid.studio/picture/LOGO.jpg">
     <link rel="apple-touch-icon" href="/icons/apple-icon-180x180.png">
     <link rel="apple-touch-icon" sizes="152x152" href="/icons/apple-icon-152x152.png">
@@ -1049,14 +1049,14 @@
             if (!resp) return;
             if (!resp.ok) {
                 var err = await resp.json();
-                content.innerHTML = '<div style="color: #ff6b6b; text-align:center; padding:20px;">❌ Ошибка: ' + (err.detail || 'Не удалось загрузить дайджест') + '</div>';
+                content.innerHTML = '<div style="color: #ff6b6b; text-align:center; padding:20px;">❌ Ошибка: ' + (err.detail || 'Не удалось загрузить лента') + '</div>';
                 return;
             }
             var data = await resp.json();
             var digestHtml = data.digest;
 
-            if (!digestHtml || digestHtml.trim() === '' || digestHtml.includes('Дайджест ещё не формировался')) {
-                content.innerHTML = '<div style="text-align:center; padding:20px; color: var(--text-secondary);">📭 Дайджест ещё не формировался. Запустите сбор вручную или дождитесь автоматического.</div>';
+            if (!digestHtml || digestHtml.trim() === '' || digestHtml.includes('Лента ещё не формировался')) {
+                content.innerHTML = '<div style="text-align:center; padding:20px; color: var(--text-secondary);">📭 Лента ещё не формировался. Запустите сбор вручную или дождитесь автоматического.</div>';
                 return;
             }
 
@@ -1081,36 +1081,32 @@
                 while (lines.length > 0 && lines[lines.length - 1].trim() === '') lines.pop();
                 var cleanedBlock = lines.join('\n');
 
-                // ===== ЭТАЛОННАЯ ОБРАБОТКА СУММАРИЗАЦИЙ =====
-                var isSummary = cleanedBlock.indexOf('<b>Обсуждения в ') !== -1;
-                if (isSummary) {
-                    var summaryStart = cleanedBlock.indexOf('<b>Обсуждения в ');
-                    if (summaryStart !== -1) {
-                        var closeBpos = cleanedBlock.indexOf('</b>', summaryStart);
-                        if (closeBpos !== -1) {
-                            var linkStart = cleanedBlock.indexOf('<a href', closeBpos);
-                            if (linkStart === -1) linkStart = cleanedBlock.length;
-                            var before = cleanedBlock.slice(0, closeBpos + 4);
-                            var body = cleanedBlock.slice(closeBpos + 4, linkStart);
-                            var after = cleanedBlock.slice(linkStart);
-                            body = body.replace(/^\s*\n+/, '').replace(/\n+\s*$/, '');
-                            after = after.replace(/^\s*\n+/, '');
-                            var parts = [];
-                            if (body.includes('\n')) {
-                                parts = body.split(/\n\s*-\s+/).filter(function(p){ return p.trim() !== ''; });
-                            } else {
-                                parts = body.split(/\s*-\s+/).filter(function(p){ return p.trim() !== ''; });
-                            }
-                            var newBody;
-                            if (parts.length > 1) {
-                                newBody = parts.map(function(p){ return '- ' + p.trim(); }).join('\n\n');
-                            } else {
-                                newBody = body.trim();
-                            }
-                            cleanedBlock = before + '\n\n' + newBody + '\n' + after;
-                        }
-                    }
-                }
+// ===== ЭТАЛОННАЯ ОБРАБОТКА СУММАРИЗАЦИЙ =====
+var isSummary = cleanedBlock.indexOf('<b>Обсуждения в ') !== -1;
+if (isSummary) {
+    var summaryStart = cleanedBlock.indexOf('<b>Обсуждения в ');
+    if (summaryStart !== -1) {
+        var closeBpos = cleanedBlock.indexOf('</b>', summaryStart);
+        if (closeBpos !== -1) {
+            var linkStart = cleanedBlock.indexOf('<a href', closeBpos);
+            if (linkStart === -1) linkStart = cleanedBlock.length;
+            var before = cleanedBlock.slice(0, closeBpos + 4);
+            var body = cleanedBlock.slice(closeBpos + 4, linkStart);
+            var after = cleanedBlock.slice(linkStart);
+            body = body.replace(/^\s*\n+/, '').replace(/\n+\s*$/, '');
+            after = after.replace(/^\s*\n+/, '');
+            // ЭТАЛОН: разбиение только по "- " (дефис + пробел) – не ломает слова с дефисами
+            var parts = body.split("- ").filter(function(p) { return p.trim() !== ''; });
+            var newBody;
+            if (parts.length > 1) {
+                newBody = parts.map(function(p) { return '- ' + p.trim(); }).join('\n\n');
+            } else {
+                newBody = body.trim();
+            }
+            cleanedBlock = before + '\n\n' + newBody + '\n' + after;
+        }
+    }
+}
 
                 if (cleanedBlock.includes('</b>')) {
                     cleanedBlock = cleanedBlock.replace(/(<\/b>)(?!\n)/, '$1\n');

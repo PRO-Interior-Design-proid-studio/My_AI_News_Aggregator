@@ -1181,7 +1181,7 @@ async function toggleDigest() {
         if (!resp.ok) {
             const err = await resp.json();
             console.error('❌ Ошибка ответа:', err);
-            content.innerHTML = `<div style="color: #ff6b6b; text-align:center; padding:20px;">❌ Ошибка: ${err.detail || 'Не удалось загрузить дайджест'}</div>`;
+            content.innerHTML = `<div style="color: #ff6b6b; text-align:center; padding:20px;">❌ Ошибка: ${err.detail || 'Не удалось загрузить лента'}</div>`;
             return;
         }
         const data = await resp.json();
@@ -1190,8 +1190,8 @@ async function toggleDigest() {
         let digestHtml = data.digest;
         console.log('📄 digestHtml длина:', digestHtml ? digestHtml.length : 0);
 
-        if (!digestHtml || digestHtml.trim() === '' || digestHtml.includes('Дайджест ещё не формировался')) {
-            console.log('📭 Дайджест пуст или ещё не формировался');
+        if (!digestHtml || digestHtml.trim() === '' || digestHtml.includes('Лента ещё не формировался')) {
+            console.log('📭 Лента пуст или ещё не формировался');
             content.innerHTML = `<div style="text-align:center; padding:20px; color: var(--text-secondary);">📭 Добавьте источники и дождитесь автоматического сбора новостей.</div>`;
             return;
         }
