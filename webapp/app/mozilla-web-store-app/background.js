@@ -27,4 +27,4 @@ browserAPI.runtime.onMessage.addListener((message, sender, sendResponse) => {
   return false;
 });
 
-console.log('✅ Мои AI Новости: расширение загружено (открывает в текущей вкладке)');
+console.log('✅ Моя АнтиСоцсеть: расширение загружено (открывает в текущей вкладке)');
