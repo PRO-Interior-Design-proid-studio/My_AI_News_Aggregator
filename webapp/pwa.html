@@ -4,13 +4,13 @@
 <link rel="icon" href="/icons/favicon.ico">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>Моя АнтиСоцсеть — персонализированный дайджест с искусственным интеллектом</title>
-<meta name="description" content="Войдите в Моя АнтиСоцсеть, чтобы получать ежедневные персонализированные дайджесты новостей из ваших любимых источников. Авторизация через VK, MAX или Яндекс ID.">
-<meta name="keywords" content="AI новости, дайджест, персонализированные новости, VK, MAX, Яндекс ID, агрегатор новостей">
+<title>Моя АнтиСоцсеть — персонализированный лента с искусственным интеллектом</title>
+<meta name="description" content="Войдите в Моя АнтиСоцсеть, чтобы получать ежедневные персонализированные лентаы новостей из ваших любимых источников. Авторизация через VK, MAX или Яндекс ID.">
+<meta name="keywords" content="AI новости, лента, персонализированные новости, VK, MAX, Яндекс ID, агрегатор новостей">
 <meta name="robots" content="index, follow">
 <link rel="canonical" href="https://news.proid.studio/pwa">
 <meta property="og:title" content="Вход в Моя АнтиСоцсеть">
-<meta property="og:description" content="Персонализированный AI-дайджест новостей. Войдите через VK, MAX или Яндекс ID.">
+<meta property="og:description" content="Персонализированный AI-лента новостей. Войдите через VK, MAX или Яндекс ID.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://news.proid.studio/pwa">
 <meta property="og:image" content="https://news.proid.studio/picture/LOGO.jpg">
@@ -20,7 +20,7 @@
 <meta property="og:site_name" content="Моя АнтиСоцсеть">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="Вход в Моя АнтиСоцсеть">
-<meta name="twitter:description" content="Персонализированный AI-дайджест новостей. Войдите через VK, MAX или Яндекс ID.">
+<meta name="twitter:description" content="Персонализированный AI-лента новостей. Войдите через VK, MAX или Яндекс ID.">
 <meta name="twitter:image" content="https://news.proid.studio/picture/LOGO.jpg">
 <script type="application/ld+json">
 {
@@ -28,7 +28,7 @@
 "@type": "WebApplication",
 "name": "Моя АнтиСоцсеть",
 "url": "https://news.proid.studio/",
-"description": "Персонализированный AI-дайджест новостей из выбранных источников.",
+"description": "Персонализированный AI-лента новостей из выбранных источников.",
 "applicationCategory": "NewsAggregator",
 "operatingSystem": "All",
 "browserRequirements": "Modern browser",
@@ -1708,7 +1708,7 @@ async function toggleDigest() {
         if (!resp.ok) {
             const err = await resp.json();
             console.error('❌ Ошибка ответа:', err);
-            content.innerHTML = `<div style="color: #ff6b6b; text-align:center; padding:20px;">❌ Ошибка: ${err.detail || 'Не удалось загрузить дайджест'}</div>`;
+            content.innerHTML = `<div style="color: #ff6b6b; text-align:center; padding:20px;">❌ Ошибка: ${err.detail || 'Не удалось загрузить лента'}</div>`;
             return;
         }
         const data = await resp.json();
@@ -1717,8 +1717,8 @@ async function toggleDigest() {
         let digestHtml = data.digest;
         console.log('📄 digestHtml длина:', digestHtml ? digestHtml.length : 0);
 
-        if (!digestHtml || digestHtml.trim() === '' || digestHtml.includes('Дайджест ещё не формировался')) {
-            console.log('📭 Дайджест пуст или ещё не формировался');
+        if (!digestHtml || digestHtml.trim() === '' || digestHtml.includes('Лента ещё не формировался')) {
+            console.log('📭 Лента пуст или ещё не формировался');
             content.innerHTML = `<div style="text-align:center; padding:20px; color: var(--text-secondary);">📭 Добавьте источники и дождитесь автоматического сбора новостей.</div>`;
             return;
         }
@@ -1757,7 +1757,8 @@ async function toggleDigest() {
                         let after = cleanedBlock.slice(linkStart);
                         body = body.replace(/^\s*\n+/, '').replace(/\n+\s*$/, '');
                         after = after.replace(/^\s*\n+/, '');
-                        let parts = body.split(/\s*-\s*/).filter(p => p.trim() !== '');
+// ЭТАЛОН: разбиение только по "- " (дефис + пробел) – не ломает слова с дефисами
+let parts = body.split("- ").filter(p => p.trim() !== '');
                         let newBody;
                         if (parts.length > 1) {
                             newBody = parts.map(p => '- ' + p.trim()).join('\n\n');

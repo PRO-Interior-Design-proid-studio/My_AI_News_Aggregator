@@ -6,11 +6,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Моя АнтиСоцсеть (Telegram)</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
-    <meta name="description" content="Войдите в Моя АнтиСоцсеть, чтобы получать ежедневные персонализированные дайджесты новостей из ваших любимых источников. Авторизация через VK, Яндекс или MAX.">
+    <meta name="description" content="Войдите в Моя АнтиСоцсеть, чтобы получать ежедневные персонализированные лентаы новостей из ваших любимых источников. Авторизация через VK, Яндекс или MAX.">
     <meta name="robots" content="index, follow">
     <link rel="canonical" href="https://news.proid.studio/pwa">
-    <meta property="og:title" content="Моя АнтиСоцсеть — персонализированный дайджест">
-    <meta property="og:description" content="Персонализированный AI-дайджест новостей. Войдите через VK, Яндекс или MAX.">
+    <meta property="og:title" content="Моя АнтиСоцсеть — персонализированный лента">
+    <meta property="og:description" content="Персонализированный AI-лента новостей. Войдите через VK, Яндекс или MAX.">
     <meta property="og:type" content="website">
     <meta property="og:url" content="https://news.proid.studio/pwa">
     <meta property="og:image" content="https://news.proid.studio/picture/LOGO.jpg">
@@ -19,8 +19,8 @@
     <meta property="og:locale" content="ru_RU">
     <meta property="og:site_name" content="Моя АнтиСоцсеть">
     <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" content="Моя АнтиСоцсеть — персонализированный дайджест">
-    <meta name="twitter:description" content="Персонализированный AI-дайджест новостей. Войдите через VK, Яндекс или MAX.">
+    <meta name="twitter:title" content="Моя АнтиСоцсеть — персонализированный лента">
+    <meta name="twitter:description" content="Персонализированный AI-лента новостей. Войдите через VK, Яндекс или MAX.">
     <meta name="twitter:image" content="https://news.proid.studio/picture/LOGO.jpg">
     <link rel="apple-touch-icon" href="/icons/apple-icon-180x180.png">
     <link rel="apple-touch-icon" sizes="152x152" href="/icons/apple-icon-152x152.png">
@@ -1251,7 +1251,7 @@ async function startVkAuth(){
     async function setTime(hour){ if(!ensureConsent())return; hapticFeedback(); try{ const resp=await apiRequest('/api/webapp/set_time',{method:'POST',headers:getHeaders(),body:JSON.stringify({hour:hour})}); if(!resp)return; if(!resp.ok){ const err=await resp.json(); alert('❌ Ошибка: '+err.detail); return; } const data=await resp.json(); currentSendTime=data.send_time; document.getElementById('currentTimeDisplay').textContent=currentSendTime+' MSK'; document.querySelectorAll('#timePickerGrid button').forEach((btn,idx)=>{ btn.classList.toggle('selected',idx===hour); }); alert('✅ Время установлено на '+currentSendTime); closeTimePicker(); await loadApp(); } catch(err){ alert('❌ Ошибка: '+err.message); } }
     function toggleTariffs(){ if(!ensureConsent())return; hapticFeedback(); document.getElementById('tariffBlock').classList.toggle('visible'); }
     async function handlePayment(tariffKey){ if(!ensureConsent())return; hapticFeedback(); if(!authToken){ alert('❌ Вы не авторизованы. Пожалуйста, войдите.'); return; } try{ const resp=await apiRequest('/api/payment/create-invoice',{method:'POST',headers:getHeaders(),body:JSON.stringify({tariff:tariffKey})}); if(!resp)return; if(!resp.ok){ const err=await resp.json(); alert('❌ Ошибка: '+err.detail); return; } const data=await resp.json(); if(data.payment_url){ window.open(data.payment_url,'_blank'); alert('🔗 Переход к оплате...'); } else { alert('❌ Не удалось получить ссылку на оплату'); } } catch(err){ alert('❌ Ошибка: '+err.message); } }
-    async function toggleDigest(){ if(!ensureConsent())return; const container=document.getElementById('digestContainer'); const content=document.getElementById('digestContent'); if(digestVisible){ container.style.display='none'; digestVisible=false; return; } container.style.display='block'; digestVisible=true; content.innerHTML='<div style="text-align:center; padding:20px; color: var(--text-secondary);">⏳ Загрузка...</div>'; try{ const resp=await apiRequest('/api/webapp/digest',{headers:getHeaders()}); if(!resp)return; if(!resp.ok){ const err=await resp.json(); content.innerHTML='<div style="color: #ff6b6b; text-align:center; padding:20px;">❌ Ошибка: '+(err.detail||'Не удалось загрузить дайджест')+'</div>'; return; } const data=await resp.json(); let digestHtml=data.digest; if(!digestHtml||digestHtml.trim()===''||digestHtml.includes('Дайджест ещё не формировался')){ content.innerHTML='<div style="text-align:center; padding:20px; color: var(--text-secondary);">📭 Дайджест ещё не формировался. Запустите сбор вручную или дождитесь автоматического.</div>'; return; } digestHtml=digestHtml.replace(/[\x00-\x1F\x7F-\x9F\u200B\u200C\u200D\uFEFF\u2028\u2029\r]/g,''); let blocks=digestHtml.split(/(?=\n- <b>)/).filter(b=>b.trim().length>0); if(blocks.length<=1){ blocks=digestHtml.split(/(?=\n-)/).filter(b=>b.trim().length>0); } if(blocks.length<=1){ blocks=digestHtml.split(/(?=- <b>)/).filter(b=>b.trim().length>0); if(blocks[0]&&blocks[0].trim()==='')blocks.shift(); } blocks=blocks.map(b=>b.startsWith('\n')?b.slice(1):b); let html=''; for(let block of blocks){ let lines=block.split('\n'); lines=lines.map(line=>line.replace(/^[\s\u00A0]+/,'')); while(lines.length>0&&lines[0].trim()==='')lines.shift(); while(lines.length>0&&lines[lines.length-1].trim()==='')lines.pop(); let cleanedBlock=lines.join('\n');
+    async function toggleDigest(){ if(!ensureConsent())return; const container=document.getElementById('digestContainer'); const content=document.getElementById('digestContent'); if(digestVisible){ container.style.display='none'; digestVisible=false; return; } container.style.display='block'; digestVisible=true; content.innerHTML='<div style="text-align:center; padding:20px; color: var(--text-secondary);">⏳ Загрузка...</div>'; try{ const resp=await apiRequest('/api/webapp/digest',{headers:getHeaders()}); if(!resp)return; if(!resp.ok){ const err=await resp.json(); content.innerHTML='<div style="color: #ff6b6b; text-align:center; padding:20px;">❌ Ошибка: '+(err.detail||'Не удалось загрузить лента')+'</div>'; return; } const data=await resp.json(); let digestHtml=data.digest; if(!digestHtml||digestHtml.trim()===''||digestHtml.includes('Лента ещё не формировался')){ content.innerHTML='<div style="text-align:center; padding:20px; color: var(--text-secondary);">📭 Лента ещё не формировался. Запустите сбор вручную или дождитесь автоматического.</div>'; return; } digestHtml=digestHtml.replace(/[\x00-\x1F\x7F-\x9F\u200B\u200C\u200D\uFEFF\u2028\u2029\r]/g,''); let blocks=digestHtml.split(/(?=\n- <b>)/).filter(b=>b.trim().length>0); if(blocks.length<=1){ blocks=digestHtml.split(/(?=\n-)/).filter(b=>b.trim().length>0); } if(blocks.length<=1){ blocks=digestHtml.split(/(?=- <b>)/).filter(b=>b.trim().length>0); if(blocks[0]&&blocks[0].trim()==='')blocks.shift(); } blocks=blocks.map(b=>b.startsWith('\n')?b.slice(1):b); let html=''; for(let block of blocks){ let lines=block.split('\n'); lines=lines.map(line=>line.replace(/^[\s\u00A0]+/,'')); while(lines.length>0&&lines[0].trim()==='')lines.shift(); while(lines.length>0&&lines[lines.length-1].trim()==='')lines.pop(); let cleanedBlock=lines.join('\n');
             // Обработка суммаризаций (эталон)
             let isSummary = cleanedBlock.indexOf('<b>Обсуждения в ') !== -1;
             if (isSummary) {
@@ -1266,12 +1266,8 @@ async function startVkAuth(){
                         let after = cleanedBlock.slice(linkStart);
                         body = body.replace(/^\s*\n+/, '').replace(/\n+\s*$/, '');
                         after = after.replace(/^\s*\n+/, '');
-                        let parts = [];
-                        if (body.includes('\n')) {
-                            parts = body.split(/\n\s*-\s+/).filter(p => p.trim() !== '');
-                        } else {
-                            parts = body.split(/\s*-\s+/).filter(p => p.trim() !== '');
-                        }
+// ЭТАЛОН: разбиение только по "- " (дефис + пробел) – не ломает слова с дефисами
+let parts = body.split("- ").filter(p => p.trim() !== '');
                         let newBody;
                         if (parts.length > 1) {
                             newBody = parts.map(p => '- ' + p.trim()).join('\n\n');
@@ -1343,7 +1339,7 @@ async function startVkAuth(){
                         headers: { 'X-Auth-Token': localStorage.getItem('auth_token') }
                     });
                     if (resp.ok) {
-                        alert('Согласие отозвано. Вы больше не будете получать дайджесты в Telegram.');
+                        alert('Согласие отозвано. Вы больше не будете получать лентаы в Telegram.');
                         // Перезагружаем страницу, чтобы обновить состояние
                         window.location.reload();
                     } else {
