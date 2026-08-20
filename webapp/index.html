@@ -1,16 +1,25 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-    <link rel="icon" href="/icons/favicon.ico">
+    <!-- ===== БАЗОВЫЕ МЕТА-ТЕГИ ===== -->
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Моя АнтиСоцсеть (Telegram)</title>
-    <script src="https://telegram.org/js/telegram-web-app.js"></script>
-    <meta name="description" content="Войдите в Моя АнтиСоцсеть, чтобы получать ежедневные персонализированные лентаы новостей из ваших любимых источников. Авторизация через VK, Яндекс или MAX.">
-    <meta name="robots" content="index, follow">
+
+    <!-- ===== TITLE (для поиска и соцсетей) ===== -->
+    <title>Моя АнтиСоцсеть — персонализированный новостной агрегатор в Telegram</title>
+
+    <!-- ===== SEO: ЗАПРЕТ ИНДЕКСАЦИИ (SPA) ===== -->
+    <meta name="robots" content="noindex, nofollow">
+
+    <!-- ===== КАНОНИЧЕСКАЯ ССЫЛКА → PWA ===== -->
     <link rel="canonical" href="https://news.proid.studio/pwa">
-    <meta property="og:title" content="Моя АнтиСоцсеть — персонализированный лента">
-    <meta property="og:description" content="Персонализированный AI-лента новостей. Войдите через VK, Яндекс или MAX.">
+
+    <!-- ===== ОПИСАНИЕ ДЛЯ ПОИСКОВИКОВ И СОЦСЕТЕЙ ===== -->
+    <meta name="description" content="Персонализированная AI-лента новостей. Войдите через VK, Яндекс или MAX и получайте ежедневную подборку из выбранных источников — без рекламы и спама.">
+
+    <!-- ===== OPEN GRAPH (Facebook, VK, Telegram) ===== -->
+    <meta property="og:title" content="Моя АнтиСоцсеть — персонализированный новостной агрегатор">
+    <meta property="og:description" content="Персонализированная AI-лента новостей. Войдите через VK, Яндекс или MAX.">
     <meta property="og:type" content="website">
     <meta property="og:url" content="https://news.proid.studio/pwa">
     <meta property="og:image" content="https://news.proid.studio/picture/LOGO.jpg">
@@ -18,19 +27,56 @@
     <meta property="og:image:height" content="630">
     <meta property="og:locale" content="ru_RU">
     <meta property="og:site_name" content="Моя АнтиСоцсеть">
+
+    <!-- ===== TWITTER CARD ===== -->
     <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" content="Моя АнтиСоцсеть — персонализированный лента">
-    <meta name="twitter:description" content="Персонализированный AI-лента новостей. Войдите через VK, Яндекс или MAX.">
+    <meta name="twitter:title" content="Моя АнтиСоцсеть — персонализированный новостной агрегатор">
+    <meta name="twitter:description" content="Персонализированная AI-лента новостей. Войдите через VK, Яндекс или MAX.">
     <meta name="twitter:image" content="https://news.proid.studio/picture/LOGO.jpg">
+
+    <!-- ===== ИКОНКИ ===== -->
+    <link rel="icon" href="/icons/favicon.ico">
     <link rel="apple-touch-icon" href="/icons/apple-icon-180x180.png">
     <link rel="apple-touch-icon" sizes="152x152" href="/icons/apple-icon-152x152.png">
     <link rel="apple-touch-icon" sizes="144x144" href="/icons/apple-icon-144x144.png">
     <link rel="apple-touch-icon" sizes="120x120" href="/icons/apple-icon-120x120.png">
     <link rel="apple-touch-icon" sizes="114x114" href="/icons/apple-icon-114x114.png">
+
+    <!-- ===== PWA / ТЕМА ===== -->
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="theme-color" content="#010715">
-    <style>
+
+    <!-- ===== СТРУКТУРИРОВАННЫЕ ДАННЫЕ (JSON-LD) ===== -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebApplication",
+      "name": "Моя АнтиСоцсеть",
+      "url": "https://news.proid.studio/pwa",
+      "description": "Персонализированная AI-лента новостей из выбранных источников (Telegram, VK, RSS, YouTube).",
+      "applicationCategory": "NewsAggregator",
+      "operatingSystem": "All",
+      "browserRequirements": "Современный браузер",
+      "offers": {
+        "@type": "Offer",
+        "price": "0",
+        "priceCurrency": "RUB"
+      },
+      "author": {
+        "@type": "Person",
+        "name": "Ерыков Артём Андреевич",
+        "url": "https://proid.studio/Erykov-Artem-Andreevich"
+      }
+    }
+    </script>
+
+    <!-- ===== TELEGRAM WEBAPP SDK ===== -->
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+
+    <!-- ===== СТИЛИ (ВСЕ ВАШИ, БЕЗ ИЗМЕНЕНИЙ) ===== -->
+</head>
+<style>
         *{margin:0;padding:0;box-sizing:border-box;}
 html, body {
     overflow-x: hidden;
@@ -1251,7 +1297,7 @@ async function startVkAuth(){
     async function setTime(hour){ if(!ensureConsent())return; hapticFeedback(); try{ const resp=await apiRequest('/api/webapp/set_time',{method:'POST',headers:getHeaders(),body:JSON.stringify({hour:hour})}); if(!resp)return; if(!resp.ok){ const err=await resp.json(); alert('❌ Ошибка: '+err.detail); return; } const data=await resp.json(); currentSendTime=data.send_time; document.getElementById('currentTimeDisplay').textContent=currentSendTime+' MSK'; document.querySelectorAll('#timePickerGrid button').forEach((btn,idx)=>{ btn.classList.toggle('selected',idx===hour); }); alert('✅ Время установлено на '+currentSendTime); closeTimePicker(); await loadApp(); } catch(err){ alert('❌ Ошибка: '+err.message); } }
     function toggleTariffs(){ if(!ensureConsent())return; hapticFeedback(); document.getElementById('tariffBlock').classList.toggle('visible'); }
     async function handlePayment(tariffKey){ if(!ensureConsent())return; hapticFeedback(); if(!authToken){ alert('❌ Вы не авторизованы. Пожалуйста, войдите.'); return; } try{ const resp=await apiRequest('/api/payment/create-invoice',{method:'POST',headers:getHeaders(),body:JSON.stringify({tariff:tariffKey})}); if(!resp)return; if(!resp.ok){ const err=await resp.json(); alert('❌ Ошибка: '+err.detail); return; } const data=await resp.json(); if(data.payment_url){ window.open(data.payment_url,'_blank'); alert('🔗 Переход к оплате...'); } else { alert('❌ Не удалось получить ссылку на оплату'); } } catch(err){ alert('❌ Ошибка: '+err.message); } }
-    async function toggleDigest(){ if(!ensureConsent())return; const container=document.getElementById('digestContainer'); const content=document.getElementById('digestContent'); if(digestVisible){ container.style.display='none'; digestVisible=false; return; } container.style.display='block'; digestVisible=true; content.innerHTML='<div style="text-align:center; padding:20px; color: var(--text-secondary);">⏳ Загрузка...</div>'; try{ const resp=await apiRequest('/api/webapp/digest',{headers:getHeaders()}); if(!resp)return; if(!resp.ok){ const err=await resp.json(); content.innerHTML='<div style="color: #ff6b6b; text-align:center; padding:20px;">❌ Ошибка: '+(err.detail||'Не удалось загрузить лента')+'</div>'; return; } const data=await resp.json(); let digestHtml=data.digest; if(!digestHtml||digestHtml.trim()===''||digestHtml.includes('Лента ещё не формировался')){ content.innerHTML='<div style="text-align:center; padding:20px; color: var(--text-secondary);">📭 Лента ещё не формировался. Запустите сбор вручную или дождитесь автоматического.</div>'; return; } digestHtml=digestHtml.replace(/[\x00-\x1F\x7F-\x9F\u200B\u200C\u200D\uFEFF\u2028\u2029\r]/g,''); let blocks=digestHtml.split(/(?=\n- <b>)/).filter(b=>b.trim().length>0); if(blocks.length<=1){ blocks=digestHtml.split(/(?=\n-)/).filter(b=>b.trim().length>0); } if(blocks.length<=1){ blocks=digestHtml.split(/(?=- <b>)/).filter(b=>b.trim().length>0); if(blocks[0]&&blocks[0].trim()==='')blocks.shift(); } blocks=blocks.map(b=>b.startsWith('\n')?b.slice(1):b); let html=''; for(let block of blocks){ let lines=block.split('\n'); lines=lines.map(line=>line.replace(/^[\s\u00A0]+/,'')); while(lines.length>0&&lines[0].trim()==='')lines.shift(); while(lines.length>0&&lines[lines.length-1].trim()==='')lines.pop(); let cleanedBlock=lines.join('\n');
+    async function toggleDigest(){ if(!ensureConsent())return; const container=document.getElementById('digestContainer'); const content=document.getElementById('digestContent'); if(digestVisible){ container.style.display='none'; digestVisible=false; return; } container.style.display='block'; digestVisible=true; content.innerHTML='<div style="text-align:center; padding:20px; color: var(--text-secondary);">⏳ Загрузка...</div>'; try{ const resp=await apiRequest('/api/webapp/digest',{headers:getHeaders()}); if(!resp)return; if(!resp.ok){ const err=await resp.json(); content.innerHTML='<div style="color: #ff6b6b; text-align:center; padding:20px;">❌ Ошибка: '+(err.detail||'Не удалось загрузить ленту')+'</div>'; return; } const data=await resp.json(); let digestHtml=data.digest; if(!digestHtml||digestHtml.trim()===''||digestHtml.includes('Лента ещё не формировалась')){ content.innerHTML='<div style="text-align:center; padding:20px; color: var(--text-secondary);">📭 Лента ещё не формировалась. Запустите сбор вручную или дождитесь автоматического.</div>'; return; } digestHtml=digestHtml.replace(/[\x00-\x1F\x7F-\x9F\u200B\u200C\u200D\uFEFF\u2028\u2029\r]/g,''); let blocks=digestHtml.split(/(?=\n- <b>)/).filter(b=>b.trim().length>0); if(blocks.length<=1){ blocks=digestHtml.split(/(?=\n-)/).filter(b=>b.trim().length>0); } if(blocks.length<=1){ blocks=digestHtml.split(/(?=- <b>)/).filter(b=>b.trim().length>0); if(blocks[0]&&blocks[0].trim()==='')blocks.shift(); } blocks=blocks.map(b=>b.startsWith('\n')?b.slice(1):b); let html=''; for(let block of blocks){ let lines=block.split('\n'); lines=lines.map(line=>line.replace(/^[\s\u00A0]+/,'')); while(lines.length>0&&lines[0].trim()==='')lines.shift(); while(lines.length>0&&lines[lines.length-1].trim()==='')lines.pop(); let cleanedBlock=lines.join('\n');
             // Обработка суммаризаций (эталон)
             let isSummary = cleanedBlock.indexOf('<b>Обсуждения в ') !== -1;
             if (isSummary) {
@@ -1339,7 +1385,7 @@ let parts = body.split("- ").filter(p => p.trim() !== '');
                         headers: { 'X-Auth-Token': localStorage.getItem('auth_token') }
                     });
                     if (resp.ok) {
-                        alert('Согласие отозвано. Вы больше не будете получать лентаы в Telegram.');
+                        alert('Согласие отозвано. Вы больше не будете получать ленты в Telegram.');
                         // Перезагружаем страницу, чтобы обновить состояние
                         window.location.reload();
                     } else {

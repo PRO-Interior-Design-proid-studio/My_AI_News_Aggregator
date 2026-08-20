@@ -1,7 +1,7 @@
 {
   "name": "Моя АнтиСоцсеть",
   "short_name": "AI News",
-  "description": "Ежедневные персонализированные лентаы новостей с искусственным интеллектом. Собирайте новости из Telegram, VK, RSS, MAX, YouTube, GitHub, Reddit и других источников. Без рекламы и шума — только то, что вы выбрали.",
+  "description": "Ежедневные персонализированные ленты новостей с искусственным интеллектом. Собирайте новости из Telegram, VK, RSS, MAX, YouTube, GitHub, Reddit и других источников. Без рекламы и шума — только то, что вы выбрали.",
   "start_url": "/pwa",
   "display": "standalone",
   "background_color": "#010715",
@@ -58,31 +58,31 @@
   },
   "screenshots": [
     {
-      "src": "/picture/1.png",
-      "sizes": "853x1844",
+      "src": "/picture/011.jpg",
+      "sizes": "1080x2342",
       "type": "image/png",
       "form_factor": "narrow"
     },
     {
-      "src": "/picture/02.jpg",
+      "src": "/picture/022.jpg",
       "sizes": "1080x2342",
       "type": "image/jpeg",
       "form_factor": "narrow"
     },
     {
-      "src": "/picture/03.jpg",
+      "src": "/picture/033.jpg",
       "sizes": "1080x2342",
       "type": "image/jpeg",
       "form_factor": "narrow"
     },
     {
-      "src": "/picture/04.jpg",
+      "src": "/picture/044.jpg",
       "sizes": "1080x2342",
       "type": "image/jpeg",
       "form_factor": "narrow"
     },
     {
-      "src": "/picture/05.jpg",
+      "src": "/picture/055.jpg",
       "sizes": "1080x2342",
       "type": "image/jpeg",
       "form_factor": "narrow"
