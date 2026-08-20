@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Моя АнтиСоцсеть — Полноценный Агрегатор",
-  "version": "1.3.29",
+  "version": "1.3.30",
   "description": "Персонализированная AI-лента новостей в вашем браузере.",
   "permissions": [
     "activeTab"
