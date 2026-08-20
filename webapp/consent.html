@@ -1,13 +1,64 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-    <link rel="icon" href="/icons/favicon.ico">
+    <!-- ===== БАЗОВЫЕ МЕТА-ТЕГИ ===== -->
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Согласие на обработку персональных данных — Моя АнтиСоцсеть</title>
-    <style>
-        /* ===== ШРИФТ ROBOTO ===== */
 
+    <!-- ===== TITLE ===== -->
+    <title>Согласие на обработку персональных данных — Моя АнтиСоцсеть</title>
+
+    <!-- ===== SEO: РАЗРЕШЕНО ИНДЕКСИРОВАТЬ (юридическая страница) ===== -->
+    <meta name="robots" content="index, follow">
+
+    <!-- ===== КАНОНИЧЕСКАЯ ССЫЛКА (на себя) ===== -->
+    <link rel="canonical" href="https://news.proid.studio/consent">
+
+    <!-- ===== ОПИСАНИЕ ДЛЯ ПОИСКОВИКОВ ===== -->
+    <meta name="description" content="Согласие на обработку персональных данных в сервисе Моя АнтиСоцсеть. Оператор — ИП Ерыков Артём Андреевич.">
+
+    <!-- ===== OPEN GRAPH ===== -->
+    <meta property="og:title" content="Согласие на обработку персональных данных — Моя АнтиСоцсеть">
+    <meta property="og:description" content="Согласие на обработку персональных данных в сервисе Моя АнтиСоцсеть. Оператор — ИП Ерыков Артём Андреевич.">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://news.proid.studio/consent">
+    <meta property="og:image" content="https://news.proid.studio/picture/LOGO.jpg">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
+    <meta property="og:locale" content="ru_RU">
+    <meta property="og:site_name" content="Моя АнтиСоцсеть">
+
+    <!-- ===== TWITTER CARD ===== -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Согласие на обработку персональных данных — Моя АнтиСоцсеть">
+    <meta name="twitter:description" content="Согласие на обработку персональных данных в сервисе Моя АнтиСоцсеть. Оператор — ИП Ерыков Артём Андреевич.">
+    <meta name="twitter:image" content="https://news.proid.studio/picture/LOGO.jpg">
+
+    <!-- ===== ИКОНКИ ===== -->
+    <link rel="icon" href="/icons/favicon.ico">
+    <link rel="apple-touch-icon" href="/icons/apple-icon-180x180.png">
+
+    <!-- ===== ТЕМА ===== -->
+    <meta name="theme-color" content="#010715">
+
+    <!-- ===== СТРУКТУРИРОВАННЫЕ ДАННЫЕ (JSON-LD) ===== -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebPage",
+      "name": "Согласие на обработку персональных данных",
+      "url": "https://news.proid.studio/consent",
+      "description": "Согласие на обработку персональных данных в сервисе Моя АнтиСоцсеть.",
+      "isPartOf": {
+        "@type": "WebSite",
+        "name": "Моя АнтиСоцсеть",
+        "url": "https://news.proid.studio/"
+      }
+    }
+    </script>
+
+    <!-- ===== СТИЛИ (БЕЗ ИЗМЕНЕНИЙ) ===== -->
+    <style>
         * { margin:0; padding:0; box-sizing:border-box; }
         :root {
             --bg-color: #010715;
@@ -268,7 +319,7 @@
 
                     <h2>1. Перечень персональных данных, на обработку которых даётся согласие</h2>
                     <ul>
-                        <li><strong>Идентификаторы в российских ID-сервисах и мессенджерах:</strong> <code>telegram_id</code> (при использовании Telegram-бота), <code>max_user_id</code> / <code>max_chat_id</code> (при использовании MAX-бота), <code>vk_user_id</code> (при использовании VK-бота), <code>yandex_id</code> (при авторизации через Яндекс ID). Эти идентификаторы используются исключительно для персонализации лентаов и направления уведомлений.</li>
+                        <li><strong>Идентификаторы в российских ID-сервисах и мессенджерах:</strong> <code>telegram_id</code> (при использовании Telegram-бота), <code>max_user_id</code> / <code>max_chat_id</code> (при использовании MAX-бота), <code>vk_user_id</code> (при использовании VK-бота), <code>yandex_id</code> (при авторизации через Яндекс ID). Эти идентификаторы используются исключительно для персонализации лент и направления уведомлений.</li>
                         <li><strong>IP-адрес и технические параметры соединения</strong> (дата/время запроса, User-Agent, код ответа сервера) – собираются автоматически в журналах доступа для обеспечения безопасности и стабильной работы Сервиса (защита от DDoS, анализ ошибок). Эти данные обезличиваются при анализе.</li>
                         <li><strong>Платёжная информация</strong> – не обрабатывается и не хранится Оператором. Все платежи проходят через стороннего агрегатора (Robokassa), который самостоятельно обрабатывает данные банковских карт и иных платёжных средств в соответствии со своей политикой конфиденциальности. Оператор получает только подтверждение об успешной оплате и идентификатор транзакции для активации подписки.</li>
                     </ul>
@@ -277,7 +328,7 @@
 
                     <h2>2. Цели обработки</h2>
                     <ul>
-                        <li>Предоставление персонализированных лентаов новостей из выбранных пользователем источников.</li>
+                        <li>Предоставление персонализированных лент новостей из выбранных пользователем источников.</li>
                         <li>Управление подписками.</li>
                         <li>Обработка платёжных транзакций через стороннего агрегатора.</li>
                         <li>Техническая поддержка пользователей.</li>

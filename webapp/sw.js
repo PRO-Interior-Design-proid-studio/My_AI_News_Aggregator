@@ -1,33 +1,34 @@
-const CACHE_VERSION = 'v119'; // Автоматически обновляется скриптом rest
+const CACHE_VERSION = 'v126'; // Автоматически обновляется скриптом rest
 
-// Список файлов для кеширования (статичные ресурсы)
 const STATIC_FILES = [
+    // Основные страницы
     '/pwa',
     '/manifest.json',
-    '/webapp/categories.js',
-    '/webapp/max-web-app.js',
-    '/picture/LOGO.jpg',
-    '/picture/1.png',
-    '/picture/02.jpg',
-    '/picture/03.jpg',
-    '/picture/04.jpg',
-    '/picture/05.jpg',
     '/webapp/index.html',
     '/webapp/max.html',
     '/webapp/pwa.html',
+    '/webapp/vk.html',
     '/webapp/landing.html',
     '/webapp/support.html',
     '/webapp/privacy.html',
     '/webapp/offer.html',
     '/webapp/consent.html',
-    '/webapp/error/400.html',
-    '/webapp/error/403.html',
-    '/webapp/error/404.html',
-    '/webapp/error/405.html',
-    '/webapp/error/500.html',
-    '/webapp/error/502.html',
-    '/webapp/error/503.html',
-    '/webapp/error/504.html',
+    '/webapp/delete-account.html',
+    '/webapp/telegram_success.html',
+
+    // Скрипты и стили (если есть отдельные CSS – добавьте)
+    '/webapp/categories.js',
+    '/webapp/max-web-app.js',
+
+    // Изображения
+    '/picture/LOGO.jpg',
+    '/picture/011.jpg',
+    '/picture/022.jpg',
+    '/picture/033.jpg',
+    '/picture/044.jpg',
+    '/picture/055.jpg',
+
+    // Иконки
     '/icons/favicon.ico',
     '/icons/apple-icon-180x180.png',
     '/icons/icon-192.png',
@@ -35,7 +36,17 @@ const STATIC_FILES = [
     '/icons/apple-icon-152x152.png',
     '/icons/apple-icon-144x144.png',
     '/icons/apple-icon-120x120.png',
-    '/icons/apple-icon-114x114.png'
+    '/icons/apple-icon-114x114.png',
+
+    // Страницы ошибок
+    '/webapp/error/400.html',
+    '/webapp/error/403.html',
+    '/webapp/error/404.html',
+    '/webapp/error/405.html',
+    '/webapp/error/500.html',
+    '/webapp/error/502.html',
+    '/webapp/error/503.html',
+    '/webapp/error/504.html'
 ];
 
 self.addEventListener('install', event => {

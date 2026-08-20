@@ -1,49 +1,79 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-<link rel="icon" href="/icons/favicon.ico">
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>Моя АнтиСоцсеть — персонализированный лента с искусственным интеллектом</title>
-<meta name="description" content="Войдите в Моя АнтиСоцсеть, чтобы получать ежедневные персонализированные лентаы новостей из ваших любимых источников. Авторизация через VK, MAX или Яндекс ID.">
-<meta name="keywords" content="AI новости, лента, персонализированные новости, VK, MAX, Яндекс ID, агрегатор новостей">
-<meta name="robots" content="index, follow">
-<link rel="canonical" href="https://news.proid.studio/pwa">
-<meta property="og:title" content="Вход в Моя АнтиСоцсеть">
-<meta property="og:description" content="Персонализированный AI-лента новостей. Войдите через VK, MAX или Яндекс ID.">
-<meta property="og:type" content="website">
-<meta property="og:url" content="https://news.proid.studio/pwa">
-<meta property="og:image" content="https://news.proid.studio/picture/LOGO.jpg">
-<meta property="og:image:width" content="1200">
-<meta property="og:image:height" content="630">
-<meta property="og:locale" content="ru_RU">
-<meta property="og:site_name" content="Моя АнтиСоцсеть">
-<meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="Вход в Моя АнтиСоцсеть">
-<meta name="twitter:description" content="Персонализированный AI-лента новостей. Войдите через VK, MAX или Яндекс ID.">
-<meta name="twitter:image" content="https://news.proid.studio/picture/LOGO.jpg">
-<script type="application/ld+json">
-{
-"@context": "https://schema.org",
-"@type": "WebApplication",
-"name": "Моя АнтиСоцсеть",
-"url": "https://news.proid.studio/",
-"description": "Персонализированный AI-лента новостей из выбранных источников.",
-"applicationCategory": "NewsAggregator",
-"operatingSystem": "All",
-"browserRequirements": "Modern browser",
-"offers": {"@type":"Offer","price":"0","priceCurrency":"RUB"}
-}
-</script>
-<link rel="manifest" href="/manifest.json">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<link rel="apple-touch-icon" href="/icons/apple-icon-180x180.png">
-<link rel="apple-touch-icon" sizes="152x152" href="/icons/apple-icon-152x152.png">
-<link rel="apple-touch-icon" sizes="144x144" href="/icons/apple-icon-144x144.png">
-<link rel="apple-touch-icon" sizes="120x120" href="/icons/apple-icon-120x120.png">
-<link rel="apple-touch-icon" sizes="114x114" href="/icons/apple-icon-114x114.png">
-<meta name="theme-color" content="#010715">
+    <!-- ===== БАЗОВЫЕ МЕТА-ТЕГИ ===== -->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
+    <!-- ===== TITLE (для поиска и соцсетей) ===== -->
+    <title>Моя АнтиСоцсеть — персонализированный новостной агрегатор (PWA)</title>
+
+    <!-- ===== SEO: ЗАПРЕТ ИНДЕКСАЦИИ (SPA) ===== -->
+    <meta name="robots" content="noindex, nofollow">
+
+    <!-- ===== КАНОНИЧЕСКАЯ ССЫЛКА (на себя) ===== -->
+    <link rel="canonical" href="https://news.proid.studio/pwa">
+
+    <!-- ===== ОПИСАНИЕ ДЛЯ ПОИСКОВИКОВ И СОЦСЕТЕЙ ===== -->
+    <meta name="description" content="Персонализированная AI-лента новостей. Войдите через VK, MAX или Яндекс ID и получайте ежедневную подборку из выбранных источников — без рекламы и спама.">
+
+    <!-- ===== OPEN GRAPH (Facebook, VK, Telegram) ===== -->
+    <meta property="og:title" content="Моя АнтиСоцсеть — персонализированный новостной агрегатор">
+    <meta property="og:description" content="Персонализированная AI-лента новостей. Войдите через VK, MAX или Яндекс ID.">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://news.proid.studio/pwa">
+    <meta property="og:image" content="https://news.proid.studio/picture/LOGO.jpg">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
+    <meta property="og:locale" content="ru_RU">
+    <meta property="og:site_name" content="Моя АнтиСоцсеть">
+
+    <!-- ===== TWITTER CARD ===== -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Моя АнтиСоцсеть — персонализированный новостной агрегатор">
+    <meta name="twitter:description" content="Персонализированная AI-лента новостей. Войдите через VK, MAX или Яндекс ID.">
+    <meta name="twitter:image" content="https://news.proid.studio/picture/LOGO.jpg">
+
+    <!-- ===== ИКОНКИ ===== -->
+    <link rel="icon" href="/icons/favicon.ico">
+    <link rel="apple-touch-icon" href="/icons/apple-icon-180x180.png">
+    <link rel="apple-touch-icon" sizes="152x152" href="/icons/apple-icon-152x152.png">
+    <link rel="apple-touch-icon" sizes="144x144" href="/icons/apple-icon-144x144.png">
+    <link rel="apple-touch-icon" sizes="120x120" href="/icons/apple-icon-120x120.png">
+    <link rel="apple-touch-icon" sizes="114x114" href="/icons/apple-icon-114x114.png">
+
+    <!-- ===== PWA / МАНИФЕСТ И ТЕМА ===== -->
+    <link rel="manifest" href="/manifest.json">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="theme-color" content="#010715">
+
+    <!-- ===== СТРУКТУРИРОВАННЫЕ ДАННЫЕ (JSON-LD) ===== -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebApplication",
+      "name": "Моя АнтиСоцсеть",
+      "url": "https://news.proid.studio/pwa",
+      "description": "Персонализированная AI-лента новостей из выбранных источников (Telegram, VK, RSS, YouTube).",
+      "applicationCategory": "NewsAggregator",
+      "operatingSystem": "All",
+      "browserRequirements": "Современный браузер",
+      "offers": {
+        "@type": "Offer",
+        "price": "0",
+        "priceCurrency": "RUB"
+      },
+      "author": {
+        "@type": "Person",
+        "name": "Ерыков Артём Андреевич",
+        "url": "https://proid.studio/Erykov-Artem-Andreevich"
+      }
+    }
+    </script>
+
+    <!-- ===== СТИЛИ (ВСЕ ВАШИ, БЕЗ ИЗМЕНЕНИЙ) ===== -->
+</head>
 <style>
 *{margin:0;padding:0;box-sizing:border-box;}
 :root{--bg-color:#010715;--footer-bg:#111c40;--text:#fff;--text-secondary:#8a9bb5;--accent:#6c5ce7;--accent2:#3088ff;--card-bg:rgba(255,255,255,0.04);--border:rgba(255,255,255,0.06);--radius:20px;--shadow:0 12px 48px rgba(0,0,0,0.6);}
@@ -1708,7 +1738,7 @@ async function toggleDigest() {
         if (!resp.ok) {
             const err = await resp.json();
             console.error('❌ Ошибка ответа:', err);
-            content.innerHTML = `<div style="color: #ff6b6b; text-align:center; padding:20px;">❌ Ошибка: ${err.detail || 'Не удалось загрузить лента'}</div>`;
+            content.innerHTML = `<div style="color: #ff6b6b; text-align:center; padding:20px;">❌ Ошибка: ${err.detail || 'Не удалось загрузить ленту'}</div>`;
             return;
         }
         const data = await resp.json();
@@ -1717,8 +1747,8 @@ async function toggleDigest() {
         let digestHtml = data.digest;
         console.log('📄 digestHtml длина:', digestHtml ? digestHtml.length : 0);
 
-        if (!digestHtml || digestHtml.trim() === '' || digestHtml.includes('Лента ещё не формировался')) {
-            console.log('📭 Лента пуст или ещё не формировался');
+        if (!digestHtml || digestHtml.trim() === '' || digestHtml.includes('Лента ещё не формировалась')) {
+            console.log('📭 Лента пуста или ещё не формировалась');
             content.innerHTML = `<div style="text-align:center; padding:20px; color: var(--text-secondary);">📭 Добавьте источники и дождитесь автоматического сбора новостей.</div>`;
             return;
         }
