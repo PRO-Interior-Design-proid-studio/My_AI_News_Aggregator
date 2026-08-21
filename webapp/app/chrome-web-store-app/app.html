@@ -56,7 +56,34 @@
    <button class="auth-btn vk" id="vkLoginBtn"><span class="icon">🚀</span> Войти через VK</button>
    <button class="auth-btn yandex" id="yandexLoginBtn"><span class="icon">🚀</span> Войти через Яндекс</button>
 </div>
+<!-- ===== ВХОД ПО ПОЧТЕ ===== -->
+<div id="emailAuthBlock" style="max-width: 340px; margin: 16px auto 0; text-align: center;">
+    <!-- Режим входа -->
+    <div id="emailLoginForm">
+        <input type="email" id="loginEmailField" placeholder="Email (только .ru, .рф)"
+               style="width:300px; padding:16px 24px; margin:0 auto 8px; border-radius:26px; background:rgba(0,0,0,0.3); color:#fff; border:1px solid var(--border); display:block;">
+        <input type="password" id="loginPasswordField" placeholder="Пароль"
+               style="width:300px; padding:16px 24px; margin:0 auto 8px; border-radius:26px; background:rgba(0,0,0,0.3); color:#fff; border:1px solid var(--border); display:block;">
+        <button id="emailLoginSubmitBtn" class="auth-btn" style="width:300px; margin:0 auto; --fill-colors:rgba(31,89,198,.26),rgba(31,89,198,.26); --border-colors:rgba(78,173,252,.61) 0%,#1F59C6 53%,#20397F 100%;">Войти</button>
+        <div style="margin-top:8px; font-size:14px; color:var(--text-secondary);">
+            Нет аккаунта? <a href="#" id="switchToRegister" style="color:var(--accent2);">Зарегистрироваться</a>
+        </div>
+    </div>
 
+    <!-- Режим регистрации -->
+    <div id="emailRegisterForm" style="display:none;">
+        <input type="email" id="regEmailField" placeholder="Email (только .ru, .рф)"
+               style="width:300px; padding:16px 24px; margin:0 auto 8px; border-radius:26px; background:rgba(0,0,0,0.3); color:#fff; border:1px solid var(--border); display:block;">
+        <div id="regCodeContainer" style="display:none;">
+            <input type="text" id="regCodeField" placeholder="Код из письма" maxlength="4"
+                   style="width:300px; padding:16px 24px; margin:0 auto 8px; border-radius:26px; background:rgba(0,0,0,0.3); color:#fff; border:1px solid var(--border); display:block;">
+        </div>
+        <button id="emailRegisterSubmitBtn" class="auth-btn" style="width:300px; margin:0 auto; --fill-colors:rgba(31,89,198,.26),rgba(31,89,198,.26); --border-colors:rgba(78,173,252,.61) 0%,#1F59C6 53%,#20397F 100%;">Получить код</button>
+        <div style="margin-top:8px; font-size:14px; color:var(--text-secondary);">
+            Уже есть аккаунт? <a href="#" id="switchToLogin" style="color:var(--accent2);">Войти</a>
+        </div>
+    </div>
+</div>
 <!-- ===== БЛОК "ВАЖНО" (ширина 340px) ===== -->
 <div class="status-block" style="margin-top: 40px; max-width: 340px; margin-left: auto; margin-right: auto;">
     <div class="status-title" style="color: var(--text);">Важно</div>
