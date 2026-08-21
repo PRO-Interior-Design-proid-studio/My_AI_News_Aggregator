@@ -396,7 +396,34 @@ html, body {
                 <button class="auth-btn vk" id="vkLoginBtn"><span class="icon">🚀</span> Войти через VK</button>
                 <button class="auth-btn yandex" id="yandexLoginBtn"><span class="icon">🚀</span> Войти через Яндекс</button>
             </div>
+<!-- ===== ВХОД ПО ПОЧТЕ ===== -->
+<div id="emailAuthBlock" style="max-width: 340px; margin: 16px auto 0; text-align: center;">
+    <!-- Режим входа -->
+    <div id="emailLoginForm">
+        <input type="email" id="loginEmailField" placeholder="Email (только .ru, .рф)"
+               style="width:300px; padding:16px 24px; margin:0 auto 8px; border-radius:26px; background:rgba(0,0,0,0.3); color:#fff; border:1px solid var(--border); display:block;">
+        <input type="password" id="loginPasswordField" placeholder="Пароль"
+               style="width:300px; padding:16px 24px; margin:0 auto 8px; border-radius:26px; background:rgba(0,0,0,0.3); color:#fff; border:1px solid var(--border); display:block;">
+        <button id="emailLoginSubmitBtn" class="auth-btn" style="width:300px; margin:0 auto; --fill-colors:rgba(31,89,198,.26),rgba(31,89,198,.26); --border-colors:rgba(78,173,252,.61) 0%,#1F59C6 53%,#20397F 100%;">Войти</button>
+        <div style="margin-top:8px; font-size:14px; color:var(--text-secondary);">
+            Нет аккаунта? <a href="#" id="switchToRegister" style="color:var(--accent2);">Зарегистрироваться</a>
+        </div>
+    </div>
 
+    <!-- Режим регистрации -->
+    <div id="emailRegisterForm" style="display:none;">
+        <input type="email" id="regEmailField" placeholder="Email (только .ru, .рф)"
+               style="width:300px; padding:16px 24px; margin:0 auto 8px; border-radius:26px; background:rgba(0,0,0,0.3); color:#fff; border:1px solid var(--border); display:block;">
+        <div id="regCodeContainer" style="display:none;">
+            <input type="text" id="regCodeField" placeholder="Код из письма" maxlength="4"
+                   style="width:300px; padding:16px 24px; margin:0 auto 8px; border-radius:26px; background:rgba(0,0,0,0.3); color:#fff; border:1px solid var(--border); display:block;">
+        </div>
+        <button id="emailRegisterSubmitBtn" class="auth-btn" style="width:300px; margin:0 auto; --fill-colors:rgba(31,89,198,.26),rgba(31,89,198,.26); --border-colors:rgba(78,173,252,.61) 0%,#1F59C6 53%,#20397F 100%;">Получить код</button>
+        <div style="margin-top:8px; font-size:14px; color:var(--text-secondary);">
+            Уже есть аккаунт? <a href="#" id="switchToLogin" style="color:var(--accent2);">Войти</a>
+        </div>
+    </div>
+</div>
             <!-- ===== БЛОК "ВАЖНО" ===== -->
             <div class="status-block" style="margin-top: 40px; max-width: 340px; margin-left: auto; margin-right: auto;">
                 <div class="status-title" style="color: var(--text);">Важно</div>
@@ -854,9 +881,6 @@ async function startVkAuth(){
     const scope = 'vkid.personal_info';
     const authUrl = `https://id.vk.ru/authorize?client_id=${VK_APP_ID}&redirect_uri=${encodeURIComponent(redirectUri)}&response_type=code&scope=${scope}&state=${state}&code_challenge=${challenge}&code_challenge_method=S256&v=5.199`;
 
-    // Скрываем интерфейс входа
-    const container = document.getElementById('loginScreen').querySelector('.auth-container');
-    if (container) container.style.display = 'none';
     const w = document.getElementById('widgetContainer');
     if (w) w.innerHTML = '<p style="color: var(--text-secondary);">Перенаправление на авторизацию VK...</p>';
 
@@ -917,9 +941,6 @@ async function startVkAuth(){
     hapticFeedback();
     const state = 'telegram_' + Math.random().toString(36).substring(2);
     
-    // Скрываем интерфейс входа
-    const container = document.getElementById('loginScreen').querySelector('.auth-container');
-    if (container) container.style.display = 'none';
     const w = document.getElementById('widgetContainer');
     if (w) w.innerHTML = '<p style="color: var(--text-secondary);">Перенаправление на авторизацию Яндекс...</p>';
     
@@ -1608,7 +1629,124 @@ let parts = body.split("- ").filter(p => p.trim() !== '');
         }
     })();
     // ===== КОНЕЦ БЛОКА =====
+// ===== EMAIL АВТОРИЗАЦИЯ =====
+(function() {
+    const loginForm = document.getElementById('emailLoginForm');
+    const registerForm = document.getElementById('emailRegisterForm');
+    const switchToRegister = document.getElementById('switchToRegister');
+    const switchToLogin = document.getElementById('switchToLogin');
 
+    const loginEmail = document.getElementById('loginEmailField');
+    const loginPassword = document.getElementById('loginPasswordField');
+    const loginSubmit = document.getElementById('emailLoginSubmitBtn');
+
+    const regEmail = document.getElementById('regEmailField');
+    const regCodeContainer = document.getElementById('regCodeContainer');
+    const regCode = document.getElementById('regCodeField');
+    const regSubmit = document.getElementById('emailRegisterSubmitBtn');
+
+    let regStep = 'request'; // 'request' | 'verify'
+
+    // Переключение между формами
+    switchToRegister.addEventListener('click', function(e) {
+        e.preventDefault();
+        loginForm.style.display = 'none';
+        registerForm.style.display = 'block';
+        regStep = 'request';
+        regSubmit.textContent = 'Получить код';
+        regCodeContainer.style.display = 'none';
+        regCode.value = '';
+    });
+
+    switchToLogin.addEventListener('click', function(e) {
+        e.preventDefault();
+        loginForm.style.display = 'block';
+        registerForm.style.display = 'none';
+    });
+
+    // Вход по email+пароль
+    loginSubmit.addEventListener('click', async function() {
+        const email = loginEmail.value.trim();
+        const password = loginPassword.value.trim();
+        if (!email || !password) { alert('Заполните email и пароль'); return; }
+        try {
+            const resp = await apiRequest('/api/auth/email/login', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email, password })
+            });
+            if (resp && resp.ok) {
+                const data = await resp.json();
+                localStorage.setItem('auth_token', data.token);
+                authToken = data.token;
+                loadApp();
+            } else {
+                const err = resp ? await resp.json() : { detail: 'Ошибка' };
+                alert('Ошибка входа: ' + (err.detail || err.message));
+            }
+        } catch(e) {
+            alert('Ошибка: ' + e.message);
+        }
+    });
+
+    // Регистрация (запрос кода / подтверждение)
+    regSubmit.addEventListener('click', async function() {
+        const email = regEmail.value.trim();
+        if (!email) { alert('Введите email'); return; }
+
+        if (regStep === 'request') {
+            // Запрос кода
+            try {
+                const resp = await apiRequest('/api/auth/email/request-code', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email })
+                });
+                if (resp && resp.ok) {
+                    regStep = 'verify';
+                    regSubmit.textContent = 'Подтвердить';
+                    regCodeContainer.style.display = 'block';
+                    regCode.value = '';
+                    alert('Код отправлен на почту');
+                } else {
+                    const err = resp ? await resp.json() : { detail: 'Ошибка' };
+                    alert('Ошибка: ' + (err.detail || err.message));
+                }
+            } catch(e) {
+                alert('Ошибка: ' + e.message);
+            }
+        } else {
+            // Подтверждение кода и регистрация
+            const code = regCode.value.trim();
+            if (!code) { alert('Введите код из письма'); return; }
+            try {
+                const resp = await apiRequest('/api/auth/email/register', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email, code })
+                });
+                if (resp && resp.ok) {
+                    const data = await resp.json();
+                    localStorage.setItem('auth_token', data.token);
+                    authToken = data.token;
+                    alert('Регистрация успешна! Пароль отправлен на почту.');
+                    loadApp();
+                } else {
+                    const err = resp ? await resp.json() : { detail: 'Ошибка' };
+                    // Если пользователь уже существует, предложим войти
+                    if (resp && resp.status === 409) {
+                        alert('Пользователь с таким email уже зарегистрирован. Используйте вход по паролю.');
+                        switchToLogin.click();
+                    } else {
+                        alert('Ошибка: ' + (err.detail || err.message));
+                    }
+                }
+            } catch(e) {
+                alert('Ошибка: ' + e.message);
+            }
+        }
+    });
+})();
     // ===== ЭКСПОРТЫ =====
     window.toggleTariffs = toggleTariffs;
     window.handlePayment = handlePayment;

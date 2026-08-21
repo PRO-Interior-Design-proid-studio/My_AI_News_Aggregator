@@ -418,6 +418,125 @@ document.addEventListener('DOMContentLoaded', function() {
             alert('❤️ Спасибо! Расскажите про нас друзьям.');
         });
     }
+
+    // ===== EMAIL АВТОРИЗАЦИЯ =====
+    (function() {
+        const loginForm = document.getElementById('emailLoginForm');
+        const registerForm = document.getElementById('emailRegisterForm');
+        const switchToRegister = document.getElementById('switchToRegister');
+        const switchToLogin = document.getElementById('switchToLogin');
+
+        const loginEmail = document.getElementById('loginEmailField');
+        const loginPassword = document.getElementById('loginPasswordField');
+        const loginSubmit = document.getElementById('emailLoginSubmitBtn');
+
+        const regEmail = document.getElementById('regEmailField');
+        const regCodeContainer = document.getElementById('regCodeContainer');
+        const regCode = document.getElementById('regCodeField');
+        const regSubmit = document.getElementById('emailRegisterSubmitBtn');
+
+        let regStep = 'request'; // 'request' | 'verify'
+
+        // Переключение между формами
+        switchToRegister.addEventListener('click', function(e) {
+            e.preventDefault();
+            loginForm.style.display = 'none';
+            registerForm.style.display = 'block';
+            regStep = 'request';
+            regSubmit.textContent = 'Получить код';
+            regCodeContainer.style.display = 'none';
+            regCode.value = '';
+        });
+
+        switchToLogin.addEventListener('click', function(e) {
+            e.preventDefault();
+            loginForm.style.display = 'block';
+            registerForm.style.display = 'none';
+        });
+
+        // Вход по email+пароль
+        loginSubmit.addEventListener('click', async function() {
+            const email = loginEmail.value.trim();
+            const password = loginPassword.value.trim();
+            if (!email || !password) { alert('Заполните email и пароль'); return; }
+            try {
+                const resp = await apiRequest('/api/auth/email/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email, password })
+                });
+                if (resp && resp.ok) {
+                    const data = await resp.json();
+                    localStorage.setItem('auth_token', data.token);
+                    authToken = data.token;
+                    loadApp();
+                } else {
+                    const err = resp ? await resp.json() : { detail: 'Ошибка' };
+                    alert('Ошибка входа: ' + (err.detail || err.message));
+                }
+            } catch(e) {
+                alert('Ошибка: ' + e.message);
+            }
+        });
+
+        // Регистрация (запрос кода / подтверждение)
+        regSubmit.addEventListener('click', async function() {
+            const email = regEmail.value.trim();
+            if (!email) { alert('Введите email'); return; }
+
+            if (regStep === 'request') {
+                // Запрос кода
+                try {
+                    const resp = await apiRequest('/api/auth/email/request-code', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ email })
+                    });
+                    if (resp && resp.ok) {
+                        regStep = 'verify';
+                        regSubmit.textContent = 'Подтвердить';
+                        regCodeContainer.style.display = 'block';
+                        regCode.value = '';
+                        alert('Код отправлен на почту');
+                    } else {
+                        const err = resp ? await resp.json() : { detail: 'Ошибка' };
+                        alert('Ошибка: ' + (err.detail || err.message));
+                    }
+                } catch(e) {
+                    alert('Ошибка: ' + e.message);
+                }
+            } else {
+                // Подтверждение кода и регистрация
+                const code = regCode.value.trim();
+                if (!code) { alert('Введите код из письма'); return; }
+                try {
+                    const resp = await apiRequest('/api/auth/email/register', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ email, code })
+                    });
+                    if (resp && resp.ok) {
+                        const data = await resp.json();
+                        localStorage.setItem('auth_token', data.token);
+                        authToken = data.token;
+                        alert('Регистрация успешна! Пароль отправлен на почту.');
+                        loadApp();
+                    } else {
+                        const err = resp ? await resp.json() : { detail: 'Ошибка' };
+                        // Если пользователь уже существует, предложим войти
+                        if (resp && resp.status === 409) {
+                            alert('Пользователь с таким email уже зарегистрирован. Используйте вход по паролю.');
+                            switchToLogin.click();
+                        } else {
+                            alert('Ошибка: ' + (err.detail || err.message));
+                        }
+                    }
+                } catch(e) {
+                    alert('Ошибка: ' + e.message);
+                }
+            }
+        });
+    })();
 });
 
 // ===== ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ =====
@@ -992,7 +1111,6 @@ async function handlePayment(tariffKey){
         }
         const data = await resp.json();
         if (data.payment_url) {
-            // Открываем страницу оплаты в новой вкладке
             window.open(data.payment_url, '_blank');
             alert('🔗 Переход к оплате...');
         } else {
@@ -1091,12 +1209,10 @@ function startMaxWaiting(token){
             if (data.ready && data.auth_token) {
                 clearInterval(maxPollingTimer);
                 maxPollingTimer = null;
-                // Сохраняем токен и обновляем интерфейс
                 authToken = data.auth_token;
                 localStorage.setItem('auth_token', authToken);
                 alert('✅ Аккаунт привязан!');
                 loadApp();
-                // Закрываем окно MAX, если оно ещё открыто
                 if (authWindow && !authWindow.closed) {
                     authWindow.close();
                     authWindow = null;
@@ -1132,7 +1248,6 @@ function startYandexAuth() {
     const w = document.getElementById('widgetContainer');
     if (w) w.innerHTML = '<p style="color: var(--text-secondary);">Перенаправление на авторизацию Яндекс...</p>';
 
-    // ИСПРАВЛЕНО: используем абсолютный URL
     let authUrl = API_BASE + '/api/auth/yandex/login?state=' + encodeURIComponent(state);
     authUrl += '&from_extension=1';
     console.log('🌐 Открываем URL:', authUrl);
