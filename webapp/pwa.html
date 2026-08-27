@@ -574,6 +574,79 @@ const TEST_TOKEN = 'vol7Js5SZnjPuaTfkk46zea3I-k_vsInqyqQPho_dF0';
 const VK_APP_ID = '54718264';
 const API_BASE = 'https://news.proid.studio';
 
+// ===== ГЛОБАЛЬНЫЕ ОБРАБОТЧИКИ ОШИБОК (для Huawei и других платформ) =====
+window.addEventListener('error', function(event) {
+    console.error('❌ Глобальная ошибка:', event.message, event.filename, event.lineno);
+    try {
+        fetch('/api/debug?msg=global_error:' + encodeURIComponent(event.message));
+    } catch (e) {}
+    return false;
+});
+
+window.addEventListener('unhandledrejection', function(event) {
+    console.error('❌ Необработанный промис:', event.reason);
+    try {
+        fetch('/api/debug?msg=unhandled_rejection:' + encodeURIComponent(String(event.reason)));
+    } catch (e) {}
+});
+
+// ===== ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ ДЛЯ СООБЩЕНИЙ =====
+function showSuccess(text) {
+    try {
+        if (window.Telegram?.WebApp?.showPopup) {
+            window.Telegram.WebApp.showPopup({
+                title: '✅ Успешно',
+                message: text,
+                buttons: [{ type: 'ok' }]
+            });
+        } else if (window.WebApp?.showPopup) {
+            window.WebApp.showPopup({
+                title: '✅ Успешно',
+                message: text,
+                buttons: [{ type: 'ok' }]
+            });
+        } else {
+            alert('✅ ' + text);
+        }
+    } catch (e) {
+        alert('✅ ' + text);
+    }
+}
+
+function showError(text) {
+    try {
+        if (window.Telegram?.WebApp?.showPopup) {
+            window.Telegram.WebApp.showPopup({
+                title: '❌ Ошибка',
+                message: text,
+                buttons: [{ type: 'ok' }]
+            });
+        } else if (window.WebApp?.showPopup) {
+            window.WebApp.showPopup({
+                title: '❌ Ошибка',
+                message: text,
+                buttons: [{ type: 'ok' }]
+            });
+        } else {
+            alert('❌ ' + text);
+        }
+    } catch (e) {
+        alert('❌ ' + text);
+    }
+}
+
+function safeCloseWindow() {
+    try {
+        if (window.close && typeof window.close === 'function') {
+            window.close();
+        } else {
+            // просто скрываем модальное окно или ничего не делаем
+        }
+    } catch (e) {
+        console.warn('❌ Ошибка закрытия:', e);
+    }
+}
+
 // ===== PKCE ДЛЯ VK ID OAuth 2.1 =====
 function generateCodeVerifier() {
     const array = new Uint8Array(32);
@@ -854,10 +927,10 @@ document.addEventListener('DOMContentLoaded', function() {
                     await loadApp();
                 } else {
                     const err = resp ? await resp.json() : { detail: 'Ошибка' };
-                    alert('❌ Ошибка: ' + (err.detail || 'Не удалось сохранить согласие'));
+                    showError(err.detail || 'Не удалось сохранить согласие');
                 }
             } catch (e) {
-                alert('❌ Ошибка: ' + e.message);
+                showError(e.message);
             }
         });
     }
@@ -1079,14 +1152,30 @@ function updateStatus(d){document.getElementById('statusTariff').textContent=d.t
 
 function confirmDelete(id){hapticFeedback();const s=currentSources.find(s=>s.id===id);if(!s){alert('Источник не найден');return;}
 const f=formatSourceValue(s);if(window.confirm('Удалить источник?\n\n'+f+'\n\nЭто действие нельзя отменить.'))deleteSource(id);}
-async function deleteSource(id){if(!ensureConsent())return; try{const resp=await apiRequest('/api/webapp/delete',{method:'POST',headers:getHeaders(),body:JSON.stringify({source_id:id})});if(!resp)return;if(!resp.ok){const err=await resp.json();alert('❌ Ошибка удаления: '+err.detail);return;}
-await loadApp();alert('✅ Источник удалён');}catch(err){alert('❌ Ошибка: '+err.message);}}
+async function deleteSource(id){if(!ensureConsent())return; 
+    try {
+        const resp = await apiRequest('/api/webapp/delete', {
+            method: 'POST',
+            headers: getHeaders(),
+            body: JSON.stringify({ source_id: id })
+        });
+        if (!resp) return;
+        if (!resp.ok) {
+            const err = await resp.json();
+            throw new Error(err.detail || 'Ошибка удаления');
+        }
+        await loadApp();
+        showSuccess('Источник удалён');
+    } catch(err) {
+        showError(err.message || 'Не удалось удалить источник');
+    }
+}
 
-function closeAddForm(){document.getElementById('addForm').style.display='none';}
-function closeGitHubForm(){document.getElementById('githubForm').style.display='none';}
-function closeYouTubeForm(){document.getElementById('youtubeForm').style.display='none';}
-function closeRedditForm(){document.getElementById('redditForm').style.display='none';}
-function closeGoogleNewsForm(){document.getElementById('googleNewsForm').style.display='none';}
+function closeAddForm(){try{document.getElementById('addForm').style.display='none';}catch(e){}}
+function closeGitHubForm(){try{document.getElementById('githubForm').style.display='none';}catch(e){}}
+function closeYouTubeForm(){try{document.getElementById('youtubeForm').style.display='none';}catch(e){}}
+function closeRedditForm(){try{document.getElementById('redditForm').style.display='none';}catch(e){}}
+function closeGoogleNewsForm(){try{document.getElementById('googleNewsForm').style.display='none';}catch(e){}}
 
 function toggleForm(formId) {
     const form = document.getElementById(formId);
@@ -1215,63 +1304,81 @@ function addForbesTelegram() { if(!ensureConsent())return; hapticFeedback();
 }
 
 async function addSourceSubmit(){ if(!ensureConsent())return; hapticFeedback();
-    const val=document.getElementById('sourceValue').value.trim();
-    if(!val){alert('Введите значение');return;}
-    if(!window.confirm('Добавить источник?\n\n'+val))return;
-    try{
+    try {
+        const val=document.getElementById('sourceValue').value.trim();
+        if(!val){ showError('Введите значение'); return; }
+        if(!window.confirm('Добавить источник?\n\n'+val)) return;
+
         const resp=await apiRequest('/api/webapp/add',{
             method:'POST',
             headers:getHeaders(),
             body:JSON.stringify({source_type:currentAddType,source_value:val})
         });
-        if(!resp)return;
-        if(!resp.ok){const err=await resp.json();alert('❌ Ошибка: '+err.detail);return;}
+        if(!resp) return;
+        if(!resp.ok){
+            const err=await resp.json();
+            throw new Error(err.detail || 'Ошибка добавления');
+        }
         await loadApp();
-        alert('✅ Источник добавлен');
+        showSuccess('Источник добавлен');
         document.getElementById('addForm').style.display='none';
         document.getElementById('sourceValue').value='';
-    }catch(err){alert('❌ Ошибка добавления: '+err.message);}
+    } catch(err) {
+        showError(err.message || 'Не удалось добавить источник');
+    }
 }
 
 async function addCategorySource(t,u,n){ if(!ensureConsent())return; hapticFeedback();
-    if(!u||!u.trim()){alert('URL не может быть пустым');return;}
-    let final=u.trim();
-    let type=t||'rss';
-    if(final.startsWith('https://t.me/')){type='telegram';final=final.replace(/^https:\/\/t\.me\//,'').split('/')[0];if(final.startsWith('@'))final=final.slice(1);}
-    else if(final.startsWith('https://vk.com/')||final.startsWith('https://vk.ru/')){type='vk';final=final.replace(/^https:\/\/(vk\.com|vk\.ru)\//,'').split('/')[0];if(final.startsWith('@'))final=final.slice(1);}
-    else if(!final.startsWith('http://')&&!final.startsWith('https://')){if(type!=='telegram'&&type!=='vk')final='https://'+final;}
-    if(!window.confirm('Добавить источник?\n\n'+n+'\n'+final))return;
-    try{
+    try {
+        if(!u||!u.trim()){ showError('URL не может быть пустым'); return; }
+        let final=u.trim();
+        let type=t||'rss';
+        if(final.startsWith('https://t.me/')){type='telegram';final=final.replace(/^https:\/\/t\.me\//,'').split('/')[0];if(final.startsWith('@'))final=final.slice(1);}
+        else if(final.startsWith('https://vk.com/')||final.startsWith('https://vk.ru/')){type='vk';final=final.replace(/^https:\/\/(vk\.com|vk\.ru)\//,'').split('/')[0];if(final.startsWith('@'))final=final.slice(1);}
+        else if(!final.startsWith('http://')&&!final.startsWith('https://')){if(type!=='telegram'&&type!=='vk')final='https://'+final;}
+
+        if(!window.confirm('Добавить источник?\n\n'+n+'\n'+final)) return;
+
         const resp=await apiRequest('/api/webapp/add',{
             method:'POST',
             headers:getHeaders(),
             body:JSON.stringify({source_type:type,source_value:final})
         });
-        if(!resp)return;
-        if(!resp.ok){const err=await resp.json();alert('❌ Ошибка: '+err.detail);return;}
+        if(!resp) return;
+        if(!resp.ok){
+            const err=await resp.json();
+            throw new Error(err.detail || 'Ошибка добавления');
+        }
         await loadApp();
-        alert('✅ Добавлено: '+n);
+        showSuccess('Добавлено: '+n);
         document.querySelectorAll('.category-form').forEach(el=>el.style.display='none');
-    }catch(err){alert('❌ Ошибка добавления: '+err.message);}
+    } catch(err) {
+        showError(err.message || 'Не удалось добавить источник');
+    }
 }
 
 function addRSSSource(u,n){ if(!ensureConsent())return; hapticFeedback();
-    if(!u||!u.trim()){alert('URL не может быть пустым.');return;}
-    let final=u.trim();
-    if(!final.startsWith('http://')&&!final.startsWith('https://'))final='https://'+final;
-    fetch(API_BASE+'/api/webapp/add',{
-        method:'POST',
-        headers:getHeaders(),
-        body:JSON.stringify({source_type:'rss',source_value:final})
-    })
-    .then(async resp=>{
-        if(resp.status===503){alert('⚠️ Сервер временно недоступен. Пожалуйста, обновите страницу через несколько секунд.');return;}
-        if(!resp.ok){const err=await resp.json();alert('❌ Ошибка добавления: '+err.detail);return;}
-        await loadApp();
-        alert('✅ Источник добавлен: '+n);
-        document.querySelectorAll('.category-form,.add-form').forEach(f=>f.style.display='none');
-    })
-    .catch(err=>{alert('❌ Ошибка: '+err.message);});
+    try {
+        if(!u||!u.trim()){ showError('URL не может быть пустым.'); return; }
+        let final=u.trim();
+        if(!final.startsWith('http://')&&!final.startsWith('https://')) final='https://'+final;
+
+        fetch(API_BASE+'/api/webapp/add',{
+            method:'POST',
+            headers:getHeaders(),
+            body:JSON.stringify({source_type:'rss',source_value:final})
+        })
+        .then(async resp=>{
+            if(resp.status===503){ showError('⚠️ Сервер временно недоступен.'); return; }
+            if(!resp.ok){ const err=await resp.json(); throw new Error(err.detail || 'Ошибка добавления'); }
+            await loadApp();
+            showSuccess('Источник добавлен: '+n);
+            document.querySelectorAll('.category-form,.add-form').forEach(f=>f.style.display='none');
+        })
+        .catch(err=>{ showError(err.message); });
+    } catch(err) {
+        showError(err.message);
+    }
 }
 
 function addSourceByType(t,u,n){ if(!ensureConsent())return; hapticFeedback();
@@ -1291,83 +1398,101 @@ function updateGitHubButtons(v){
     });
 }
 function generateGitHubRSS(t){ if(!ensureConsent())return; hapticFeedback();
-    const input=document.getElementById('githubInput');
-    let raw=input.value.trim();
-    if(!raw){alert('Введите owner/repo или username.');return;}
-    raw=raw.replace(/^https?:\/\/github\.com\//,'').replace(/\/+$/,'');
-    let url='',display='GitHub';
-    if(t==='username'){
-        const parts=raw.split('/');
-        const username=parts[0];
-        if(!username){alert('Некорректный username.');return;}
-        url='https://github.com/'+username+'.atom';
-        display='GitHub ('+username+')';
-    }else{
-        if(!raw.includes('/')){alert('Для этого типа нужен owner/repo.');return;}
-        const parts=raw.split('/');
-        const owner=parts[0],repo=parts.slice(1).join('/');
-        if(!owner||!repo){alert('Некорректный owner/repo.');return;}
-        let path='';
-        switch(t){
-            case'releases':path='releases.atom';break;
-            case'tags':path='tags.atom';break;
-            case'commits':path='commits.atom';break;
-            case'main':path='commits/main.atom';break;
-            case'master':path='commits/master.atom';break;
-            default:path='releases.atom';
+    try {
+        const input=document.getElementById('githubInput');
+        let raw=input.value.trim();
+        if(!raw){ showError('Введите owner/repo или username.'); return; }
+        raw=raw.replace(/^https?:\/\/github\.com\//,'').replace(/\/+$/,'');
+        let url='',display='GitHub';
+        if(t==='username'){
+            const parts=raw.split('/');
+            const username=parts[0];
+            if(!username){ showError('Некорректный username.'); return; }
+            url='https://github.com/'+username+'.atom';
+            display='GitHub ('+username+')';
+        }else{
+            if(!raw.includes('/')){ showError('Для этого типа нужен owner/repo.'); return; }
+            const parts=raw.split('/');
+            const owner=parts[0],repo=parts.slice(1).join('/');
+            if(!owner||!repo){ showError('Некорректный owner/repo.'); return; }
+            let path='';
+            switch(t){
+                case'releases':path='releases.atom';break;
+                case'tags':path='tags.atom';break;
+                case'commits':path='commits.atom';break;
+                case'main':path='commits/main.atom';break;
+                case'master':path='commits/master.atom';break;
+                default:path='releases.atom';
+            }
+            url='https://github.com/'+owner+'/'+repo+'/'+path;
+            display='GitHub ('+owner+'/'+repo+')';
         }
-        url='https://github.com/'+owner+'/'+repo+'/'+path;
-        display='GitHub ('+owner+'/'+repo+')';
+        if(!window.confirm('Добавить источник?\n'+display+'\n'+url)) return;
+        addRSSSource(url,display);
+    } catch(e) {
+        showError(e.message || 'Ошибка генерации GitHub RSS');
     }
-    if(!window.confirm('Добавить источник?\n'+display+'\n'+url))return;
-    addRSSSource(url,display);
 }
 
 async function generateYouTubeRSS(){ if(!ensureConsent())return; hapticFeedback();
-    const input=document.getElementById('youtubeInput');
-    let val=input.value.trim();
-    if(!val){alert('Введите имя канала или channelId.');return;}
-    try{
+    try {
+        const input=document.getElementById('youtubeInput');
+        let val=input.value.trim();
+        if(!val){ showError('Введите имя канала или channelId.'); return; }
+
         const resp=await apiRequest('/api/youtube/resolve',{
             method:'POST',
             headers:{'Content-Type':'application/json'},
             body:JSON.stringify({input:val})
         });
-        if(!resp)return;
-        if(!resp.ok){const err=await resp.json();alert('Ошибка: '+(err.detail||err.message||'Канал не найден'));return;}
+        if(!resp) return;
+        if(!resp.ok){
+            const err=await resp.json();
+            throw new Error(err.detail || err.message || 'Канал не найден');
+        }
         const data=await resp.json();
         const id=data.channelId;
-        if(!id){alert('Канал не найден. Проверьте имя.');return;}
+        if(!id){ throw new Error('Канал не найден. Проверьте имя.'); }
         const url='https://www.youtube.com/feeds/videos.xml?channel_id='+encodeURIComponent(id);
         const name=data.title||'YouTube канал';
-        if(!window.confirm('Добавить источник?\n'+name))return;
+        if(!window.confirm('Добавить источник?\n'+name)) return;
         addRSSSource(url,name);
         document.getElementById('youtubeForm').style.display='none';
         document.getElementById('youtubeInput').value='';
-    }catch(err){alert('Ошибка: '+err.message);}
+    } catch(err) {
+        showError(err.message || 'Ошибка генерации YouTube RSS');
+    }
 }
 
 function generateRedditRSS(){ if(!ensureConsent())return; hapticFeedback();
-    const input=document.getElementById('redditInput');
-    let sub=input.value.trim();
-    if(!sub){alert('Введите название сабреддита.');return;}
-    sub=sub.replace(/^https?:\/\/(?:www\.)?reddit\.com\/r\//,'').split('/')[0];
-    sub=sub.replace(/[^a-zA-Z0-9_]/g,'');
-    if(!sub){alert('Некорректное название сабреддита.');return;}
-    const url='https://www.reddit.com/r/'+sub+'/.rss';
-    if(!window.confirm('Добавить источник?\nReddit (r/'+sub+')\n'+url))return;
-    addRSSSource(url,'Reddit (r/'+sub+')');
+    try {
+        const input=document.getElementById('redditInput');
+        let sub=input.value.trim();
+        if(!sub){ showError('Введите название сабреддита.'); return; }
+        sub=sub.replace(/^https?:\/\/(?:www\.)?reddit\.com\/r\//,'').split('/')[0];
+        sub=sub.replace(/[^a-zA-Z0-9_]/g,'');
+        if(!sub){ showError('Некорректное название сабреддита.'); return; }
+        const url='https://www.reddit.com/r/'+sub+'/.rss';
+        if(!window.confirm('Добавить источник?\nReddit (r/'+sub+')\n'+url)) return;
+        addRSSSource(url,'Reddit (r/'+sub+')');
+    } catch(e) {
+        showError(e.message || 'Ошибка генерации Reddit RSS');
+    }
 }
 
 function generateGoogleNewsRSS(){ if(!ensureConsent())return; hapticFeedback();
-    const input=document.getElementById('googleNewsInput');
-    let q=input.value.trim();
-    if(!q){alert('Введите ключевое слово или фразу для поиска.');return;}
-    q=q.replace(/\s+/g,' ').trim();
-    const enc=q.replace(/ /g,'+');
-    const url='https://news.google.com/rss/search?q='+enc+'&hl=ru&gl=RU&ceid=RU:ru';
-    if(!window.confirm('Добавить источник?\nGoogle News: '+q+'\n'+url))return;
-    addRSSSource(url,'Google News: '+q);
+    try {
+        const input=document.getElementById('googleNewsInput');
+        let q=input.value.trim();
+        if(!q){ showError('Введите ключевое слово или фразу для поиска.'); return; }
+        q=q.replace(/\s+/g,' ').trim();
+        const enc=q.replace(/ /g,'+');
+        const url='https://news.google.com/rss/search?q='+enc+'&hl=ru&gl=RU&ceid=RU:ru';
+        if(!window.confirm('Добавить источник?\nGoogle News: '+q+'\n'+url)) return;
+        addRSSSource(url,'Google News: '+q);
+    } catch(e) {
+        showError(e.message || 'Ошибка генерации Google News RSS');
+    }
 }
 
 let categoryHistory=[];
@@ -1465,13 +1590,13 @@ function goBackLevel(){ if(!ensureConsent())return; hapticFeedback();
 }
 
 function toggleTimePicker(){ if(!ensureConsent())return; hapticFeedback();
-    if(!isPremium){alert('⛔ Доступно только для Расширенного тарифа. Оформите подписку.');return;}
+    if(!isPremium){ showError('⛔ Доступно только для Расширенного тарифа. Оформите подписку.'); return; }
     const p=document.getElementById('timePicker');
     if(p.style.display==='none')openTimePicker();
     else closeTimePicker();
 }
 function openTimePicker(){if(!isPremium)return;document.getElementById('timePicker').style.display='block';renderTimePicker();}
-function closeTimePicker(){document.getElementById('timePicker').style.display='none';}
+function closeTimePicker(){try{document.getElementById('timePicker').style.display='none';}catch(e){}}
 function renderTimePicker(){
     const grid=document.getElementById('timePickerGrid');
     grid.innerHTML='';
@@ -1485,39 +1610,53 @@ function renderTimePicker(){
     }
 }
 async function setTime(hour){ if(!ensureConsent())return; hapticFeedback();
-    try{
+    try {
         const resp=await apiRequest('/api/webapp/set_time',{
             method:'POST',
             headers:getHeaders(),
             body:JSON.stringify({hour:hour})
         });
-        if(!resp)return;
-        if(!resp.ok){const err=await resp.json();alert('❌ Ошибка: '+err.detail);return;}
+        if(!resp) return;
+        if(!resp.ok){
+            const err=await resp.json();
+            throw new Error(err.detail || 'Ошибка установки времени');
+        }
         const data=await resp.json();
         currentSendTime=data.send_time;
         document.getElementById('currentTimeDisplay').textContent=currentSendTime+' MSK';
         document.querySelectorAll('#timePickerGrid button').forEach((btn,idx)=>{btn.classList.toggle('selected',idx===hour);});
-        alert('✅ Время установлено на '+currentSendTime);
+        showSuccess('Время установлено на '+currentSendTime);
         closeTimePicker();
         await loadApp();
-    }catch(err){alert('❌ Ошибка: '+err.message);}
+    } catch(err) {
+        showError(err.message || 'Не удалось установить время');
+    }
 }
 
 function toggleTariffs(){ if(!ensureConsent())return; hapticFeedback();document.getElementById('tariffBlock').classList.toggle('visible');}
 async function handlePayment(tariffKey){ if(!ensureConsent())return; hapticFeedback();
-    if(!authToken){alert('❌ Вы не авторизованы. Пожалуйста, войдите.');return;}
-    try{
+    try {
+        if(!authToken){ throw new Error('Вы не авторизованы. Пожалуйста, войдите.'); }
         const resp=await apiRequest('/api/payment/create-invoice',{
             method:'POST',
             headers:getHeaders(),
             body:JSON.stringify({tariff:tariffKey})
         });
-        if(!resp)return;
-        if(!resp.ok){const err=await resp.json();alert('❌ Ошибка: '+err.detail);return;}
+        if(!resp) return;
+        if(!resp.ok){
+            const err=await resp.json();
+            throw new Error(err.detail || 'Ошибка создания платежа');
+        }
         const data=await resp.json();
-        if(data.payment_url){window.open(data.payment_url,'_blank');alert('🔗 Переход к оплате...');}
-        else{alert('❌ Не удалось получить ссылку на оплату');}
-    }catch(err){alert('❌ Ошибка: '+err.message);}
+        if(data.payment_url){
+            window.open(data.payment_url,'_blank');
+            showSuccess('🔗 Переход к оплате...');
+        } else {
+            throw new Error('Не удалось получить ссылку на оплату');
+        }
+    } catch(err) {
+        showError(err.message);
+    }
 }
 
 // ===== ФУНКЦИИ ВХОДА =====
