@@ -1,6 +1,6 @@
 {
   "name": "Моя АнтиСоцсеть",
-  "short_name": "AI News",
+  "short_name": "АнтиСоцсеть",
   "description": "Ежедневные персонализированные ленты новостей с искусственным интеллектом. Собирайте новости из Telegram, VK, RSS, MAX, YouTube, GitHub, Reddit и других источников. Без рекламы и шума — только то, что вы выбрали.",
   "start_url": "/pwa",
   "display": "standalone",
@@ -45,7 +45,7 @@
   "lang": "ru",
   "scope": "/",
   "id": "/",
-  "orientation": "portrait",
+  "orientation": "any",
   "dir": "ltr",
   "categories": [
     "news",
@@ -54,7 +54,13 @@
     "utilities"
   ],
   "share_target": {
-    "method": "GET"
+    "action": "/pwa",
+    "method": "GET",
+    "params": {
+      "title": "title",
+      "text": "text",
+      "url": "url"
+    }
   },
   "screenshots": [
     {
