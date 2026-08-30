@@ -1,0 +1,27 @@
+{
+  "specVersion": "0.1.0",
+  "host": {
+    "url": "https://news.proid.studio",
+    "name": "My AntiSocial Network"
+  },
+  "entries": [
+    {
+      "id": "1",
+      "urn": "urn:air:news.proid.studio:docs:api",
+      "identifier": "api-docs",
+      "displayName": "API Documentation",
+      "type": "text/markdown",
+      "url": "https://news.proid.studio/api-docs.md",
+      "representativeQueries": ["API endpoints", "authentication", "sources"]
+    },
+    {
+      "id": "2",
+      "urn": "urn:air:news.proid.studio:docs:llms",
+      "identifier": "llms-overview",
+      "displayName": "LLM Overview",
+      "type": "text/markdown",
+      "url": "https://news.proid.studio/llms.txt",
+      "representativeQueries": ["What is My AntiSocial Network", "how to use"]
+    }
+  ]
+}

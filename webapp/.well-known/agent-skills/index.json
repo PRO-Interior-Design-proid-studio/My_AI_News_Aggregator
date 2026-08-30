@@ -1,0 +1,12 @@
+{
+  "$schema": "https://agentskills.io/schema.json",
+  "skills": [
+    {
+      "name": "get_digest",
+      "type": "action",
+      "description": "Get the latest news digest for a user",
+      "url": "https://news.proid.studio/api/webapp/digest",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  ]
+}
