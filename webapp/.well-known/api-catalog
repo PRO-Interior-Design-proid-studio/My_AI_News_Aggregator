@@ -1,0 +1,12 @@
+{
+  "linkset": [
+    {
+      "anchor": "https://news.proid.studio",
+      "link": [
+        {"rel": "service-desc", "href": "https://news.proid.studio/openapi.json", "type": "application/openapi+json"},
+        {"rel": "service-doc", "href": "https://news.proid.studio/api-docs.md", "type": "text/markdown"},
+        {"rel": "status", "href": "https://news.proid.studio/api/health", "type": "application/json"}
+      ]
+    }
+  ]
+}

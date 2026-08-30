@@ -1,0 +1,5 @@
+{
+  "serverInfo": { "name": "My AntiSocial Network", "version": "1.0.0" },
+  "transport": { "type": "sse", "endpoint": "https://news.proid.studio/api/mcp/sse" },
+  "capabilities": { "tools": true, "resources": true }
+}

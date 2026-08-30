@@ -4,3 +4,18 @@ Disallow: /webapp/
 Disallow: /pwa
 Disallow: /payment/
 Allow: /
+
+User-agent: GPTBot
+Allow: /
+User-agent: OAI-SearchBot
+Allow: /
+User-agent: Claude-Web
+Allow: /
+User-agent: Google-Extended
+Allow: /
+
+Content-Signal: ai-train=no
+Content-Signal: search=yes
+Content-Signal: ai-input=yes
+
+Sitemap: https://news.proid.studio/sitemap.xml

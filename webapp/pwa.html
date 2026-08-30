@@ -73,6 +73,8 @@
     </script>
 
     <!-- ===== СТИЛИ (ВСЕ ВАШИ, БЕЗ ИЗМЕНЕНИЙ) ===== -->
+    <link rel="alternate" type="text/markdown" href="/pwa.html.md">
+    <link rel="describedby" href="/llms.txt">
 </head>
 <style>
 *{margin:0;padding:0;box-sizing:border-box;}
@@ -353,6 +355,8 @@ body{font-family:-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, 
 }
 
 </style>
+    <link rel="alternate" type="text/markdown" href="/pwa.html.md">
+    <link rel="describedby" href="/llms.txt">
 </head>
 <body>
 <div class="page-wrap">
@@ -2437,6 +2441,24 @@ window.addEventListener('message', function(event) {
     });
 })();
 
+</script>
+
+<script>
+if (navigator.modelContext && navigator.modelContext.provideContext) {
+  navigator.modelContext.provideContext({
+    name: "get_digest",
+    description: "Get the current news digest",
+    inputSchema: {
+      type: "object",
+      properties: {}
+    },
+    execute: async () => {
+      const resp = await fetch('/api/webapp/digest', { headers: { 'X-Auth-Token': localStorage.getItem('auth_token') || '' } });
+      const data = await resp.json();
+      return data.digest;
+    }
+  });
+}
 </script>
 
 <!-- ===== ФУТЕР ===== -->

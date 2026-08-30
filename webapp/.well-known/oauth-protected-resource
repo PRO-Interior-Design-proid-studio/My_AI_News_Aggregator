@@ -1,0 +1,5 @@
+{
+  "resource": "https://news.proid.studio",
+  "authorization_servers": ["https://news.proid.studio/.well-known/openid-configuration"],
+  "scopes_supported": ["openid", "profile"]
+}
