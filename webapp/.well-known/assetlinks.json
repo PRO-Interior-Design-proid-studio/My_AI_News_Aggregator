@@ -1,0 +1,8 @@
+[{
+      "relation": ["delegate_permission/common.handle_all_urls"],
+      "target": {
+        "namespace": "android_app",
+        "package_name": "studio.proid.news.twa",
+        "sha256_cert_fingerprints": ["95:11:3B:99:33:E5:F3:96:F3:F0:28:FF:65:E4:05:62:E6:22:46:2B:1F:38:C4:CA:8C:CF:60:90:60:54:8A:C9"]
+      }
+    }]

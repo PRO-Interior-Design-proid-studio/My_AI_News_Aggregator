@@ -307,7 +307,6 @@ WebApp](https://interior-design.proid.studio/picture/033.jpg)
 Доступные цены для любого бюджета.
 
 ::: {.grid-pricing}
-::: {.plan}
 ### Бесплатный
 
 ::: {.price}
@@ -326,9 +325,7 @@ WebApp](https://interior-design.proid.studio/picture/033.jpg)
 ::: {.plan-actions}
 [Начать](/pwa){.btn .btn-plan-secondary}
 :::
-:::
 
-::: {.plan}
 ### Базовый
 
 ::: {.price}
@@ -347,9 +344,7 @@ WebApp](https://interior-design.proid.studio/picture/033.jpg)
 ::: {.plan-actions}
 [Выбрать](/pwa){.btn .btn-plan-secondary}
 :::
-:::
 
-::: {.plan .popular}
 ::: {.badge}
 Популярный
 :::
@@ -372,7 +367,6 @@ WebApp](https://interior-design.proid.studio/picture/033.jpg)
 
 ::: {.plan-actions}
 [Выбрать](/pwa){.btn .btn-plan-primary}
-:::
 :::
 :::
 
@@ -502,13 +496,11 @@ GitHub](https://github.com/PRO-Interior-Design-proid-studio/My_AI_News_Aggregato
 :::
 :::
 
-::: {#docs .footer-wrapper}
 ::: {.footer-inner}
 [© 2026 «Моя АнтиСоцсеть»](/) [\|]{.sep} [Политика](/privacy) [\|]{.sep}
 [Оферта](/offer) [\|]{.sep} [Согласие](/consent) [\|]{.sep}
 [Реквизиты](/offer#requisites) [\|]{.sep} [Помощь](/support) [\|]{.sep}
 Создано: [proid.studio](https://proid.studio){.studio-link}
-:::
 :::
 
 ::: {#iosModal style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.85); z-index:1000; justify-content:center; align-items:center; padding:20px; backdrop-filter:blur(4px);"}
@@ -526,6 +518,9 @@ GitHub](https://github.com/PRO-Interior-Design-proid-studio/My_AI_News_Aggregato
 
 ::: {style="text-align: center; margin-top: 16px;"}
 Понятно
+
+\
+\
 
 Приятного использования!
 :::
