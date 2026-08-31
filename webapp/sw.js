@@ -1,4 +1,4 @@
-const CACHE_VERSION = 'v170'; // Автоматически обновляется скриптом rest
+const CACHE_VERSION = 'v174'; // Автоматически обновляется скриптом rest
 
 const STATIC_FILES = [
     // Основные страницы
