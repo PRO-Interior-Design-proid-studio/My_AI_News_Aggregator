@@ -434,6 +434,10 @@ Telegram](https://t.me/My_AI_News_Aggregator_bot){.change-time-btn}
 Выход (сброс кэша)
 :::
 :::
+
+::: {style="text-align: center; margin-top: 12px; font-size: 14px; color: var(--text-secondary);"}
+Контакт: <news@proid.studio>
+:::
 :::
 :::
 :::

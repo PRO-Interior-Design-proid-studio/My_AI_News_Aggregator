@@ -1,23 +1,12 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-    <!-- ===== БАЗОВЫЕ МЕТА-ТЕГИ ===== -->
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-
-    <!-- ===== TITLE (для поиска и соцсетей) ===== -->
     <title>Моя АнтиСоцсеть — персонализированный новостной агрегатор (PWA)</title>
-
-    <!-- ===== SEO: ЗАПРЕТ ИНДЕКСАЦИИ (SPA) ===== -->
     <meta name="robots" content="noindex, nofollow">
-
-    <!-- ===== КАНОНИЧЕСКАЯ ССЫЛКА (на себя) ===== -->
     <link rel="canonical" href="https://news.proid.studio/pwa">
-
-    <!-- ===== ОПИСАНИЕ ДЛЯ ПОИСКОВИКОВ И СОЦСЕТЕЙ ===== -->
     <meta name="description" content="Персонализированная AI-лента новостей. Войдите через VK, MAX или Яндекс ID и получайте ежедневную подборку из выбранных источников — без рекламы и спама.">
-
-    <!-- ===== OPEN GRAPH (Facebook, VK, Telegram) ===== -->
     <meta property="og:title" content="Моя АнтиСоцсеть — персонализированный новостной агрегатор">
     <meta property="og:description" content="Персонализированная AI-лента новостей. Войдите через VK, MAX или Яндекс ID.">
     <meta property="og:type" content="website">
@@ -27,28 +16,20 @@
     <meta property="og:image:height" content="630">
     <meta property="og:locale" content="ru_RU">
     <meta property="og:site_name" content="Моя АнтиСоцсеть">
-
-    <!-- ===== TWITTER CARD ===== -->
     <meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:title" content="Моя АнтиСоцсеть — персонализированный новостной агрегатор">
     <meta name="twitter:description" content="Персонализированная AI-лента новостей. Войдите через VK, MAX или Яндекс ID.">
     <meta name="twitter:image" content="https://news.proid.studio/picture/LOGO.jpg">
-
-    <!-- ===== ИКОНКИ ===== -->
     <link rel="icon" href="/icons/favicon.ico">
     <link rel="apple-touch-icon" href="/icons/apple-icon-180x180.png">
     <link rel="apple-touch-icon" sizes="152x152" href="/icons/apple-icon-152x152.png">
     <link rel="apple-touch-icon" sizes="144x144" href="/icons/apple-icon-144x144.png">
     <link rel="apple-touch-icon" sizes="120x120" href="/icons/apple-icon-120x120.png">
     <link rel="apple-touch-icon" sizes="114x114" href="/icons/apple-icon-114x114.png">
-
-    <!-- ===== PWA / МАНИФЕСТ И ТЕМА ===== -->
     <link rel="manifest" href="/manifest.json">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="theme-color" content="#010715">
-
-    <!-- ===== СТРУКТУРИРОВАННЫЕ ДАННЫЕ (JSON-LD) ===== -->
     <script type="application/ld+json">
     {
       "@context": "https://schema.org",
@@ -71,11 +52,8 @@
       }
     }
     </script>
-
-    <!-- ===== СТИЛИ (ВСЕ ВАШИ, БЕЗ ИЗМЕНЕНИЙ) ===== -->
     <link rel="alternate" type="text/markdown" href="/pwa.html.md">
     <link rel="describedby" href="/llms.txt">
-</head>
 <style>
 *{margin:0;padding:0;box-sizing:border-box;}
 :root{--bg-color:#010715;--footer-bg:#111c40;--text:#fff;--text-secondary:#8a9bb5;--accent:#6c5ce7;--accent2:#3088ff;--card-bg:rgba(255,255,255,0.04);--border:rgba(255,255,255,0.06);--radius:20px;--shadow:0 12px 48px rgba(0,0,0,0.6);}
@@ -243,8 +221,6 @@ body{font-family:-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, 
 #logoutContainer:hover {
     color: var(--text) !important;
 }
-
-/* ===== БЛОК ПОГОДЫ (6 колонок: день, иконка, температура, направление ветра, скорость ветра, влажность) ===== */
 #weatherContent {
     display: flex;
     flex-direction: column;
@@ -330,7 +306,6 @@ body{font-family:-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, 
     color: #ff6b6b;
     font-size: 14px;
 }
-
 .btn-more {
     display: block;
     width: 100%;
@@ -353,10 +328,7 @@ body{font-family:-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, 
 .btn-more:active {
     transform: scale(0.98);
 }
-
 </style>
-    <link rel="alternate" type="text/markdown" href="/pwa.html.md">
-    <link rel="describedby" href="/llms.txt">
 </head>
 <body>
 <div class="page-wrap">
@@ -368,9 +340,7 @@ body{font-family:-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, 
    <button class="auth-btn vk" id="vkLoginBtn"><span class="icon">🚀</span> Войти через VK</button>
    <button class="auth-btn yandex" id="yandexLoginBtn"><span class="icon">🚀</span> Войти через Яндекс</button>
 </div>
-<!-- ===== ВХОД ПО ПОЧТЕ ===== -->
 <div id="emailAuthBlock" style="max-width: 340px; margin: 16px auto 0; text-align: center;">
-    <!-- Режим входа -->
     <div id="emailLoginForm">
         <input type="email" id="loginEmailField" placeholder="Email (только .ru, .рф)"
                style="width:300px; padding:16px 24px; margin:0 auto 8px; border-radius:26px; background:rgba(0,0,0,0.3); color:#fff; border:1px solid var(--border); display:block;">
@@ -381,8 +351,6 @@ body{font-family:-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, 
             Нет аккаунта? <a href="#" id="switchToRegister" style="color:var(--accent2);">Зарегистрироваться</a>
         </div>
     </div>
-
-    <!-- Режим регистрации -->
     <div id="emailRegisterForm" style="display:none;">
         <input type="email" id="regEmailField" placeholder="Email (только .ru, .рф)"
                style="width:300px; padding:16px 24px; margin:0 auto 8px; border-radius:26px; background:rgba(0,0,0,0.3); color:#fff; border:1px solid var(--border); display:block;">
@@ -396,33 +364,20 @@ body{font-family:-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, 
         </div>
     </div>
 </div>
-<!-- ===== БЛОК "ВАЖНО" (ширина 340px) ===== -->
 <div class="status-block" style="margin-top: 40px; max-width: 340px; margin-left: auto; margin-right: auto;">
     <div class="status-title" style="color: var(--text);">Важно</div>
     <div style="margin: 8px 0 10px; font-size: 13px; color: var(--text-secondary);">
-        <div style="padding: 6px 0; border-bottom: 1px solid var(--border); text-align: center;">
-            Telegram будет доступен после входа
-        </div>
-        <div style="padding: 6px 0; border-bottom: 1px solid var(--border); text-align: center;">
-            Привязка аккаунта к одному методу входа
-        </div>
-        <div style="padding: 6px 0; border-bottom: 1px solid var(--border); text-align: center;">
-            Зарубежный автовход запрещен в РФ
-        </div>
-        <div style="padding: 6px 0; border-bottom: 1px solid var(--border); text-align: center;">
-            Иногда VPN может мешать авторизации
-        </div>
-        <div style="padding: 6px 0; text-align: center;">
-            Подробнее в нашей <a href="/support" target="_blank" style="color: var(--accent2); text-decoration: none;">Справке</a>
-        </div>
+        <div style="padding: 6px 0; border-bottom: 1px solid var(--border); text-align: center;">Telegram будет доступен после входа</div>
+        <div style="padding: 6px 0; border-bottom: 1px solid var(--border); text-align: center;">Привязка аккаунта к одному методу входа</div>
+        <div style="padding: 6px 0; border-bottom: 1px solid var(--border); text-align: center;">Зарубежный автовход запрещен в РФ</div>
+        <div style="padding: 6px 0; border-bottom: 1px solid var(--border); text-align: center;">Иногда VPN может мешать авторизации</div>
+        <div style="padding: 6px 0; text-align: center;">Подробнее в нашей <a href="/support" target="_blank" style="color: var(--accent2); text-decoration: none;">Справке</a></div>
     </div>
 </div>
 <div class="widget-container" id="widgetContainer"></div>
 </div>
 <div id="appScreen" class="hidden">
 <div class="header"><h1>Моя АнтиСоцсеть</h1></div>
-
-<!-- ===== БЛОК СОГЛАСИЯ ===== -->
 <div class="status-block" id="consentBlock" style="display: none;">
     <div class="status-title">Конфиденциальность</div>
     <p style="color: var(--text-secondary); font-size: 14px; margin-bottom: 12px; line-height: 1.6;">
@@ -441,8 +396,6 @@ body{font-family:-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, 
         Соглашаюсь
     </button>
 </div>
-
-<!-- Остальной контент -->
 <div id="appContent">
 <div class="section-header">Добавить</div>
 <div class="quick-buttons" id="quickButtons">
@@ -523,14 +476,10 @@ body{font-family:-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, 
 <div class="category-grid" id="categoryGrid"></div>
 <button class="btn-secondary" id="categoryBackBtn" style="display:none;margin-top:8px;width:100%;">← Назад</button>
 </div>
-
-<!-- Кнопка "Смотреть новости" -->
 <button class="payment-toggle-btn" id="digestToggleBtn">📰 Смотреть новости</button>
 <div id="digestContainer" style="display: none; margin-top: 0;">
     <div id="digestContent"></div>
 </div>
-
-<!-- ===== БЛОК ПОГОДЫ ===== -->
 <div class="status-block" id="weatherBlock">
     <div class="status-title">Погода в Москве</div>
     <div id="weatherContent">
@@ -540,7 +489,6 @@ body{font-family:-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, 
         Данные обновляются каждый час · <span id="weatherUpdateTime">—</span>
     </div>
 </div>
-
 <div class="section-header">Мои источники (<span id="counter">0</span>)</div>
 <div id="sourceListContainer"></div>
 <button class="payment-toggle-btn" id="paymentToggleBtn">💰 Оплатить тариф</button>
@@ -573,9 +521,7 @@ body{font-family:-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, 
 <button class="close-picker-btn" id="closeTimePickerBtn">Закрыть</button>
 </div>
 </div>
-
 <div class="status-block" style="padding: 8px 8px; cursor: pointer;" onclick="alert('❤️ Спасибо! Расскажите про нас друзьям.' )"><div class="status-row" style="border-bottom: none; justify-content: center; padding: 0;"><span style="color: var(--text-secondary); font-size: 14px;">❤️ Сделано с любовью к людям</span></div></div>
-<!-- ===== ССЫЛКИ НА БОТОВ ===== -->
 <div style="display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; margin: 12px 0;">
     <a href="https://max.ru/id772609477460_bot" target="_blank" class="change-time-btn" style="display: inline-block; text-decoration: none;">Открыть в MAX</a>
     <a href="https://t.me/My_AI_News_Aggregator_bot" target="_blank" class="change-time-btn" style="display: inline-block; text-decoration: none;">Открыть в Telegram</a>
@@ -584,24 +530,20 @@ body{font-family:-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, 
 <div style="display: flex; justify-content: center; margin-top: 8px;">
     <div id="logoutContainer" class="change-time-btn" style="cursor: pointer; text-decoration: none; padding: 4px 12px; display: inline-block;">Выход (сброс кэша)</div>
 </div>
-</div> <!-- /appContent -->
-</div> <!-- /appScreen -->
+<!-- ===== КОНТАКТ ===== -->
+<div style="text-align: center; margin-top: 12px; font-size: 14px; color: var(--text-secondary);">
+    Контакт: <a href="mailto:news@proid.studio" style="color: var(--accent2); text-decoration: none;">news@proid.studio</a>
 </div>
 </div>
-
-<!-- ===== ПОДКЛЮЧАЕМ CATEGORIES.JS ===== -->
+</div>
+</div>
+</div>
 <script src="/webapp/categories.js?v=50"></script>
-
 <script>
-// ===== ФЛАГ: страница открыта из расширения =====
 const isFromExtension = new URLSearchParams(window.location.search).get('from_extension') === '1';
-
-// ===== КОНСТАНТЫ =====
 const TEST_TOKEN = 'vol7Js5SZnjPuaTfkk46zea3I-k_vsInqyqQPho_dF0';
 const VK_APP_ID = '54718264';
 const API_BASE = 'https://news.proid.studio';
-
-// ===== ГЛОБАЛЬНЫЕ ОБРАБОТЧИКИ ОШИБОК (для Huawei и других платформ) =====
 window.addEventListener('error', function(event) {
     console.error('❌ Глобальная ошибка:', event.message, event.filename, event.lineno);
     try {
@@ -609,15 +551,12 @@ window.addEventListener('error', function(event) {
     } catch (e) {}
     return false;
 });
-
 window.addEventListener('unhandledrejection', function(event) {
     console.error('❌ Необработанный промис:', event.reason);
     try {
         fetch('/api/debug?msg=unhandled_rejection:' + encodeURIComponent(String(event.reason)));
     } catch (e) {}
 });
-
-// ===== ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ ДЛЯ СООБЩЕНИЙ =====
 function showSuccess(text) {
     try {
         if (window.Telegram?.WebApp?.showPopup) {
@@ -639,7 +578,6 @@ function showSuccess(text) {
         alert('✅ ' + text);
     }
 }
-
 function showError(text) {
     try {
         if (window.Telegram?.WebApp?.showPopup) {
@@ -661,80 +599,62 @@ function showError(text) {
         alert('❌ ' + text);
     }
 }
-
 function safeCloseWindow() {
     try {
         if (window.close && typeof window.close === 'function') {
             window.close();
         } else {
-            // просто скрываем модальное окно или ничего не делаем
         }
     } catch (e) {
         console.warn('❌ Ошибка закрытия:', e);
     }
 }
-
-// ===== PKCE ДЛЯ VK ID OAuth 2.1 =====
 function generateCodeVerifier() {
     const array = new Uint8Array(32);
     crypto.getRandomValues(array);
     return base64UrlEncode(array);
 }
-
 function base64UrlEncode(buffer) {
     return btoa(String.fromCharCode(...buffer))
         .replace(/\+/g, '-')
         .replace(/\//g, '_')
         .replace(/=+$/, '');
 }
-
 async function sha256(plain) {
     const encoder = new TextEncoder();
     const data = encoder.encode(plain);
     const hash = await crypto.subtle.digest('SHA-256', data);
     return hash;
 }
-
 async function generateCodeChallenge(verifier) {
     const hash = await sha256(verifier);
     return base64UrlEncode(new Uint8Array(hash));
 }
-
-// ===== ФУНКЦИЯ POLLFOTOKEN (ДЛЯ ЯНДЕКСА) =====
 let yandexPollingState = null;
-
 function pollForToken(state, onSuccess, source) {
     console.log('🔍 pollForToken запущен для state:', state, 'source:', source);
-
     if (yandexPollingState === state) {
         console.warn('⏭️ pollForToken уже выполняется для state:', state);
         return;
     }
     yandexPollingState = state;
-
     let attempts = 0;
     const maxAttempts = 120;
-
     const poll = async () => {
         attempts++;
         console.log(`🔄 Попытка ${attempts}/${maxAttempts} для state ${state}`);
-
         try {
             const resp = await apiRequest(
                 `/api/auth/get-token-by-state?state=${encodeURIComponent(state)}`
             );
-
             if (resp && resp.ok) {
                 const data = await resp.json();
                 console.log('📦 Ответ от сервера:', data);
-
                 if (data.token) {
                     yandexPollingState = null;
                     authToken = data.token;
                     localStorage.setItem('auth_token', authToken);
-
                     console.log('✅ Токен получен! Источник:', source);
-
                     setTimeout(() => {
                         if (source === 'telegram') {
                             alert('✅ Нажмите ОК для входа! Чтобы привязать Telegram-бота вернитесь в приложение Telegram.');
@@ -743,35 +663,26 @@ function pollForToken(state, onSuccess, source) {
                         }
                         if (onSuccess) onSuccess();
                     }, 100);
-
                     return;
                 }
             }
         } catch (e) {
             console.error('❌ Ошибка в pollForToken:', e);
         }
-
         if (attempts >= maxAttempts) {
             yandexPollingState = null;
             console.error('⏰ Время истекло для state', state);
             alert('⏰ Время истекло. Попробуйте снова.');
-
             const container = document.querySelector('#loginScreen .auth-container');
             if (container) container.style.display = 'block';
-
             const w = document.getElementById('widgetContainer');
             if (w) w.innerHTML = '';
-
             return;
         }
-
         setTimeout(poll, 3000);
     };
-
     poll();
 }
-
-// ===== ГЛОБАЛЬНЫЕ ПЕРЕМЕННЫЕ =====
 let currentSources = [];
 let currentLimit = 5;
 let currentAddType = 'rss';
@@ -781,11 +692,9 @@ let defaultSendHour = 18;
 let authToken = localStorage.getItem('auth_token') || null;
 let isTestUser = false;
 let consentGiven = false;
-
 function hapticFeedback(){if(navigator.vibrate)navigator.vibrate(10);}
 (function(){
     const p = new URLSearchParams(window.location.search);
-    // ===== СОХРАНЯЕМ ФЛАГИ В sessionStorage (ДО УДАЛЕНИЯ ПАРАМЕТРОВ) =====
     const fromTelegram = p.get("from_telegram") === "1";
     const fromYandex = p.get("from_yandex") === "1";
     if (fromTelegram) sessionStorage.setItem("telegram_alert", "true");
@@ -809,20 +718,16 @@ function hapticFeedback(){if(navigator.vibrate)navigator.vibrate(10);}
         }
     }
 })();
-
 function getHeaders(){
     return {
         'Content-Type': 'application/json',
         ...(authToken ? {'X-Auth-Token': authToken} : {})
     };
 }
-
 function showLoginScreen(){
     document.getElementById('loginScreen').style.display = 'block';
     document.getElementById('appScreen').classList.add('hidden');
 }
-
-// ===== УПРАВЛЕНИЕ СОГЛАСИЕМ =====
 function showConsentBlock() {
     document.getElementById('loginScreen').style.display = 'none';
     document.getElementById('appScreen').classList.remove('hidden');
@@ -830,7 +735,6 @@ function showConsentBlock() {
     document.getElementById('appContent').style.display = 'none';
     document.getElementById('appScreen').classList.add('consent-pending');
 }
-
 function showAppContent() {
     document.getElementById('loginScreen').style.display = 'none';
     document.getElementById('appScreen').classList.remove('hidden');
@@ -838,8 +742,6 @@ function showAppContent() {
     document.getElementById('appContent').style.display = 'block';
     document.getElementById('appScreen').classList.remove('consent-pending');
 }
-
-// ===== ИСПРАВЛЕННАЯ APIREQUEST (добавляет API_BASE) =====
 async function apiRequest(url, options = {}) {
     const fullUrl = url.startsWith('http') ? url : API_BASE + url;
     try {
@@ -854,7 +756,6 @@ async function apiRequest(url, options = {}) {
         throw err;
     }
 }
-
 function ensureConsent() {
     if (!consentGiven && !isTestUser) {
         alert('Сначала примите согласие на обработку данных.');
@@ -862,8 +763,6 @@ function ensureConsent() {
     }
     return true;
 }
-
-// ===== ЗАГРУЗКА ПРИЛОЖЕНИЯ =====
 async function loadApp(){
     if (!authToken) {
         showLoginScreen();
@@ -894,14 +793,13 @@ async function loadApp(){
         const data = await resp.json();
         currentSources = data.sources || [];
         currentLimit = data.limit || 5;
+        window.lastSent = data.last_sent || null; // <-- СОХРАНЯЕМ ДАТУ ЛЕНТЫ
         renderGroupedSources(currentSources);
         document.getElementById('counter').textContent = currentSources.length;
         updateStatus(data);
-
         isTestUser = (authToken === TEST_TOKEN);
         consentGiven = data.consent_given === true;
         window.TEST_MODE = isTestUser;
-
         if (!consentGiven || isTestUser) {
             showConsentBlock();
             document.getElementById('quickButtons').style.display = 'none';
@@ -916,8 +814,6 @@ async function loadApp(){
         showAppContent();
     }
 }
-
-// ===== ОБРАБОТЧИК КНОПКИ "ПРИНИМАЮ" =====
 document.addEventListener('DOMContentLoaded', function() {
     const check = document.getElementById('consentCheck');
     const btn = document.getElementById('consentAcceptBtn');
@@ -961,24 +857,16 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
     }
-
-    // ===== ПРИВЯЗКА ОСНОВНЫХ КНОПОК =====
     const vkBtn = document.getElementById('vkLoginBtn');
     if (vkBtn) vkBtn.addEventListener('click', startVkAuth);
-
     const maxBtn = document.getElementById('maxLoginBtn');
     if (maxBtn) maxBtn.addEventListener('click', startMaxAuth);
-
     const yandexBtn = document.getElementById('yandexLoginBtn');
     if (yandexBtn) yandexBtn.addEventListener('click', startYandexAuth);
-
     const digestBtn = document.getElementById('digestToggleBtn');
     if (digestBtn) digestBtn.addEventListener('click', toggleDigest);
-
     const logoutEl = document.getElementById('logoutContainer');
     if (logoutEl) logoutEl.addEventListener('click', logout);
-
-    // Быстрое меню
     const btnDzen = document.getElementById('btn-dzen');
     if (btnDzen) btnDzen.addEventListener('click', function() { toggleCategoryForm('dzen'); });
     const btnRb = document.getElementById('btn-rb');
@@ -1009,8 +897,6 @@ document.addEventListener('DOMContentLoaded', function() {
     if (btnGoogleNews) btnGoogleNews.addEventListener('click', toggleGoogleNewsForm);
     const btnCnn = document.getElementById('btn-cnn');
     if (btnCnn) btnCnn.addEventListener('click', function() { toggleCategoryForm('cnn'); });
-
-    // Формы
     const addSourceSubmitBtn = document.getElementById('addSourceSubmitBtn');
     if (addSourceSubmitBtn) addSourceSubmitBtn.addEventListener('click', addSourceSubmit);
     const closeAddFormBtn = document.getElementById('closeAddFormBtn');
@@ -1029,8 +915,6 @@ document.addEventListener('DOMContentLoaded', function() {
     if (generateGoogleNewsBtn) generateGoogleNewsBtn.addEventListener('click', generateGoogleNewsRSS);
     const closeGoogleNewsFormBtn = document.getElementById('closeGoogleNewsFormBtn');
     if (closeGoogleNewsFormBtn) closeGoogleNewsFormBtn.addEventListener('click', closeGoogleNewsForm);
-
-    // GitHub grid
     const githubReleases = document.getElementById('github-releases');
     if (githubReleases) githubReleases.addEventListener('click', function() { generateGitHubRSS('releases'); });
     const githubTags = document.getElementById('github-tags');
@@ -1043,20 +927,14 @@ document.addEventListener('DOMContentLoaded', function() {
     if (githubMaster) githubMaster.addEventListener('click', function() { generateGitHubRSS('master'); });
     const githubUsername = document.getElementById('github-username');
     if (githubUsername) githubUsername.addEventListener('click', function() { generateGitHubRSS('username'); });
-
-    // Категории
     const categoryBrowserBtn = document.getElementById('categoryBrowserBtn');
     if (categoryBrowserBtn) categoryBrowserBtn.addEventListener('click', toggleCategoryBrowser);
     const categoryBackBtn = document.getElementById('categoryBackBtn');
     if (categoryBackBtn) categoryBackBtn.addEventListener('click', goBackLevel);
     const suggestSourceBtn = document.getElementById('suggestSourceBtn');
     if (suggestSourceBtn) suggestSourceBtn.addEventListener('click', suggestSource);
-
-    // Тарифы
     const paymentToggleBtn = document.getElementById('paymentToggleBtn');
     if (paymentToggleBtn) paymentToggleBtn.addEventListener('click', toggleTariffs);
-
-    // Время
     const changeTimeBtn = document.getElementById('changeTimeBtn');
     if (changeTimeBtn) changeTimeBtn.addEventListener('click', toggleTimePicker);
     const closeTimePickerBtn = document.getElementById('closeTimePickerBtn');
@@ -1064,8 +942,6 @@ document.addEventListener('DOMContentLoaded', function() {
     const upgradeLink = document.getElementById('upgradeLink');
     if (upgradeLink) upgradeLink.addEventListener('click', function(e) { e.preventDefault(); toggleTariffs(); });
 });
-
-// ===== ОСТАЛЬНЫЕ ФУНКЦИИ =====
 function getTypeLabel(t){const m={'rss':'RSS/HTML','telegram':'Telegram','vk':'VK','max':'MAX'};return m[t]||t;}
 function truncate(s,l){l=l||40;return s.length>l?s.slice(0,l)+'…':s;}
 function safeDecodeUrl(u){try{return decodeURIComponent(u);}catch(e){return u;}}
@@ -1074,8 +950,6 @@ if(s.type==='rss'){v=safeDecodeUrl(v).replace(/^https?:\/\//,'').replace(/^www\.
 return v;}
 function getSourceUrl(s){let u=s.value;if(s.type==='telegram')u='https://t.me/'+u.replace(/^@/,'');else if(s.type==='vk')u='https://vk.com/'+u.replace(/^@/,'');return u;}
 function askOpenLink(u){hapticFeedback();if(window.confirm('Открыть ссылку?\n\n'+u))window.open(u,'_blank');}
-
-// ===== НОВАЯ ЭТАЛОННАЯ ФУНКЦИЯ RENDERGROUPEDSOURCES =====
 function renderGroupedSources(sources) {
     const container = document.getElementById('sourceListContainer');
     if (!container) return;
@@ -1131,7 +1005,6 @@ function renderGroupedSources(sources) {
         groupDiv.appendChild(list);
         container.appendChild(groupDiv);
     });
-
     if (sources.length > 5) {
         const btn = document.createElement('button');
         btn.className = 'btn-more';
@@ -1173,10 +1046,8 @@ function renderGroupedSources(sources) {
         });
     }
 }
-
 function getIconGradient(t){switch(t){case'telegram':return'linear-gradient(290deg,#d235ff 0%,#a062ff 30%,#3088ff 66%,#61d8ff 100%)';case'vk':return'linear-gradient(290deg,#0d47a1 0%,#1565c0 30%,#1e88e5 66%,#64b5f6 100%)';case'rss':return'linear-gradient(290deg,#d84315 0%,#f57c00 30%,#f9a825 66%,#ffee58 100%)';default:return'linear-gradient(290deg,#d235ff 0%,#a062ff 30%,#3088ff 66%,#61d8ff 100%)';}}
 function updateStatus(d){document.getElementById('statusTariff').textContent=d.tariff_name||'—';document.getElementById('statusSources').textContent=d.used||0;document.getElementById('statusLimit').textContent=d.limit||5;document.getElementById('statusAutoSend').textContent='✅';document.getElementById('statusLastSent').textContent=d.last_sent||'—';document.getElementById('statusExpires').textContent=d.expires_at||'—';isPremium=d.is_premium||false;defaultSendHour=d.default_send_hour||18;currentSendTime=d.send_time||null;const display=currentSendTime?currentSendTime:(defaultSendHour.toString().padStart(2,'0')+':00');document.getElementById('currentTimeDisplay').textContent=display+' MSK';const btn=document.getElementById('changeTimeBtn');const hint=document.getElementById('upgradeHint');if(isPremium){btn.style.display='inline-block';btn.disabled=false;hint.style.display='none';}else{btn.style.display='none';hint.style.display='inline-block';if(document.getElementById('timePicker').style.display!=='none')closeTimePicker();}}
-
 function confirmDelete(id){hapticFeedback();const s=currentSources.find(s=>s.id===id);if(!s){alert('Источник не найден');return;}
 const f=formatSourceValue(s);if(window.confirm('Удалить источник?\n\n'+f+'\n\nЭто действие нельзя отменить.'))deleteSource(id);}
 async function deleteSource(id){if(!ensureConsent())return; 
@@ -1197,13 +1068,11 @@ async function deleteSource(id){if(!ensureConsent())return;
         showError(err.message || 'Не удалось удалить источник');
     }
 }
-
 function closeAddForm(){try{document.getElementById('addForm').style.display='none';}catch(e){}}
 function closeGitHubForm(){try{document.getElementById('githubForm').style.display='none';}catch(e){}}
 function closeYouTubeForm(){try{document.getElementById('youtubeForm').style.display='none';}catch(e){}}
 function closeRedditForm(){try{document.getElementById('redditForm').style.display='none';}catch(e){}}
 function closeGoogleNewsForm(){try{document.getElementById('googleNewsForm').style.display='none';}catch(e){}}
-
 function toggleForm(formId) {
     const form = document.getElementById(formId);
     if (!form) return;
@@ -1217,7 +1086,6 @@ function toggleForm(formId) {
         form.style.display = 'none';
     }
 }
-
 function toggleCategoryForm(type) { if(!ensureConsent())return; hapticFeedback();
     const map = {
         'bbc':'bbcForm','cnn':'cnnForm','dzen':'dzenForm',
@@ -1256,7 +1124,6 @@ function toggleCategoryForm(type) { if(!ensureConsent())return; hapticFeedback()
         }
     }
 }
-
 function toggleAddForm(type) { if(!ensureConsent())return; hapticFeedback();
     const form = document.getElementById('addForm');
     const isHidden = window.getComputedStyle(form).display === 'none';
@@ -1274,7 +1141,6 @@ function toggleAddForm(type) { if(!ensureConsent())return; hapticFeedback();
         form.style.display = 'none';
     }
 }
-
 function toggleGitHubForm() { if(!ensureConsent())return; hapticFeedback();
     const form = document.getElementById('githubForm');
     const isHidden = window.getComputedStyle(form).display === 'none';
@@ -1292,7 +1158,6 @@ function toggleGitHubForm() { if(!ensureConsent())return; hapticFeedback();
         form.style.display = 'none';
     }
 }
-
 function toggleYouTubeForm() { if(!ensureConsent())return; hapticFeedback();
     const form = document.getElementById('youtubeForm');
     const isHidden = window.getComputedStyle(form).display === 'none';
@@ -1303,7 +1168,6 @@ function toggleYouTubeForm() { if(!ensureConsent())return; hapticFeedback();
         form.style.display = 'none';
     }
 }
-
 function toggleRedditForm() { if(!ensureConsent())return; hapticFeedback();
     const form = document.getElementById('redditForm');
     const isHidden = window.getComputedStyle(form).display === 'none';
@@ -1314,7 +1178,6 @@ function toggleRedditForm() { if(!ensureConsent())return; hapticFeedback();
         form.style.display = 'none';
     }
 }
-
 function toggleGoogleNewsForm() { if(!ensureConsent())return; hapticFeedback();
     const form = document.getElementById('googleNewsForm');
     const isHidden = window.getComputedStyle(form).display === 'none';
@@ -1325,17 +1188,14 @@ function toggleGoogleNewsForm() { if(!ensureConsent())return; hapticFeedback();
         form.style.display = 'none';
     }
 }
-
 function addForbesTelegram() { if(!ensureConsent())return; hapticFeedback();
     addCategorySource('telegram','forbesrussia','Forbes (Telegram)');
 }
-
 async function addSourceSubmit(){ if(!ensureConsent())return; hapticFeedback();
     try {
         const val=document.getElementById('sourceValue').value.trim();
         if(!val){ showError('Введите значение'); return; }
         if(!window.confirm('Добавить источник?\n\n'+val)) return;
-
         const resp=await apiRequest('/api/webapp/add',{
             method:'POST',
             headers:getHeaders(),
@@ -1354,7 +1214,6 @@ async function addSourceSubmit(){ if(!ensureConsent())return; hapticFeedback();
         showError(err.message || 'Не удалось добавить источник');
     }
 }
-
 async function addCategorySource(t,u,n){ if(!ensureConsent())return; hapticFeedback();
     try {
         if(!u||!u.trim()){ showError('URL не может быть пустым'); return; }
@@ -1363,9 +1222,7 @@ async function addCategorySource(t,u,n){ if(!ensureConsent())return; hapticFeedb
         if(final.startsWith('https://t.me/')){type='telegram';final=final.replace(/^https:\/\/t\.me\//,'').split('/')[0];if(final.startsWith('@'))final=final.slice(1);}
         else if(final.startsWith('https://vk.com/')||final.startsWith('https://vk.ru/')){type='vk';final=final.replace(/^https:\/\/(vk\.com|vk\.ru)\//,'').split('/')[0];if(final.startsWith('@'))final=final.slice(1);}
         else if(!final.startsWith('http://')&&!final.startsWith('https://')){if(type!=='telegram'&&type!=='vk')final='https://'+final;}
-
         if(!window.confirm('Добавить источник?\n\n'+n+'\n'+final)) return;
-
         const resp=await apiRequest('/api/webapp/add',{
             method:'POST',
             headers:getHeaders(),
@@ -1383,13 +1240,11 @@ async function addCategorySource(t,u,n){ if(!ensureConsent())return; hapticFeedb
         showError(err.message || 'Не удалось добавить источник');
     }
 }
-
 function addRSSSource(u,n){ if(!ensureConsent())return; hapticFeedback();
     try {
         if(!u||!u.trim()){ showError('URL не может быть пустым.'); return; }
         let final=u.trim();
         if(!final.startsWith('http://')&&!final.startsWith('https://')) final='https://'+final;
-
         fetch(API_BASE+'/api/webapp/add',{
             method:'POST',
             headers:getHeaders(),
@@ -1407,13 +1262,11 @@ function addRSSSource(u,n){ if(!ensureConsent())return; hapticFeedback();
         showError(err.message);
     }
 }
-
 function addSourceByType(t,u,n){ if(!ensureConsent())return; hapticFeedback();
     let type=t;
     if(!['rss','telegram','vk','max'].includes(type))type='rss';
     addCategorySource(type,u,n);
 }
-
 function updateGitHubButtons(v){
     const grid=document.getElementById('githubGrid');
     const btns=grid.querySelectorAll('button');
@@ -1460,13 +1313,11 @@ function generateGitHubRSS(t){ if(!ensureConsent())return; hapticFeedback();
         showError(e.message || 'Ошибка генерации GitHub RSS');
     }
 }
-
 async function generateYouTubeRSS(){ if(!ensureConsent())return; hapticFeedback();
     try {
         const input=document.getElementById('youtubeInput');
         let val=input.value.trim();
         if(!val){ showError('Введите имя канала или channelId.'); return; }
-
         const resp=await apiRequest('/api/youtube/resolve',{
             method:'POST',
             headers:{'Content-Type':'application/json'},
@@ -1490,7 +1341,6 @@ async function generateYouTubeRSS(){ if(!ensureConsent())return; hapticFeedback(
         showError(err.message || 'Ошибка генерации YouTube RSS');
     }
 }
-
 function generateRedditRSS(){ if(!ensureConsent())return; hapticFeedback();
     try {
         const input=document.getElementById('redditInput');
@@ -1506,7 +1356,6 @@ function generateRedditRSS(){ if(!ensureConsent())return; hapticFeedback();
         showError(e.message || 'Ошибка генерации Reddit RSS');
     }
 }
-
 function generateGoogleNewsRSS(){ if(!ensureConsent())return; hapticFeedback();
     try {
         const input=document.getElementById('googleNewsInput');
@@ -1521,7 +1370,6 @@ function generateGoogleNewsRSS(){ if(!ensureConsent())return; hapticFeedback();
         showError(e.message || 'Ошибка генерации Google News RSS');
     }
 }
-
 let categoryHistory=[];
 const CATEGORY_CACHE_TTL=3600000;
 async function loadCategoryLevel(parentId=null){
@@ -1615,7 +1463,6 @@ function goBackLevel(){ if(!ensureConsent())return; hapticFeedback();
     if(categoryHistory.length===0)showLevel(null);
     else showLevel(categoryHistory[categoryHistory.length-1].id);
 }
-
 function toggleTimePicker(){ if(!ensureConsent())return; hapticFeedback();
     if(!isPremium){ showError('⛔ Доступно только для Расширенного тарифа. Оформите подписку.'); return; }
     const p=document.getElementById('timePicker');
@@ -1659,7 +1506,6 @@ async function setTime(hour){ if(!ensureConsent())return; hapticFeedback();
         showError(err.message || 'Не удалось установить время');
     }
 }
-
 function toggleTariffs(){ if(!ensureConsent())return; hapticFeedback();document.getElementById('tariffBlock').classList.toggle('visible');}
 async function handlePayment(tariffKey){ if(!ensureConsent())return; hapticFeedback();
     try {
@@ -1685,18 +1531,11 @@ async function handlePayment(tariffKey){ if(!ensureConsent())return; hapticFeedb
         showError(err.message);
     }
 }
-
-// ===== ФУНКЦИИ ВХОДА =====
-
-// ----- VK OAuth с серверным хранением code_verifier (новая вкладка) -----
 async function startVkAuth(){
     hapticFeedback();
     const verifier = generateCodeVerifier();
     const challenge = await generateCodeChallenge(verifier);
-    // ИЗМЕНЕНО: state с префиксом telegram_
     const state = 'telegram_' + Math.random().toString(36).substring(2);
-
-    // Сохраняем verifier на сервере
     try {
         const resp = await apiRequest('/api/auth/vk/save-verifier', {
             method: 'POST',
@@ -1708,30 +1547,21 @@ async function startVkAuth(){
         alert('Ошибка: ' + e.message);
         return;
     }
-
     const redirectUri = 'https://news.proid.studio/pwa';
     const scope = 'vkid.personal_info';
     let authUrl = `https://id.vk.ru/authorize?client_id=${VK_APP_ID}&redirect_uri=${encodeURIComponent(redirectUri)}&response_type=code&scope=${scope}&state=${state}&code_challenge=${challenge}&code_challenge_method=S256&v=5.199`;
     if (isFromExtension) {
         authUrl += '&from_extension=1';
     }
-
-
     const w = document.getElementById('widgetContainer');
     if (w) w.innerHTML = '<p style="color: var(--text-secondary);">Перенаправление на авторизацию VK...</p>';
-
     window.open(authUrl, '_blank');
-    // Для VK поллинг не нужен, т.к. обработка через callback в родительской вкладке
 }
-
-// ----- MAX AUTH -----
 async function startMaxAuth(){
     hapticFeedback();
-
     const w = document.getElementById('widgetContainer');
     w.innerHTML = '<div class="loader"></div>';
     try{
-        // ИЗМЕНЕНО: добавлен параметр source=telegram
         const resp=await apiRequest('/api/auth/max-token?source=telegram');
         if(!resp){ w.innerHTML=''; return; }
         if(!resp.ok)throw new Error('Не удалось получить токен');
@@ -1748,7 +1578,6 @@ async function startMaxAuth(){
         w.innerHTML='';
     }
 }
-
 function startMaxWaiting(token){
     let attempts=0;
     const maxAttempts=60;
@@ -1773,42 +1602,31 @@ function startMaxWaiting(token){
         }catch(e){}
     },3000);
 }
-
-// ----- Яндекс ID (исправлен: передаём state с префиксом) -----
 function startYandexAuth() {
     hapticFeedback();
     console.log('🔹 startYandexAuth() вызвана');
-
-    // Определяем, открыто ли приложение внутри Telegram
     const isTelegram = window.Telegram && window.Telegram.WebApp;
     console.log('📱 isTelegram:', isTelegram);
-
     const prefix = isTelegram ? 'telegram_' : 'pwa_';
     const state = prefix + Math.random().toString(36).substring(2);
     console.log('🔑 Сгенерирован state:', state);
     console.log('📤 source для pollForToken:', prefix === 'telegram_' ? 'telegram' : 'pwa');
-
     const w = document.getElementById('widgetContainer');
     if (w) w.innerHTML = '<p style="color: var(--text-secondary);">Перенаправление на авторизацию Яндекс...</p>';
-
     let authUrl = '/api/auth/yandex/login?state=' + encodeURIComponent(state);
     if (isFromExtension) {
         authUrl += '&from_extension=1';
     }
     console.log('🌐 Открываем URL:', authUrl);
     window.open(authUrl, '_blank');
-
     console.log('⏳ Запускаем pollForToken с state:', state);
     pollForToken(state, loadApp, prefix === 'telegram_' ? 'telegram' : 'pwa');
 }
-
-// ===== ОБРАБОТКА ВОЗВРАТА ИЗ VK (новая вкладка) =====
 (function handleVkCallback() {
     const params = new URLSearchParams(window.location.search);
     const code = params.get('code');
     const state = params.get('state');
     const device_id = params.get('device_id');
-
     if (code && state) {
         if (sessionStorage.getItem('vk_processed_' + state) === 'true') {
             console.log('VK callback already processed, skipping');
@@ -1816,12 +1634,9 @@ function startYandexAuth() {
             return;
         }
         sessionStorage.setItem('vk_processed_' + state, 'pending');
-
-        // ИЗМЕНЕНО: проверяем префикс state, а не парсим JSON
         if (state && state.startsWith('telegram_')) {
             sessionStorage.setItem('telegram_alert', 'true');
         }
-
         apiRequest('/api/auth/vk/callback', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -1839,7 +1654,6 @@ function startYandexAuth() {
             if (data.token) {
                 localStorage.setItem('auth_token', data.token);
                 sessionStorage.setItem('vk_processed_' + state, 'true');
-                // Если страница открыта из расширения – отправляем токен через postMessage и закрываем окно
                 if (isFromExtension && window.opener) {
                     window.opener.postMessage({ type: 'auth_token', token: data.token }, '*');
                     window.close();
@@ -1861,12 +1675,9 @@ function startYandexAuth() {
             showLoginScreen();
         });
     }
-
-    // Обработка Яндекса (если используется)
     const yandexToken = params.get('auth_token');
     if (yandexToken) {
         localStorage.setItem('auth_token', yandexToken);
-        // Если страница открыта из расширения – отправляем токен через postMessage и закрываем окно
         if (isFromExtension && window.opener) {
             window.opener.postMessage({ type: 'auth_token', token: yandexToken }, '*');
             window.close();
@@ -1879,16 +1690,12 @@ function startYandexAuth() {
         }
     }
 })();
-
-// ===== СЛУШАТЕЛЬ STORAGE =====
 window.addEventListener('storage', function(e) {
     if (e.key === 'auth_token' && e.newValue) {
         console.log('VK/Yandex: auth_token changed, reloading parent');
         location.reload();
     }
 });
-
-// ===== КНОПКА "СМОТРЕТЬ НОВОСТИ" =====
 let digestVisible = false;
 async function toggleDigest() {
     console.log('🟢 toggleDigest() вызвана');
@@ -1897,11 +1704,9 @@ async function toggleDigest() {
         return;
     }
     console.log('✅ ensureConsent() пройден');
-
     const container = document.getElementById('digestContainer');
     const content = document.getElementById('digestContent');
     console.log('📦 container:', container, 'content:', content);
-
     if (digestVisible) {
         console.log('🔄 digestVisible = true, скрываем контейнер');
         container.style.display = 'none';
@@ -1911,15 +1716,12 @@ async function toggleDigest() {
     console.log('🔄 digestVisible = false, показываем контейнер');
     container.style.display = 'block';
     digestVisible = true;
-
     content.innerHTML = '<div style="text-align:center; padding:20px; color: var(--text-secondary);">⏳ Загрузка...</div>';
     console.log('📝 Установлен текст загрузки');
-
     try {
         console.log('📡 Вызов apiRequest("/api/webapp/digest")...');
         const resp = await apiRequest('/api/webapp/digest', { headers: getHeaders() });
         console.log('📡 Ответ получен, статус:', resp ? resp.status : 'null');
-
         if (!resp) {
             console.warn('⚠️ resp = null, прерываем');
             return;
@@ -1932,19 +1734,15 @@ async function toggleDigest() {
         }
         const data = await resp.json();
         console.log('📄 Получены данные:', data);
-
         let digestHtml = data.digest;
         console.log('📄 digestHtml длина:', digestHtml ? digestHtml.length : 0);
-
         if (!digestHtml || digestHtml.trim() === '' || digestHtml.includes('Лента ещё не формировалась')) {
             console.log('📭 Лента пуста или ещё не формировалась');
             content.innerHTML = `<div style="text-align:center; padding:20px; color: var(--text-secondary);">📭 Добавьте источники и дождитесь автоматического сбора новостей.</div>`;
             return;
         }
-
         digestHtml = digestHtml.replace(/[\x00-\x1F\x7F-\x9F\u200B\u200C\u200D\uFEFF\u2028\u2029\r]/g, '');
         console.log('🧹 После очистки длина:', digestHtml.length);
-
         let blocks = digestHtml.split(/(?=\n- <b>)/).filter(b => b.trim().length > 0);
         if (blocks.length <= 1) {
             blocks = digestHtml.split(/(?=\n-)/).filter(b => b.trim().length > 0);
@@ -1954,7 +1752,6 @@ async function toggleDigest() {
             if (blocks[0] && blocks[0].trim() === '') blocks.shift();
         }
         console.log('🧩 Количество блоков:', blocks.length);
-
         let html = '';
         for (let block of blocks) {
             let lines = block.split('\n');
@@ -1962,7 +1759,6 @@ async function toggleDigest() {
             while (lines.length > 0 && lines[0].trim() === '') lines.shift();
             while (lines.length > 0 && lines[lines.length - 1].trim() === '') lines.pop();
             let cleanedBlock = lines.join('\n');
-
             let isSummary = cleanedBlock.indexOf('<b>Обсуждения в ') !== -1;
             if (isSummary) {
                 let summaryStart = cleanedBlock.indexOf('<b>Обсуждения в ');
@@ -1976,8 +1772,7 @@ async function toggleDigest() {
                         let after = cleanedBlock.slice(linkStart);
                         body = body.replace(/^\s*\n+/, '').replace(/\n+\s*$/, '');
                         after = after.replace(/^\s*\n+/, '');
-// ЭТАЛОН: разбиение только по "- " (дефис + пробел) – не ломает слова с дефисами
-let parts = body.split("- ").filter(p => p.trim() !== '');
+                        let parts = body.split("- ").filter(p => p.trim() !== '');
                         let newBody;
                         if (parts.length > 1) {
                             newBody = parts.map(p => '- ' + p.trim()).join('\n\n');
@@ -1988,7 +1783,6 @@ let parts = body.split("- ").filter(p => p.trim() !== '');
                     }
                 }
             }
-
             if (cleanedBlock.includes('</b>')) {
                 cleanedBlock = cleanedBlock.replace(/(<\/b>)(?!\n)/, '$1\n');
             }
@@ -1996,12 +1790,47 @@ let parts = body.split("- ").filter(p => p.trim() !== '');
                 cleanedBlock = cleanedBlock.replace(/(?!\n)(<a href)/, '\n$1');
             }
             cleanedBlock = cleanedBlock.replace(/\n{3,}/g, '\n\n');
-
+// ===== ДОБАВЛЯЕМ ДАТУ В ТУ ЖЕ СТРОКУ, ЧТО И ССЫЛКА =====
+let lastSentDate = null;
+if (window.lastSent) {
+    // Парсим формат "ДД.ММ.ГГГГ ЧЧ:ММ"
+    const parts = window.lastSent.match(/(\d{2})\.(\d{2})\.(\d{4})\s+(\d{2}):(\d{2})/);
+    if (parts) {
+        const day = parseInt(parts[1], 10);
+        const month = parseInt(parts[2], 10) - 1;
+        const year = parseInt(parts[3], 10);
+        const hours = parseInt(parts[4], 10);
+        const minutes = parseInt(parts[5], 10);
+        lastSentDate = new Date(year, month, day, hours, minutes);
+    }
+}
+// fallback на текущую дату, если не распарсилось
+if (!lastSentDate || isNaN(lastSentDate.getTime())) {
+    lastSentDate = new Date();
+}
+if (!isNaN(lastSentDate.getTime())) {
+    const day = String(lastSentDate.getDate()).padStart(2, '0');
+    const month = String(lastSentDate.getMonth() + 1).padStart(2, '0');
+    const year = lastSentDate.getFullYear();
+    const dateStr = `${day}.${month}.${year}`;
+    // Ищем ссылку с текстом "читать" и оборачиваем в flex
+    const newBlock = cleanedBlock.replace(
+        /(<a\s+href="[^"]*"[^>]*>читать[^<]*<\/a>)/,
+        `<span style="display:flex; justify-content:space-between; align-items:center; width:100%;">$1<span style="color:var(--text-secondary); font-size:0.9em;">${dateStr}</span></span>`
+    );
+    if (newBlock !== cleanedBlock) {
+        cleanedBlock = newBlock;
+        console.log('✅ Дата добавлена:', dateStr);
+    } else {
+        console.warn('⚠️ Ссылка "читать" не найдена в блоке:', cleanedBlock.slice(0, 200));
+    }
+} else {
+    console.warn('⚠️ Не удалось распарсить дату:', window.lastSent);
+}
             if (cleanedBlock) {
                 html += `<div class="status-block">${cleanedBlock}</div>`;
             }
         }
-
         if (html) {
             console.log('✅ Готово, вставляем HTML, длина:', html.length);
             content.innerHTML = html;
@@ -2010,14 +1839,11 @@ let parts = body.split("- ").filter(p => p.trim() !== '');
             console.log('📭 После обработки блоков ничего не осталось');
             content.innerHTML = `<div style="text-align:center; padding:20px; color: var(--text-secondary);">📭 Новости не найдены.</div>`;
         }
-
     } catch (e) {
         console.error('❌ Исключение в toggleDigest:', e);
         content.innerHTML = `<div style="color: #ff6b6b; text-align:center; padding:20px;">❌ Ошибка: ${e.message}</div>`;
     }
 }
-
-// ===== ВЫХОД ИЗ АККАУНТА =====
 function logout() {
     const confirmLogout = () => {
         localStorage.removeItem('auth_token');
@@ -2032,7 +1858,6 @@ function logout() {
         currentSources = [];
         window.location.reload();
     };
-
     if (window.Telegram && window.Telegram.WebApp && window.Telegram.WebApp.showPopup) {
         window.Telegram.WebApp.showPopup({
             title: 'Выход',
@@ -2061,7 +1886,6 @@ function logout() {
         }
     }
 }
-
 window.suggestSource = function(){
     if (!ensureConsent()) return;
     hapticFeedback();
@@ -2069,8 +1893,6 @@ window.suggestSource = function(){
     const text='Добрый день. Хочу предложить источник:';
     window.open(url+'?text='+encodeURIComponent(text),'_blank');
 };
-
-// ---- ИНИЦИАЛИЗАЦИЯ ----
 (function init(){
     if(authToken){
         if(document.getElementById('sourceListContainer').children.length===0)loadApp();
@@ -2082,8 +1904,6 @@ window.suggestSource = function(){
         if (w) w.innerHTML = '';
     }
 })();
-
-// ---- ЭКСПОРТЫ ----
 window.startVkAuth = startVkAuth;
 window.startMaxAuth = startMaxAuth;
 window.startYandexAuth = startYandexAuth;
@@ -2127,12 +1947,9 @@ window.toggleDigest = toggleDigest;
 window.suggestSource = window.suggestSource;
 window.ensureConsent = ensureConsent;
 window.logout = logout;
-
-// ===== ПОГОДА =====
 const WEATHER_API_URL = 'https://api.open-meteo.com/v1/forecast';
 const WEATHER_LAT = 55.7558;
 const WEATHER_LON = 37.6173;
-
 const WEATHER_CODES = {
     0: { icon: '☀️', desc: 'Ясно' },
     1: { icon: '🌤️', desc: 'Малооблачно' },
@@ -2163,26 +1980,21 @@ const WEATHER_CODES = {
     96: { icon: '⛈️', desc: 'Гроза с градом слабая' },
     99: { icon: '⛈️', desc: 'Гроза с градом сильная' },
 };
-
 function getWeatherDescription(code) {
     return WEATHER_CODES[code] || { icon: '🌡️', desc: '—' };
 }
-
 function formatDay(dateStr) {
     const days = ['Вс', 'Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб'];
     const d = new Date(dateStr + 'T00:00:00');
     return days[d.getDay()];
 }
-
 function formatDate(dateStr) {
     const d = new Date(dateStr + 'T00:00:00');
     return d.toLocaleDateString('ru-RU', { day: 'numeric', month: 'short' });
 }
-
 async function fetchWeather() {
     const container = document.getElementById('weatherContent');
     const timeEl = document.getElementById('weatherUpdateTime');
-
     const windDirections = [
         { from: 0, to: 22.5, dir: 'С' },
         { from: 22.5, to: 67.5, dir: 'СВ' },
@@ -2194,7 +2006,6 @@ async function fetchWeather() {
         { from: 292.5, to: 337.5, dir: 'СЗ' },
         { from: 337.5, to: 360, dir: 'С' }
     ];
-
     function getWindDirection(deg) {
         if (deg == null) return '—';
         for (let d of windDirections) {
@@ -2202,7 +2013,6 @@ async function fetchWeather() {
         }
         return 'С';
     }
-
     try {
         const params = new URLSearchParams({
             latitude: WEATHER_LAT,
@@ -2219,17 +2029,13 @@ async function fetchWeather() {
             timezone: 'Europe/Moscow',
             forecast_days: 7
         });
-
         const resp = await fetch(`${WEATHER_API_URL}?${params}`);
         if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
         const data = await resp.json();
-
         if (!data.daily || !data.daily.time) {
             throw new Error('Некорректный ответ API');
         }
-
         const { time, weather_code, temperature_2m_max, temperature_2m_min, apparent_temperature_max, wind_speed_10m_max, wind_direction_10m_dominant, relative_humidity_2m_max } = data.daily;
-
         let html = '';
         for (let i = 0; i < time.length; i++) {
             const dayName = i === 0 ? 'Сегодня' : formatDay(time[i]);
@@ -2242,7 +2048,6 @@ async function fetchWeather() {
             const windSpeed = Math.round(wind_speed_10m_max[i]);
             const windDir = getWindDirection(wind_direction_10m_dominant[i]);
             const humidity = Math.round(relative_humidity_2m_max[i]);
-
             html += `
                 <div class="weather-day">
                     <span class="day-name">${dayName}${dateStr}</span>
@@ -2257,40 +2062,31 @@ async function fetchWeather() {
                 </div>
             `;
         }
-
         container.innerHTML = html;
         if (timeEl) {
             const now = new Date();
             timeEl.textContent = now.toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' });
         }
-
     } catch (err) {
         console.error('Weather fetch error:', err);
         container.innerHTML = `<div class="weather-error">❌ Не удалось загрузить прогноз: ${err.message}</div>`;
         if (timeEl) timeEl.textContent = '—';
     }
 }
-
-// Загружаем погоду при загрузке страницы и каждые 60 минут
 if (document.getElementById('weatherBlock')) {
     fetchWeather();
     setInterval(fetchWeather, 60 * 60 * 1000);
 }
-
-// ===== НОВЫЙ БЛОК: ПРОВЕРКА УВЕДОМЛЕНИЙ ДЛЯ ВХОДА =====
 (function checkTelegramAlert() {
     const params = new URLSearchParams(window.location.search);
     const fromYandex = params.get('from_yandex') === '1';
     const fromTelegram = params.get('from_telegram') === '1';
     const hasSessionFlag = sessionStorage.getItem('telegram_alert') === 'true';
-
     if (fromYandex) {
-        // Вход через Яндекс из PWA (браузер)
         alert('✅ Вы успешно вошли! Чтобы получать уведомления необходимо открыть бота в Telegram, VK или MAX.');
         const newUrl = window.location.pathname + window.location.search.replace(/[?&]from_yandex=1/, '').replace(/^&/, '?');
         window.history.replaceState({}, document.title, newUrl);
     } else if (fromTelegram || hasSessionFlag) {
-        // Вход через VK или Яндекс из Telegram WebApp
         alert('✅ Нажмите ОК для входа! Чтобы привязать Telegram-бота вернитесь в приложение Telegram.');
         sessionStorage.removeItem('telegram_alert');
         if (fromTelegram) {
@@ -2299,11 +2095,7 @@ if (document.getElementById('weatherBlock')) {
         }
     }
 })();
-// ===== КОНЕЦ БЛОКА =====
-
-// ===== ДОПОЛНИТЕЛЬНЫЙ ОБРАБОТЧИК ДЛЯ POSTMESSAGE (родительское окно) =====
 window.addEventListener('message', function(event) {
-    // Проверяем, что сообщение пришло с нашего же origin
     if (event.origin !== window.location.origin) return;
     const data = event.data;
     if (data && data.type === 'yandex_auth' && data.token) {
@@ -2320,27 +2112,19 @@ window.addEventListener('message', function(event) {
         loadApp();
     }
 });
-// ===== КОНЕЦ ОБРАБОТЧИКА =====
-
-// ===== EMAIL АВТОРИЗАЦИЯ =====
 (function() {
     const loginForm = document.getElementById('emailLoginForm');
     const registerForm = document.getElementById('emailRegisterForm');
     const switchToRegister = document.getElementById('switchToRegister');
     const switchToLogin = document.getElementById('switchToLogin');
-
     const loginEmail = document.getElementById('loginEmailField');
     const loginPassword = document.getElementById('loginPasswordField');
     const loginSubmit = document.getElementById('emailLoginSubmitBtn');
-
     const regEmail = document.getElementById('regEmailField');
     const regCodeContainer = document.getElementById('regCodeContainer');
     const regCode = document.getElementById('regCodeField');
     const regSubmit = document.getElementById('emailRegisterSubmitBtn');
-
-    let regStep = 'request'; // 'request' | 'verify'
-
-    // Переключение между формами
+    let regStep = 'request';
     switchToRegister.addEventListener('click', function(e) {
         e.preventDefault();
         loginForm.style.display = 'none';
@@ -2350,14 +2134,11 @@ window.addEventListener('message', function(event) {
         regCodeContainer.style.display = 'none';
         regCode.value = '';
     });
-
     switchToLogin.addEventListener('click', function(e) {
         e.preventDefault();
         loginForm.style.display = 'block';
         registerForm.style.display = 'none';
     });
-
-    // Вход по email+пароль
     loginSubmit.addEventListener('click', async function() {
         const email = loginEmail.value.trim();
         const password = loginPassword.value.trim();
@@ -2381,14 +2162,10 @@ window.addEventListener('message', function(event) {
             alert('Ошибка: ' + e.message);
         }
     });
-
-    // Регистрация (запрос кода / подтверждение)
     regSubmit.addEventListener('click', async function() {
         const email = regEmail.value.trim();
         if (!email) { alert('Введите email'); return; }
-
         if (regStep === 'request') {
-            // Запрос кода
             try {
                 const resp = await apiRequest('/api/auth/email/request-code', {
                     method: 'POST',
@@ -2409,7 +2186,6 @@ window.addEventListener('message', function(event) {
                 alert('Ошибка: ' + e.message);
             }
         } else {
-            // Подтверждение кода и регистрация
             const code = regCode.value.trim();
             if (!code) { alert('Введите код из письма'); return; }
             try {
@@ -2426,7 +2202,6 @@ window.addEventListener('message', function(event) {
                     loadApp();
                 } else {
                     const err = resp ? await resp.json() : { detail: 'Ошибка' };
-                    // Если пользователь уже существует, предложим войти
                     if (resp && resp.status === 409) {
                         alert('Пользователь с таким email уже зарегистрирован. Используйте вход по паролю.');
                         switchToLogin.click();
@@ -2440,10 +2215,6 @@ window.addEventListener('message', function(event) {
         }
     });
 })();
-
-</script>
-
-<script>
 if (navigator.modelContext && navigator.modelContext.provideContext) {
   navigator.modelContext.provideContext({
     name: "get_digest",
@@ -2460,8 +2231,6 @@ if (navigator.modelContext && navigator.modelContext.provideContext) {
   });
 }
 </script>
-
-<!-- ===== ФУТЕР ===== -->
 <div class="footer-wrapper">
     <div class="footer-inner">
         <a href="/" style="text-decoration: none; color: inherit;">© 2026 «Моя АнтиСоцсеть»</a>
@@ -2479,6 +2248,5 @@ if (navigator.modelContext && navigator.modelContext.provideContext) {
         <span>Создано: <a href="https://proid.studio" target="_blank" class="studio-link">proid.studio</a></span>
     </div>
 </div>
-
 </body>
 </html>

@@ -120,18 +120,25 @@ window.addEventListener('message', function(event) {
     const data = event.data;
     if (data && data.type === 'auth_token' && data.token) {
         console.log('📩 Токен получен через postMessage (запасной)');
-        localStorage.setItem('auth_token', data.token);
-        authToken = data.token;
-        if (authWindow && !authWindow.closed) {
-            authWindow.close();
-            authWindow = null;
+        // Не перезаписываем, если уже есть токен
+        if (!authToken) {
+            localStorage.setItem('auth_token', data.token);
+            authToken = data.token;
+            if (authWindow && !authWindow.closed) {
+                authWindow.close();
+                authWindow = null;
+            }
+            alert('✅ Аккаунт привязан!');
+            loadApp();
+        } else {
+            console.log('ℹ️ Токен уже есть, игнорируем postMessage');
         }
-        alert('✅ Аккаунт привязан!');
-        loadApp();
     }
 });
 
 function hapticFeedback(){if(navigator.vibrate)navigator.vibrate(10);}
+
+// ===== ОБРАБОТКА URL-ПАРАМЕТРОВ (ДЛЯ СЛУЧАЯ, ЕСЛИ СТРАНИЦА ПЕРЕЗАГРУЗИЛАСЬ) =====
 (function(){
     const p = new URLSearchParams(window.location.search);
     const t = p.get('auth_token');
@@ -1123,12 +1130,13 @@ async function handlePayment(tariffKey){
 
 // ===== ФУНКЦИИ ВХОДА =====
 
-// ----- VK OAuth с pollForToken (как Яндекс) -----
+// ----- VK OAuth (с префиксом 'telegram_' для совместимости с PWA) -----
 async function startVkAuth(){
     hapticFeedback();
     const verifier = generateCodeVerifier();
     const challenge = await generateCodeChallenge(verifier);
-    const state = 'vk_' + Math.random().toString(36).substring(2);
+    // Используем префикс 'telegram_' как в PWA
+    const state = 'telegram_' + Math.random().toString(36).substring(2);
 
     try {
         const resp = await apiRequest('/api/auth/vk/save-verifier', {
@@ -1146,6 +1154,7 @@ async function startVkAuth(){
     const scope = 'vkid.personal_info';
     const authUrl = `https://id.vk.ru/authorize?client_id=${VK_APP_ID}&redirect_uri=${encodeURIComponent(redirectUri)}&response_type=code&scope=${scope}&state=${state}&code_challenge=${challenge}&code_challenge_method=S256&v=5.199&from_extension=1`;
 
+    // Скрываем кнопки и показываем индикатор
     const container = document.getElementById('loginScreen').querySelector('.auth-container');
     if (container) container.style.display = 'none';
     const w = document.getElementById('widgetContainer');
@@ -1153,6 +1162,7 @@ async function startVkAuth(){
 
     authWindow = window.open(authUrl, '_blank');
 
+    // Запускаем опрос токена
     pollForToken(state, loadApp, 'vk');
 }
 
@@ -1232,16 +1242,14 @@ function startMaxWaiting(token){
     }, 3000);
 }
 
-// ----- Яндекс ID (с абсолютным URL) -----
+// ----- Яндекс ID (с префиксом 'pwa_', так как расширение — это не Telegram) -----
 function startYandexAuth() {
     hapticFeedback();
     console.log('🔹 startYandexAuth() вызвана');
 
-    const isTelegram = window.Telegram && window.Telegram.WebApp;
-    const prefix = isTelegram ? 'telegram_' : 'pwa_';
-    const state = prefix + Math.random().toString(36).substring(2);
+    // Для расширения используем 'pwa_', так как это не Telegram WebApp
+    const state = 'pwa_' + Math.random().toString(36).substring(2);
     console.log('🔑 Сгенерирован state:', state);
-    console.log('📤 source для pollForToken:', prefix === 'telegram_' ? 'telegram' : 'pwa');
 
     const container = document.querySelector('#loginScreen .auth-container');
     if (container) container.style.display = 'none';
@@ -1254,7 +1262,7 @@ function startYandexAuth() {
     authWindow = window.open(authUrl, '_blank');
 
     console.log('⏳ Запускаем pollForToken с state:', state);
-    pollForToken(state, loadApp, prefix === 'telegram_' ? 'telegram' : 'pwa');
+    pollForToken(state, loadApp, 'pwa');
 }
 
 // ===== КНОПКА "СМОТРЕТЬ НОВОСТИ" =====
@@ -1332,6 +1340,7 @@ async function toggleDigest() {
             while (lines.length > 0 && lines[lines.length - 1].trim() === '') lines.pop();
             let cleanedBlock = lines.join('\n');
 
+            // === ИСПРАВЛЕНИЕ: эталонная обработка суммаризаций ===
             let isSummary = cleanedBlock.indexOf('<b>Обсуждения в ') !== -1;
             if (isSummary) {
                 let summaryStart = cleanedBlock.indexOf('<b>Обсуждения в ');
@@ -1345,7 +1354,8 @@ async function toggleDigest() {
                         let after = cleanedBlock.slice(linkStart);
                         body = body.replace(/^\s*\n+/, '').replace(/\n+\s*$/, '');
                         after = after.replace(/^\s*\n+/, '');
-                        let parts = body.split(/\s*-\s*/).filter(p => p.trim() !== '');
+                        // ПРАВИЛЬНО: разбиваем только по "- " (дефис + пробел)
+                        let parts = body.split("- ").filter(p => p.trim() !== '');
                         let newBody;
                         if (parts.length > 1) {
                             newBody = parts.map(p => '- ' + p.trim()).join('\n\n');
