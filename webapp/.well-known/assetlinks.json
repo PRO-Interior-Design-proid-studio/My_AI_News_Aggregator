@@ -1,8 +1,18 @@
-[{
-      "relation": ["delegate_permission/common.handle_all_urls"],
-      "target": {
-        "namespace": "android_app",
-        "package_name": "studio.proid.news.twa",
-        "sha256_cert_fingerprints": ["95:11:3B:99:33:E5:F3:96:F3:F0:28:FF:65:E4:05:62:E6:22:46:2B:1F:38:C4:CA:8C:CF:60:90:60:54:8A:C9"]
-      }
-    }]
+[
+  {
+    "relation": [
+      "delegate_permission/common.handle_all_urls",
+      "delegate_permission/common.get_login_creds"
+    ],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "studio.proid.news.twa",
+      "sha256_cert_fingerprints": [
+        "95:11:3B:99:33:E5:F3:96:F3:F0:28:FF:65:E4:05:62:E6:22:46:2B:1F:38:C4:CA:8C:CF:60:90:60:54:8A:C9",
+        "DD:5F:7D:29:B6:F3:A3:E9:A6:58:EF:38:61:A2:12:77:7A:00:4B:06:06:35:22:B3:96:A0:42:7C:A4:7C:CC:04",
+        "54:1B:77:1E:ED:77:0A:E8:81:2D:56:CB:0A:70:C6:FF:34:12:B8:E7:3E:6F:D1:79:57:6C:62:F8:D2:41:CB:97",
+        "DD:C6:0D:25:E3:94:15:30:A4:01:00:51:FB:D4:43:35:88:AD:00:96:73:F4:C5:B4:43:BA:C7:C1:04:13:63:B3"
+      ]
+    }
+  }
+]

@@ -625,16 +625,16 @@ window.BBC_CATEGORIES = {
 };
 
 window.CNN_CATEGORIES = {
-    "Азия": "https://rss.cnn.com/rss/edition_asia.rss",
-    "Америка": "https://rss.cnn.com/rss/edition_americas.rss",
-    "Африка": "https://rss.cnn.com/rss/edition_africa.rss",
-    "Бизнес": "https://rss.cnn.com/rss/edition_business.rss",
-    "Ближний Восток": "https://rss.cnn.com/rss/edition_meast.rss",
-    "Главные новости": "https://rss.cnn.com/rss/edition.rss",
-    "Европа": "https://rss.cnn.com/rss/edition_europe.rss",
-    "Мир": "https://rss.cnn.com/rss/edition_world.rss",
-    "Путешествия": "https://rss.cnn.com/rss/edition_travel.rss",
-    "Спорт": "https://rss.cnn.com/rss/edition_sport.rss",
-    "США": "https://rss.cnn.com/rss/edition_us.rss",
-    "Технологии": "https://rss.cnn.com/rss/edition_technology.rss"
+    "Азия": "http://rss.cnn.com/rss/edition_asia.rss",
+    "Америка": "http://rss.cnn.com/rss/edition_americas.rss",
+    "Африка": "http://rss.cnn.com/rss/edition_africa.rss",
+    "Бизнес": "http://rss.cnn.com/rss/edition_business.rss",
+    "Ближний Восток": "http://rss.cnn.com/rss/edition_meast.rss",
+    "Главные новости": "http://rss.cnn.com/rss/edition.rss",
+    "Европа": "http://rss.cnn.com/rss/edition_europe.rss",
+    "Мир": "http://rss.cnn.com/rss/edition_world.rss",
+    "Путешествия": "http://rss.cnn.com/rss/edition_travel.rss",
+    "Спорт": "http://rss.cnn.com/rss/edition_sport.rss",
+    "США": "http://rss.cnn.com/rss/edition_us.rss",
+    "Технологии": "http://rss.cnn.com/rss/edition_technology.rss"
 };
