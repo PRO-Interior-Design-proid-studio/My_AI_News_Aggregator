@@ -714,7 +714,7 @@ html, body {
 // Опрос сервера для получения токена по state
 function pollForToken(state, onSuccess) {
     let attempts = 0;
-    const maxAttempts = 60; // ~3 минуты
+    const maxAttempts = 60;
     const interval = setInterval(async () => {
         attempts++;
         try {
@@ -726,17 +726,16 @@ function pollForToken(state, onSuccess) {
                     localStorage.setItem('auth_token', data.token);
                     authToken = data.token;
                     alert('✅ Аккаунт привязан!');
+                    // ДОБАВЛЯЕМ ПРИВЯЗКУ TELEGRAM
+                    await linkTelegram();
                     if (onSuccess) onSuccess();
                     return;
                 }
             }
-        } catch (e) {
-            // ignore
-        }
+        } catch (e) {}
         if (attempts >= maxAttempts) {
             clearInterval(interval);
             alert('⏰ Время истекло. Попробуйте снова.');
-            // Восстанавливаем интерфейс входа
             const container = document.getElementById('loginScreen').querySelector('.auth-container');
             if (container) container.style.display = 'block';
             const w = document.getElementById('widgetContainer');
@@ -778,6 +777,27 @@ function pollForToken(state, onSuccess) {
             'Content-Type': 'application/json',
             ...(authToken ? { 'X-Auth-Token': authToken } : {})
         };
+    }
+
+    // ===== НОВАЯ ФУНКЦИЯ ДЛЯ ПРИВЯЗКИ TELEGRAM =====
+    async function linkTelegram() {
+        const initData = window.Telegram?.WebApp?.initData;
+        if (!initData) return; // не в Telegram
+        try {
+            const resp = await apiRequest('/api/webapp/link_telegram', {
+                method: 'POST',
+                headers: getHeaders(),
+                body: JSON.stringify({ init_data: initData })
+            });
+            if (resp && resp.ok) {
+                console.log('✅ Telegram привязан');
+            } else {
+                const err = resp ? await resp.json() : { detail: 'Ошибка привязки' };
+                console.warn('⚠️ Ошибка привязки Telegram:', err.detail);
+            }
+        } catch (e) {
+            console.warn('⚠️ Ошибка привязки Telegram:', e);
+        }
     }
 
     function showLoginScreen(){
@@ -951,6 +971,8 @@ async function startVkAuth(){
                     authToken = data.auth_token;
                     localStorage.setItem('auth_token', authToken);
                     alert('✅ Аккаунт привязан');
+                    // Привязываем Telegram, если есть initData
+                    await linkTelegram();
                     loadApp();
                     return;
                 }
@@ -1081,7 +1103,7 @@ async function startVkAuth(){
             currentSources = data.sources || [];
             currentLimit = data.limit || 5;
             consentGiven = data.consent_given === true;
-            telegramConsentGiven = data.telegram_consent_given === true; // обновляем глобальную переменную
+            telegramConsentGiven = data.telegram_consent_given === true;
             isPremium = data.is_premium || false;
             currentSendTime = data.send_time || null;
             defaultSendHour = data.default_send_hour || 18;
@@ -1656,7 +1678,7 @@ let parts = body.split("- ").filter(p => p.trim() !== '');
         }
     })();
     // ===== КОНЕЦ БЛОКА =====
-// ===== EMAIL АВТОРИЗАЦИЯ =====
+// ===== EMAIL АВТОРИЗАЦИЯ (С ПРИВЯЗКОЙ TELEGRAM) =====
 (function() {
     const loginForm = document.getElementById('emailLoginForm');
     const registerForm = document.getElementById('emailRegisterForm');
@@ -1706,6 +1728,8 @@ let parts = body.split("- ").filter(p => p.trim() !== '');
                 const data = await resp.json();
                 localStorage.setItem('auth_token', data.token);
                 authToken = data.token;
+                // Привязываем Telegram, если есть initData
+                await linkTelegram();
                 loadApp();
             } else {
                 const err = resp ? await resp.json() : { detail: 'Ошибка' };
@@ -1756,6 +1780,8 @@ let parts = body.split("- ").filter(p => p.trim() !== '');
                     const data = await resp.json();
                     localStorage.setItem('auth_token', data.token);
                     authToken = data.token;
+                    // Привязываем Telegram
+                    await linkTelegram();
                     alert('Регистрация успешна! Пароль отправлен на почту.');
                     loadApp();
                 } else {
@@ -1816,7 +1842,8 @@ let parts = body.split("- ").filter(p => p.trim() !== '');
     window.loadApp = loadApp;
     window.logout = logout;
     window.ensureConsent = ensureConsent;
-    window.telegramConsentGiven = telegramConsentGiven; // экспорт для отладки
+    window.telegramConsentGiven = telegramConsentGiven;
+    window.linkTelegram = linkTelegram;
 </script>
 <!-- ===== ФУТЕР ===== -->
 <div class="footer-wrapper">

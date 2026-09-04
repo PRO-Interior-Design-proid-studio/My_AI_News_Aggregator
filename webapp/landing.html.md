@@ -487,6 +487,8 @@ Add-ons](https://microsoftedge.microsoft.com/addons/detail/caebikohjnlallmckhbho
 .btn-bot-secondary} [🚀 Mozilla
 Add-ons](https://addons.mozilla.org/ru/firefox/addon/%D0%BC%D0%BE%D0%B8-ai-%D0%BD%D0%BE%D0%B2%D0%BE%D1%81%D1%82%D0%B8-%D0%B2%D0%B0%D1%88-%D0%B0%D0%B3%D1%80%D0%B5%D0%B3%D0%B0%D1%82%D0%BE%D1%80/){.btn
 .btn-bot-secondary} [🚀
+Trashbox](https://trashbox.ru/topics/216493/moya-antisocset-agregator-lichnyh-novostej-s-ii){.btn
+.btn-bot-secondary} [🚀
 GitHub](https://github.com/PRO-Interior-Design-proid-studio/My_AI_News_Aggregator){.btn
 .btn-bot-secondary}
 :::
