@@ -480,6 +480,8 @@ onclick="toggleGitHub()"}
 .btn-bot-secondary} [🚀 VK бот](https://vk.ru/im?sel=-240799234){.btn
 .btn-bot-secondary} [🚀
 RuStore](https://www.rustore.ru/catalog/app/studio.proid.news.twa){.btn
+.btn-bot-secondary} [🚀 Samsung
+App](https://apps.samsung.com/appquery/appDetail.as?appId=studio.proid.news.twa){.btn
 .btn-bot-secondary} [🚀 Chrome
 Add-ons](https://chromewebstore.google.com/detail/%D0%BC%D0%BE%D0%B8-ai-%D0%BD%D0%BE%D0%B2%D0%BE%D1%81%D1%82%D0%B8-%E2%80%94-%D0%BF%D0%BE%D0%BB%D0%BD%D0%BE%D1%86%D0%B5%D0%BD/neodfgcjhffnoccenpinoemeijneegmh){.btn
 .btn-bot-secondary} [🚀 Edge
