@@ -160,6 +160,7 @@ body{font-family:-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, 
 .auth-btn.yandex{--fill-colors:rgba(216,67,21,.26),rgba(245,124,0,.35);--border-colors:rgba(216,67,21,.82) 0%,rgba(245,124,0,.24) 53%,#f57c00 100%;background:linear-gradient(180deg,var(--fill-colors)) padding-box,linear-gradient(var(--bg-color),var(--bg-color)) padding-box,linear-gradient(180deg,var(--border-colors)) border-box,linear-gradient(180deg,var(--fill-colors)) border-box;}
 .auth-btn:hover{transform:scale(1.03);opacity:.9;}
 .auth-btn:active{transform:scale(.97);opacity:.8;}
+.auth-btn:disabled{opacity:.4 !important;cursor:not-allowed !important;pointer-events:none !important;transform:none !important;}
 .small-note{font-size:12px;color:var(--text-secondary);margin-top:4px;line-height:1.4;}
 .widget-container{margin-top:16px;min-height:60px;display:flex;justify-content:center;align-items:center;flex-direction:column;}
 .loader{display:inline-block;width:24px;height:24px;border:3px solid var(--border);border-top-color:var(--accent2);border-radius:50%;animation:spin .8s linear infinite;}
@@ -328,6 +329,47 @@ body{font-family:-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, 
 .btn-more:active {
     transform: scale(0.98);
 }
+/* ===== СОГЛАСИЯ НА ВХОДЕ (общие для OAuth и email) ===== */
+.login-consent-block {
+    max-width: 340px;
+    margin: 4px auto 20px;
+    text-align: left;
+    padding: 14px 16px;
+    border-radius: 12px;
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    backdrop-filter: blur(4px);
+}
+.login-consent-block .row {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    margin-bottom: 10px;
+}
+.login-consent-block .row:last-child {
+    margin-bottom: 0;
+}
+.login-consent-block input[type="checkbox"] {
+    width: 18px;
+    height: 18px;
+    margin-top: 2px;
+    flex-shrink: 0;
+    accent-color: var(--accent2);
+    cursor: pointer;
+}
+.login-consent-block label {
+    color: var(--text-secondary);
+    font-size: 13px;
+    line-height: 1.5;
+    cursor: pointer;
+}
+.login-consent-block label a {
+    color: var(--accent2);
+    text-decoration: none;
+}
+.login-consent-block label a:hover {
+    text-decoration: underline;
+}
 </style>
 </head>
 <body>
@@ -336,17 +378,38 @@ body{font-family:-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, 
 <div id="loginScreen">
 <div class="header"><h1>Моя АнтиСоцсеть</h1></div>
 <div class="auth-container">
-   <button class="auth-btn max" id="maxLoginBtn"><span class="icon">🚀</span> Войти через MAX</button>
-   <button class="auth-btn vk" id="vkLoginBtn"><span class="icon">🚀</span> Войти через VK</button>
-   <button class="auth-btn yandex" id="yandexLoginBtn"><span class="icon">🚀</span> Войти через Яндекс</button>
+   <button class="auth-btn max" id="maxLoginBtn" disabled><span class="icon">🚀</span> Войти через MAX</button>
+   <button class="auth-btn vk" id="vkLoginBtn" disabled><span class="icon">🚀</span> Войти через VK</button>
+   <button class="auth-btn yandex" id="yandexLoginBtn" disabled><span class="icon">🚀</span> Войти через Яндекс</button>
 </div>
+
+<!-- ===== СОГЛАСИЯ (обязательны для всех способов входа) ===== -->
+<div id="loginConsentBlock" class="login-consent-block">
+    <div class="row">
+        <input type="checkbox" id="consentPdCheck">
+        <label for="consentPdCheck">
+            Я даю согласие на обработку
+            <a href="/consent" target="_blank">персональных данных</a>
+            и ознакомлен(а) с
+            <a href="/privacy" target="_blank">Политикой конфиденциальности</a>.
+        </label>
+    </div>
+    <div class="row">
+        <input type="checkbox" id="consentOfferCheck">
+        <label for="consentOfferCheck">
+            Я принимаю условия
+            <a href="/offer" target="_blank">Публичной оферты</a>.
+        </label>
+    </div>
+</div>
+
 <div id="emailAuthBlock" style="max-width: 340px; margin: 16px auto 0; text-align: center;">
     <div id="emailLoginForm">
         <input type="email" id="loginEmailField" placeholder="Email (только .ru, .рф)"
                style="width:300px; padding:16px 24px; margin:0 auto 8px; border-radius:26px; background:rgba(0,0,0,0.3); color:#fff; border:1px solid var(--border); display:block;">
         <input type="password" id="loginPasswordField" placeholder="Пароль"
                style="width:300px; padding:16px 24px; margin:0 auto 8px; border-radius:26px; background:rgba(0,0,0,0.3); color:#fff; border:1px solid var(--border); display:block;">
-        <button id="emailLoginSubmitBtn" class="auth-btn" style="width:300px; margin:0 auto; --fill-colors:rgba(31,89,198,.26),rgba(31,89,198,.26); --border-colors:rgba(78,173,252,.61) 0%,#1F59C6 53%,#20397F 100%;">Войти</button>
+        <button id="emailLoginSubmitBtn" class="auth-btn" disabled style="width:300px; margin:0 auto; --fill-colors:rgba(31,89,198,.26),rgba(31,89,198,.26); --border-colors:rgba(78,173,252,.61) 0%,#1F59C6 53%,#20397F 100%;">Войти</button>
         <div style="margin-top:8px; font-size:14px; color:var(--text-secondary);">
             Нет аккаунта? <a href="#" id="switchToRegister" style="color:var(--accent2);">Зарегистрироваться</a>
         </div>
@@ -358,7 +421,7 @@ body{font-family:-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, 
             <input type="text" id="regCodeField" placeholder="Код из письма" maxlength="4"
                    style="width:300px; padding:16px 24px; margin:0 auto 8px; border-radius:26px; background:rgba(0,0,0,0.3); color:#fff; border:1px solid var(--border); display:block;">
         </div>
-        <button id="emailRegisterSubmitBtn" class="auth-btn" style="width:300px; margin:0 auto; --fill-colors:rgba(31,89,198,.26),rgba(31,89,198,.26); --border-colors:rgba(78,173,252,.61) 0%,#1F59C6 53%,#20397F 100%;">Получить код</button>
+        <button id="emailRegisterSubmitBtn" class="auth-btn" disabled style="width:300px; margin:0 auto; --fill-colors:rgba(31,89,198,.26),rgba(31,89,198,.26); --border-colors:rgba(78,173,252,.61) 0%,#1F59C6 53%,#20397F 100%;">Получить код</button>
         <div style="margin-top:8px; font-size:14px; color:var(--text-secondary);">
             Уже есть аккаунт? <a href="#" id="switchToLogin" style="color:var(--accent2);">Войти</a>
         </div>
@@ -418,6 +481,7 @@ body{font-family:-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, 
 <div class="add-form" id="addForm">
 <div style="font-weight:600;margin-bottom:6px;" id="addFormTitle">Добавить RSS/HTML</div>
 <input id="sourceValue" type="text" placeholder="Введите URL...">
+<div id="sourceHint" style="font-size:13px;color:var(--text-secondary);margin:2px 0 10px 0;line-height:1.4;min-height:18px;text-align:center;">любые RSS или HTML без JS</div>
 <button class="btn-primary" id="addSourceSubmitBtn">Добавить</button>
 <button class="btn-secondary" id="closeAddFormBtn">Отмена</button>
 </div>
@@ -857,6 +921,26 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
     }
+    // ===== ОБЯЗАТЕЛЬНЫЕ СОГЛАСИЯ (для OAuth и email) =====
+    const consentPdCheck = document.getElementById('consentPdCheck');
+    const consentOfferCheck = document.getElementById('consentOfferCheck');
+    const oauthBtns = document.querySelectorAll('.auth-btn.max, .auth-btn.vk, .auth-btn.yandex');
+    const emailLoginBtnEl = document.getElementById('emailLoginSubmitBtn');
+    const emailRegisterBtnEl = document.getElementById('emailRegisterSubmitBtn');
+
+    function updateEntryButtons() {
+        const enabled = !!(consentPdCheck && consentPdCheck.checked
+                        && consentOfferCheck && consentOfferCheck.checked);
+        oauthBtns.forEach(function (b) { b.disabled = !enabled; });
+        if (emailLoginBtnEl) emailLoginBtnEl.disabled = !enabled;
+        if (emailRegisterBtnEl) emailRegisterBtnEl.disabled = !enabled;
+    }
+
+    if (consentPdCheck && consentOfferCheck) {
+        consentPdCheck.addEventListener('change', updateEntryButtons);
+        consentOfferCheck.addEventListener('change', updateEntryButtons);
+        updateEntryButtons();
+    }
     const vkBtn = document.getElementById('vkLoginBtn');
     if (vkBtn) vkBtn.addEventListener('click', startVkAuth);
     const maxBtn = document.getElementById('maxLoginBtn');
@@ -1135,6 +1219,7 @@ function toggleAddForm(type) { if(!ensureConsent())return; hapticFeedback();
         title.textContent = 'Добавить '+labels[type];
         const input = document.getElementById('sourceValue');
         input.placeholder = type==='rss'?'Введите URL...':(type==='telegram'?'Введите username (без @)...':'Введите username (без @)...');
+        var _sh=document.getElementById('sourceHint');if(_sh)_sh.textContent=type==='rss'?'любые RSS или HTML без JS':(type==='telegram'?'только открытые группы и каналы':'только открытые группы и страницы');
         input.value = '';
         form.style.display = 'block';
     } else {
@@ -1947,7 +2032,7 @@ window.toggleDigest = toggleDigest;
 window.suggestSource = window.suggestSource;
 window.ensureConsent = ensureConsent;
 window.logout = logout;
-const WEATHER_API_URL = 'https://api.open-meteo.com/v1/forecast';
+const WEATHER_API_URL = '/api/weather/forecast';
 const WEATHER_LAT = 55.7558;
 const WEATHER_LON = 37.6173;
 const WEATHER_CODES = {
