@@ -14,6 +14,17 @@
 [🚀]{.icon} Войти через Яндекс
 :::
 
+::: {#loginConsentBlock .login-consent-block}
+::: {.row}
+Я даю согласие на обработку [персональных данных](/consent) и
+ознакомлен(а) с [Политикой конфиденциальности](/privacy).
+:::
+
+::: {.row}
+Я принимаю условия [Публичной оферты](/offer).
+:::
+:::
+
 ::: {#emailAuthBlock style="max-width: 340px; margin: 16px auto 0; text-align: center;"}
 ::: {#emailLoginForm}
 Войти
@@ -133,6 +144,10 @@ CNN
 ::: {#addForm .add-form}
 ::: {#addFormTitle style="font-weight:600;margin-bottom:6px;"}
 Добавить RSS/HTML
+:::
+
+::: {#sourceHint style="font-size:13px;color:var(--text-secondary);margin:2px 0 10px 0;line-height:1.4;min-height:18px;text-align:center;"}
+любые RSS или HTML без JS
 :::
 
 Добавить

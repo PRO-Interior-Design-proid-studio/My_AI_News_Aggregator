@@ -734,6 +734,7 @@ function toggleAddForm(type) { if(!ensureConsent())return; hapticFeedback();
         title.textContent = 'Добавить '+labels[type];
         const input = document.getElementById('sourceValue');
         input.placeholder = type==='rss'?'Введите URL...':(type==='telegram'?'Введите username (без @)...':'Введите username (без @)...');
+        var _sh=document.getElementById('sourceHint');if(_sh)_sh.textContent=type==='rss'?'любые RSS или HTML без JS':(type==='telegram'?'только открытые группы и каналы':'только открытые группы и страницы');
         input.value = '';
         form.style.display = 'block';
     } else {
@@ -1508,7 +1509,7 @@ window.logout = logout;
 window.pollForToken = pollForToken;
 
 // ===== ПОГОДА =====
-const WEATHER_API_URL = 'https://api.open-meteo.com/v1/forecast';
+const WEATHER_API_URL = '/api/weather/forecast';
 const WEATHER_LAT = 55.7558;
 const WEATHER_LON = 37.6173;
 

@@ -16,8 +16,14 @@ Telegram-бот. Если окно не закрывается автомати�
 
 Закрыть окно
 
-::: {style="margin-top: 16px; font-size: 14px; color: var(--text-secondary);"}
-[Закроется через 10 секунд\...]{#countdown}
+::: {#countdownWrap style="margin-top: 16px; font-size: 14px; color: var(--text-secondary);"}
+[Закроется через 10 секунд]{#countdown}
+:::
+
+::: {#manualHint .manual-hint}
+**Закройте окно вручную** --- вернитесь в приложение Telegram.
+Автоматическое закрытие не сработало, потому что браузер не разрешает
+закрывать окна из соображений безопасности.
 :::
 :::
 

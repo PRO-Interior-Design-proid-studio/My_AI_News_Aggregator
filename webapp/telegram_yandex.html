@@ -1,23 +1,19 @@
- <!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="ru">
 <head>
     <!-- ===== БАЗОВЫЕ МЕТА-ТЕГИ ===== -->
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 
-    <!-- ===== TITLE (для вкладки браузера) ===== -->
+    <!-- ===== TITLE ===== -->
     <title>Успешный вход — Моя АнтиСоцсеть</title>
 
-    <!-- ===== SEO: ЗАПРЕТ ИНДЕКСАЦИИ (вспомогательная страница) ===== -->
+    <!-- ===== SEO ===== -->
     <meta name="robots" content="noindex, nofollow">
-
-    <!-- ===== КАНОНИЧЕСКАЯ ССЫЛКА → PWA ===== -->
     <link rel="canonical" href="https://news.proid.studio/pwa">
-
-    <!-- ===== ОПИСАНИЕ (для соцсетей, если вдруг расшарят) ===== -->
     <meta name="description" content="Вы успешно вошли в Моя АнтиСоцсеть. Аккаунт привязан, окно закроется автоматически.">
 
-    <!-- ===== OPEN GRAPH (минимально для соцсетей) ===== -->
+    <!-- ===== OPEN GRAPH ===== -->
     <meta property="og:title" content="Успешный вход — Моя АнтиСоцсеть">
     <meta property="og:description" content="Вы успешно вошли в Моя АнтиСоцсеть. Аккаунт привязан.">
     <meta property="og:type" content="website">
@@ -41,11 +37,11 @@
     <!-- ===== ТЕМА ===== -->
     <meta name="theme-color" content="#010715">
 
-    <!-- ===== СТИЛИ (ВСЕ ВАШИ, БЕЗ ИЗМЕНЕНИЙ) ===== -->
+    <!-- ===== ССЫЛКИ НА LLM/MARKDOWN ===== -->
     <link rel="alternate" type="text/markdown" href="/telegram_yandex.html.md">
     <link rel="describedby" href="/llms.txt">
-</head>
-<style>
+
+    <style>
         * { margin:0; padding:0; box-sizing:border-box; }
         :root {
             --bg-color: #010715;
@@ -133,16 +129,6 @@
             transform: scale(1.03);
             opacity: 0.9;
         }
-        .btn-secondary {
-            background: transparent;
-            border: 1px solid var(--border);
-            color: var(--text-secondary);
-            margin-top: 8px;
-        }
-        .btn-secondary:hover {
-            background: rgba(255,255,255,0.05);
-            color: var(--text);
-        }
         .footer {
             font-size: 13px;
             color: var(--text-secondary);
@@ -156,37 +142,30 @@
         .footer a:hover {
             text-decoration: underline;
         }
+        .manual-hint {
+            display: none;
+            margin-top: 16px;
+            padding: 14px 16px;
+            border-radius: 12px;
+            background: rgba(48,136,255,0.12);
+            border-left: 3px solid var(--accent2);
+            font-size: 14px;
+            color: var(--text-secondary);
+            text-align: left;
+            line-height: 1.5;
+        }
+        .manual-hint.visible {
+            display: block;
+        }
+        .manual-hint strong {
+            color: var(--text);
+        }
         @media (max-width: 480px) {
             .container { padding: 30px 20px; }
             .logo { font-size: 24px; }
             h1 { font-size: 22px; }
         }
-.btn-more {
-    display: block;
-    width: 100%;
-    padding: 12px 16px;
-    margin-top: 12px;
-    background: var(--card-bg);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    color: var(--text);
-    font-size: 15px;
-    font-weight: 500;
-    cursor: pointer;
-    transition: all 0.2s;
-    backdrop-filter: blur(4px);
-    text-align: center;
-}
-.btn-more:hover {
-    background: rgba(255,255,255,0.08);
-}
-.btn-more:active {
-    transform: scale(0.98);
-}
-
     </style>
-    <link rel="alternate" type="text/markdown" href="/telegram_yandex.html.md">
-    <link rel="describedby" href="/llms.txt">
 </head>
 <body>
     <div class="container">
@@ -194,9 +173,15 @@
         <div class="icon">✅</div>
         <h1>Вы успешно вошли!</h1>
         <p>Аккаунт привязан. Теперь вы можете закрыть это окно и вернуться в Telegram-бот. Если окно не закрывается автоматически, нажмите кнопку ниже.</p>
-        <button class="btn" onclick="window.close()">Закрыть окно</button>
-        <div style="margin-top: 16px; font-size: 14px; color: var(--text-secondary);">
-            <span id="countdown">Закроется через 10 секунд...</span>
+        <button class="btn" id="closeBtn" onclick="tryClose()">Закрыть окно</button>
+        <div id="countdownWrap" style="margin-top: 16px; font-size: 14px; color: var(--text-secondary);">
+            <span id="countdown">Закроется через 10 секунд</span>
+        </div>
+
+        <div class="manual-hint" id="manualHint">
+            <strong>Закройте окно вручную</strong> — вернитесь в приложение Telegram.
+            Автоматическое закрытие не сработало, потому что браузер не разрешает
+            закрывать окна из соображений безопасности.
         </div>
     </div>
     <div class="footer">
@@ -204,19 +189,72 @@
         <a href="https://news.proid.studio/privacy" target="_blank">Политика</a> &bull;
         <a href="https://news.proid.studio/offer" target="_blank">Оферта</a>
     </div>
+
     <script>
-        let seconds = 10;
-        const countdownEl = document.getElementById('countdown');
-        const timer = setInterval(() => {
-            seconds--;
-            if (seconds <= 0) {
-                clearInterval(timer);
-                countdownEl.textContent = 'Закрываю...';
-                setTimeout(() => { window.close(); }, 500);
-            } else {
-                countdownEl.textContent = 'Закроется через ' + seconds + ' секунд' + (seconds === 1 ? 'у' : 'ы') + '...';
+        // ============================================================
+        //  Закрытие окна через стандартный браузерный API
+        // ============================================================
+        function tryClose() {
+            try {
+                window.close();
+            } catch (e) {
+                console.warn('window.close failed:', e);
             }
-        }, 1000);
+
+            // Проверяем через 400 мс, закрылось ли окно
+            setTimeout(function () {
+                if (!window.closed) {
+                    // Не удалось закрыть — показываем только подсказку,
+                    // кнопку и счётчик скрываем
+                    var hint = document.getElementById('manualHint');
+                    var btn = document.getElementById('closeBtn');
+                    var countdownWrap = document.getElementById('countdownWrap');
+                    if (hint) hint.classList.add('visible');
+                    if (btn) btn.style.display = 'none';
+                    if (countdownWrap) countdownWrap.style.display = 'none';
+                }
+            }, 400);
+        }
+
+        // ============================================================
+        //  Автозакрытие через 10 секунд + корректное склонение
+        // ============================================================
+        function pluralSeconds(n) {
+            var mod10 = n % 10;
+            var mod100 = n % 100;
+            if (mod10 === 1 && mod100 !== 11) return n + ' секунда';
+            if (mod10 >= 2 && mod10 <= 4 && (mod100 < 12 || mod100 > 14)) return n + ' секунды';
+            return n + ' секунд';
+        }
+
+        document.addEventListener('DOMContentLoaded', function () {
+            var seconds = 10;
+            var countdownEl = document.getElementById('countdown');
+            var hintEl = document.getElementById('manualHint');
+
+            if (countdownEl) {
+                countdownEl.textContent = 'Закроется через ' + pluralSeconds(seconds);
+            }
+
+            var timer = setInterval(function () {
+                seconds--;
+                if (seconds <= 0) {
+                    clearInterval(timer);
+                    if (countdownEl) countdownEl.textContent = 'Закрываю...';
+                    setTimeout(tryClose, 500);
+                } else {
+                    if (countdownEl) countdownEl.textContent = 'Закроется через ' + pluralSeconds(seconds);
+                }
+            }, 1000);
+
+            // Если показалась подсказка — останавливаем таймер
+            var hintCheck = setInterval(function () {
+                if (hintEl && hintEl.classList.contains('visible')) {
+                    clearInterval(timer);
+                    clearInterval(hintCheck);
+                }
+            }, 1000);
+        });
     </script>
 </body>
 </html>

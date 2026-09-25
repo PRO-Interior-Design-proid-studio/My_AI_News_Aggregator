@@ -481,7 +481,6 @@ body{font-family:-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, 
 <div class="add-form" id="addForm">
 <div style="font-weight:600;margin-bottom:6px;" id="addFormTitle">Добавить RSS/HTML</div>
 <input id="sourceValue" type="text" placeholder="Введите URL...">
-<div id="sourceHint" style="font-size:13px;color:var(--text-secondary);margin:2px 0 10px 0;line-height:1.4;min-height:18px;text-align:center;">любые RSS или HTML без JS</div>
 <button class="btn-primary" id="addSourceSubmitBtn">Добавить</button>
 <button class="btn-secondary" id="closeAddFormBtn">Отмена</button>
 </div>
@@ -1219,7 +1218,6 @@ function toggleAddForm(type) { if(!ensureConsent())return; hapticFeedback();
         title.textContent = 'Добавить '+labels[type];
         const input = document.getElementById('sourceValue');
         input.placeholder = type==='rss'?'Введите URL...':(type==='telegram'?'Введите username (без @)...':'Введите username (без @)...');
-        var _sh=document.getElementById('sourceHint');if(_sh)_sh.textContent=type==='rss'?'любые RSS или HTML без JS':(type==='telegram'?'только открытые группы и каналы':'только открытые группы и страницы');
         input.value = '';
         form.style.display = 'block';
     } else {
