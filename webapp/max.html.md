@@ -295,6 +295,8 @@ VC.ru --- выберите категорию
 
 ::: {.tariff-link}
 [Описание тарифов](https://news.proid.studio/#pricing)
+[·]{style="color:var(--text-secondary);margin:0 6px;"} [Отменить
+подписку](#)
 :::
 :::
 
