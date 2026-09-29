@@ -564,7 +564,7 @@
                         </div>
                     </div>
                     <div class="tariff-link">
-                        <a href="https://news.proid.studio/#pricing" target="_blank">Описание тарифов</a> <span style="color:var(--text-secondary);margin:0 6px;">·</span> <a href="#" onclick="openCancelMail(event);return false;">Отменить подписку</a>
+                        <a href="https://news.proid.studio/#pricing" target="_blank">Описание тарифов</a> <span style="color:var(--text-secondary);margin:0 6px;">·</span> <a href="mailto:news@proid.studio?subject=Отмена%20подписки&amp;body=Здравствуйте!%20Прошу%20отменить%20мою%20подписку%20в%20сервисе%20«Моя%20АнтиСоцсеть».%0D%0A%0D%0AМой%20ID:%20">Отменить подписку</a>
                     </div>
                 </div>
 
@@ -1819,48 +1819,6 @@ let parts = body.split("- ").filter(p => p.trim() !== '');
         window.toggleDigest = toggleDigest;
         window.logout = logout;
         window.ensureConsent = ensureConsent;
-    
-    function openCancelMail(e) {
-        if (e) e.preventDefault();
-        var subject = encodeURIComponent('Отмена подписки');
-        var body = encodeURIComponent(
-            'Здравствуйте! Прошу отменить мою подписку в сервисе «Моя АнтиСоцсеть».\n\nМой ID: '
-        );
-        var mail = 'mailto:news@proid.studio?subject=' + subject + '&body=' + body;
-
-        // 1) Telegram WebApp — открывает системный почтовый клиент
-        try {
-            if (window.Telegram && window.Telegram.WebApp &&
-                typeof window.Telegram.WebApp.openLink === 'function') {
-                window.Telegram.WebApp.openLink(mail);
-                return;
-            }
-        } catch (err) { console.warn('tg.openLink failed:', err); }
-
-        // 2) MAX WebApp
-        try {
-            if (window.WebApp && typeof window.WebApp.openLink === 'function') {
-                window.WebApp.openLink(mail);
-                return;
-            }
-        } catch (err) { console.warn('WebApp.openLink failed:', err); }
-
-        // 3) VK Bridge (если когда-то понадобится)
-        try {
-            if (window.vkBridge) {
-                window.vkBridge.send('VKWebAppOpenURL', { url: mail });
-                return;
-            }
-        } catch (err) { console.warn('vkBridge failed:', err); }
-
-        // 4) Обычный браузер
-        try {
-            window.location.href = mail;
-        } catch (err) {
-            alert('Для отмены подписки напишите на news@proid.studio');
-        }
-    }
-
-</script>
+    </script>
 </body>
 </html>
