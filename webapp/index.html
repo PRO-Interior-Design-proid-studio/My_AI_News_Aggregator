@@ -1432,7 +1432,7 @@ async function startVkAuth(){
     function renderTimePicker(){ const grid=document.getElementById('timePickerGrid'); grid.innerHTML=''; const cur=currentSendTime?parseInt(currentSendTime.split(':')[0]):-1; for(let h=0;h<24;h++){ const btn=document.createElement('button'); btn.textContent=h.toString().padStart(2,'0')+':00'; if(h===cur)btn.classList.add('selected'); btn.onclick=function(){setTime(h);}; grid.appendChild(btn); } }
     async function setTime(hour){ if(!ensureConsent())return; hapticFeedback(); try{ const resp=await apiRequest('/api/webapp/set_time',{method:'POST',headers:getHeaders(),body:JSON.stringify({hour:hour})}); if(!resp)return; if(!resp.ok){ const err=await resp.json(); alert('❌ Ошибка: '+err.detail); return; } const data=await resp.json(); currentSendTime=data.send_time; document.getElementById('currentTimeDisplay').textContent=currentSendTime+' MSK'; document.querySelectorAll('#timePickerGrid button').forEach((btn,idx)=>{ btn.classList.toggle('selected',idx===hour); }); alert('✅ Время установлено на '+currentSendTime); closeTimePicker(); await loadApp(); } catch(err){ alert('❌ Ошибка: '+err.message); } }
     function toggleTariffs(){ if(!ensureConsent())return; hapticFeedback(); document.getElementById('tariffBlock').classList.toggle('visible'); }
-    async function handlePayment(tariffKey){ if(!ensureConsent())return; hapticFeedback(); if(!authToken){ alert('❌ Вы не авторизованы. Пожалуйста, войдите.'); return; } try{ const resp=await apiRequest('/api/payment/create-invoice',{method:'POST',headers:getHeaders(),body:JSON.stringify({tariff:tariffKey})}); if(!resp)return; if(!resp.ok){ const err=await resp.json(); alert('❌ Ошибка: '+err.detail); return; } const data=await resp.json(); if(data.payment_url){ window.open(data.payment_url,'_blank'); alert('🔗 Переход к оплате...'); } else { alert('❌ Не удалось получить ссылку на оплату'); } } catch(err){ alert('❌ Ошибка: '+err.message); } }
+    async function handlePayment(tariffKey){ if(!ensureConsent())return; hapticFeedback(); if(!authToken){ alert('❌ Вы не авторизованы. Пожалуйста, войдите.'); return; } try{ const resp=await apiRequest('/api/webapp/create-subscription',{method:'POST',headers:getHeaders(),body:JSON.stringify({tariff:tariffKey})}); if(!resp)return; if(!resp.ok){ const err=await resp.json(); alert('❌ Ошибка: '+err.detail); return; } const data=await resp.json(); if(data.payment_url){ window.open(data.payment_url,'_blank'); alert('🔗 Переход к оплате...'); } else { alert('❌ Не удалось получить ссылку на оплату'); } } catch(err){ alert('❌ Ошибка: '+err.message); } }
     async function toggleDigest(){ if(!ensureConsent())return; const container=document.getElementById('digestContainer'); const content=document.getElementById('digestContent'); if(digestVisible){ container.style.display='none'; digestVisible=false; return; } container.style.display='block'; digestVisible=true; content.innerHTML='<div style="text-align:center; padding:20px; color: var(--text-secondary);">⏳ Загрузка...</div>'; try{ const resp=await apiRequest('/api/webapp/digest',{headers:getHeaders()}); if(!resp)return; if(!resp.ok){ const err=await resp.json(); content.innerHTML='<div style="color: #ff6b6b; text-align:center; padding:20px;">❌ Ошибка: '+(err.detail||'Не удалось загрузить ленту')+'</div>'; return; } const data=await resp.json(); let digestHtml=data.digest; if(!digestHtml||digestHtml.trim()===''||digestHtml.includes('Лента ещё не формировалась')){ content.innerHTML='<div style="text-align:center; padding:20px; color: var(--text-secondary);">📭 Лента ещё не формировалась. Запустите сбор вручную или дождитесь автоматического.</div>'; return; } digestHtml=digestHtml.replace(/[\x00-\x1F\x7F-\x9F\u200B\u200C\u200D\uFEFF\u2028\u2029\r]/g,''); let blocks=digestHtml.split(/(?=\n- <b>)/).filter(b=>b.trim().length>0); if(blocks.length<=1){ blocks=digestHtml.split(/(?=\n-)/).filter(b=>b.trim().length>0); } if(blocks.length<=1){ blocks=digestHtml.split(/(?=- <b>)/).filter(b=>b.trim().length>0); if(blocks[0]&&blocks[0].trim()==='')blocks.shift(); } blocks=blocks.map(b=>b.startsWith('\n')?b.slice(1):b); let html=''; for(let block of blocks){ let lines=block.split('\n'); lines=lines.map(line=>line.replace(/^[\s\u00A0]+/,'')); while(lines.length>0&&lines[0].trim()==='')lines.shift(); while(lines.length>0&&lines[lines.length-1].trim()==='')lines.pop(); let cleanedBlock=lines.join('\n');
             // Обработка суммаризаций (эталон)
             let isSummary = cleanedBlock.indexOf('<b>Обсуждения в ') !== -1;
@@ -1932,46 +1932,87 @@ let parts = body.split("- ").filter(p => p.trim() !== '');
     window.telegramConsentGiven = telegramConsentGiven;
     window.linkTelegram = linkTelegram;
 
-    function openCancelMail(e) {
-        if (e) e.preventDefault();
-        var subject = encodeURIComponent('Отмена подписки');
-        var body = encodeURIComponent(
-            'Здравствуйте! Прошу отменить мою подписку в сервисе «Моя АнтиСоцсеть».\n\nМой ID: '
-        );
-        var mail = 'mailto:news@proid.studio?subject=' + subject + '&body=' + body;
+    async function openCancelMail(e) {
+    if (e) e.preventDefault();
+    if (typeof hapticFeedback === 'function') hapticFeedback();
 
-        // 1) Telegram WebApp — открывает системный почтовый клиент
-        try {
-            if (window.Telegram && window.Telegram.WebApp &&
-                typeof window.Telegram.WebApp.openLink === 'function') {
-                window.Telegram.WebApp.openLink(mail);
-                return;
-            }
-        } catch (err) { console.warn('tg.openLink failed:', err); }
+    var popupTitle = 'Отменить подписку?';
+    var popupMessage = 'Текущая подписка сохранит действие до конца оплаченного периода.';
 
-        // 2) MAX WebApp
-        try {
-            if (window.WebApp && typeof window.WebApp.openLink === 'function') {
-                window.WebApp.openLink(mail);
-                return;
-            }
-        } catch (err) { console.warn('WebApp.openLink failed:', err); }
-
-        // 3) VK Bridge (если когда-то понадобится)
-        try {
-            if (window.vkBridge) {
-                window.vkBridge.send('VKWebAppOpenURL', { url: mail });
-                return;
-            }
-        } catch (err) { console.warn('vkBridge failed:', err); }
-
-        // 4) Обычный браузер
-        try {
-            window.location.href = mail;
-        } catch (err) {
-            alert('Для отмены подписки напишите на news@proid.studio');
+    // 1. Подтверждение через платформенный popup
+    var confirmed = false;
+    try {
+        if (typeof tg !== 'undefined' && tg && typeof tg.showPopup === 'function') {
+            confirmed = await new Promise(function(resolve){
+                tg.showPopup({
+                    title: popupTitle,
+                    message: popupMessage,
+                    buttons: [
+                        {id:'cancel', type:'cancel', text:'Оставить'},
+                        {id:'ok', type:'destructive', text:'Отменить'}
+                    ]
+                }, function(btnId){ resolve(btnId === 'ok'); });
+            });
+        } else if (typeof window !== 'undefined' && window.WebApp && typeof window.WebApp.showPopup === 'function') {
+            confirmed = await new Promise(function(resolve){
+                window.WebApp.showPopup({
+                    title: popupTitle,
+                    message: popupMessage,
+                    buttons: [
+                        {id:'cancel', type:'cancel', text:'Оставить'},
+                        {id:'ok', type:'destructive', text:'Отменить'}
+                    ]
+                }, function(btnId){ resolve(btnId === 'ok'); });
+            });
+        } else {
+            confirmed = confirm(popupTitle + '\n\n' + popupMessage);
         }
+    } catch(_) {
+        confirmed = confirm(popupTitle + '\n\n' + popupMessage);
     }
+    if (!confirmed) return;
+
+    // 2. Запрос к API
+    try {
+        var resp = await apiRequest('/api/webapp/cancel_subscription', {
+            method: 'POST',
+            headers: getHeaders(),
+            body: JSON.stringify({ reason: 'user_request' })
+        });
+        if (!resp) return;
+        if (!resp.ok) {
+            var err = await resp.json().catch(function(){ return {detail:'Ошибка'}; });
+            var msg = err && err.detail ? err.detail : 'Не удалось отменить подписку';
+            alert('❌ ' + msg);
+            return;
+        }
+        var data = await resp.json();
+        if (data.status === 'already_disabled') {
+            alert('ℹ️ Автопродление уже отключено.');
+        } else {
+            alert('✅ Автопродление отключено.\nПодписка действует до конца оплаченного периода.');
+        }
+    } catch(err) {
+        alert('❌ Ошибка: ' + (err && err.message ? err.message : 'неизвестная'));
+    }
+}
+
+
+    // Авто-открытие отмены подписки по ссылке ?cancel=1
+    (function autoCancelFromUrl() {
+        if (new URLSearchParams(location.search).get('cancel') !== '1') return;
+        var tries = 0;
+        var timer = setInterval(function() {
+            tries++;
+            var tokenOk = (typeof authToken !== 'undefined' && authToken);
+            var fnOk = (typeof openCancelMail === 'function');
+            if (tokenOk && fnOk) {
+                clearInterval(timer);
+                setTimeout(function(){ openCancelMail(null); }, 300);
+            }
+            if (tries >= 60) { clearInterval(timer); }
+        }, 500);
+    })();
 
 </script>
 <!-- ===== ФУТЕР ===== -->
