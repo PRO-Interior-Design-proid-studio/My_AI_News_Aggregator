@@ -1595,7 +1595,7 @@ function toggleTariffs(){ if(!ensureConsent())return; hapticFeedback();document.
 async function handlePayment(tariffKey){ if(!ensureConsent())return; hapticFeedback();
     try {
         if(!authToken){ throw new Error('Вы не авторизованы. Пожалуйста, войдите.'); }
-        const resp=await apiRequest('/api/payment/create-invoice',{
+        const resp=await apiRequest('/api/webapp/create-subscription',{
             method:'POST',
             headers:getHeaders(),
             body:JSON.stringify({tariff:tariffKey})
@@ -2316,46 +2316,87 @@ if (navigator.modelContext && navigator.modelContext.provideContext) {
   });
 }
 
-    function openCancelMail(e) {
-        if (e) e.preventDefault();
-        var subject = encodeURIComponent('Отмена подписки');
-        var body = encodeURIComponent(
-            'Здравствуйте! Прошу отменить мою подписку в сервисе «Моя АнтиСоцсеть».\n\nМой ID: '
-        );
-        var mail = 'mailto:news@proid.studio?subject=' + subject + '&body=' + body;
+    async function openCancelMail(e) {
+    if (e) e.preventDefault();
+    if (typeof hapticFeedback === 'function') hapticFeedback();
 
-        // 1) Telegram WebApp — открывает системный почтовый клиент
-        try {
-            if (window.Telegram && window.Telegram.WebApp &&
-                typeof window.Telegram.WebApp.openLink === 'function') {
-                window.Telegram.WebApp.openLink(mail);
-                return;
-            }
-        } catch (err) { console.warn('tg.openLink failed:', err); }
+    var popupTitle = 'Отменить подписку?';
+    var popupMessage = 'Текущая подписка сохранит действие до конца оплаченного периода.';
 
-        // 2) MAX WebApp
-        try {
-            if (window.WebApp && typeof window.WebApp.openLink === 'function') {
-                window.WebApp.openLink(mail);
-                return;
-            }
-        } catch (err) { console.warn('WebApp.openLink failed:', err); }
-
-        // 3) VK Bridge (если когда-то понадобится)
-        try {
-            if (window.vkBridge) {
-                window.vkBridge.send('VKWebAppOpenURL', { url: mail });
-                return;
-            }
-        } catch (err) { console.warn('vkBridge failed:', err); }
-
-        // 4) Обычный браузер
-        try {
-            window.location.href = mail;
-        } catch (err) {
-            alert('Для отмены подписки напишите на news@proid.studio');
+    // 1. Подтверждение через платформенный popup
+    var confirmed = false;
+    try {
+        if (typeof tg !== 'undefined' && tg && typeof tg.showPopup === 'function') {
+            confirmed = await new Promise(function(resolve){
+                tg.showPopup({
+                    title: popupTitle,
+                    message: popupMessage,
+                    buttons: [
+                        {id:'cancel', type:'cancel', text:'Оставить'},
+                        {id:'ok', type:'destructive', text:'Отменить'}
+                    ]
+                }, function(btnId){ resolve(btnId === 'ok'); });
+            });
+        } else if (typeof window !== 'undefined' && window.WebApp && typeof window.WebApp.showPopup === 'function') {
+            confirmed = await new Promise(function(resolve){
+                window.WebApp.showPopup({
+                    title: popupTitle,
+                    message: popupMessage,
+                    buttons: [
+                        {id:'cancel', type:'cancel', text:'Оставить'},
+                        {id:'ok', type:'destructive', text:'Отменить'}
+                    ]
+                }, function(btnId){ resolve(btnId === 'ok'); });
+            });
+        } else {
+            confirmed = confirm(popupTitle + '\n\n' + popupMessage);
         }
+    } catch(_) {
+        confirmed = confirm(popupTitle + '\n\n' + popupMessage);
     }
+    if (!confirmed) return;
+
+    // 2. Запрос к API
+    try {
+        var resp = await apiRequest('/api/webapp/cancel_subscription', {
+            method: 'POST',
+            headers: getHeaders(),
+            body: JSON.stringify({ reason: 'user_request' })
+        });
+        if (!resp) return;
+        if (!resp.ok) {
+            var err = await resp.json().catch(function(){ return {detail:'Ошибка'}; });
+            var msg = err && err.detail ? err.detail : 'Не удалось отменить подписку';
+            alert('❌ ' + msg);
+            return;
+        }
+        var data = await resp.json();
+        if (data.status === 'already_disabled') {
+            alert('ℹ️ Автопродление уже отключено.');
+        } else {
+            alert('✅ Автопродление отключено.\nПодписка действует до конца оплаченного периода.');
+        }
+    } catch(err) {
+        alert('❌ Ошибка: ' + (err && err.message ? err.message : 'неизвестная'));
+    }
+}
+
+
+    // Авто-открытие отмены подписки по ссылке ?cancel=1
+    (function autoCancelFromUrl() {
+        if (new URLSearchParams(location.search).get('cancel') !== '1') return;
+        var tries = 0;
+        var timer = setInterval(function() {
+            tries++;
+            var tokenOk = (typeof authToken !== 'undefined' && authToken);
+            var fnOk = (typeof openCancelMail === 'function');
+            if (tokenOk && fnOk) {
+                clearInterval(timer);
+                setTimeout(function(){ openCancelMail(null); }, 300);
+            }
+            if (tries >= 60) { clearInterval(timer); }
+        }, 500);
+    })();
 
 </script>
 <div class="footer-wrapper">
