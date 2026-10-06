@@ -540,18 +540,7 @@
                 <div class="section-header">Мои источники (<span id="counter">0</span>)</div>
                 <div id="sourceListContainer"></div>
 
-                                <button class="payment-toggle-btn" id="paymentToggleBtn" onclick="toggleTariffs()">💰 Оплатить тариф</button>
-                <div class="status-block" id="emailBlock" style="display:none;">
-                    <div class="status-title">📧 Email для чека</div>
-                    <p style="color: var(--text-secondary); font-size: 13px; margin-bottom: 10px; line-height: 1.5;">
-                        Robokassa отправит чек на этот адрес. Допустимы только домены <strong>.ru</strong> и <strong>.рф</strong>.
-                    </p>
-                    <input type="email" id="emailInput" placeholder="user@example.ru"
-                           style="width:100%; padding:12px; margin-bottom:8px; background:rgba(0,0,0,0.3); color:var(--text); border:1px solid var(--border); border-radius:12px; font-size:15px; outline:none;">
-                    <button id="emailSaveBtn" style="width:100%; padding:12px; border:none; border-radius:12px; font-size:16px; font-weight:600; cursor:pointer; background:linear-gradient(290deg,#d235ff 0%,#a062ff 30%,#3088ff 66%,#61d8ff 100%); color:#fff;">
-                        Сохранить email
-                    </button>
-                </div>
+                <button class="payment-toggle-btn" id="paymentToggleBtn" onclick="toggleTariffs()">💰 Оплатить тариф</button>
 
                 <div class="tariff-block" id="tariffBlock">
                     <div class="tariff-grid">
@@ -643,7 +632,6 @@
 
         // ===== ГЛОБАЛЬНЫЕ ПЕРЕМЕННЫЕ =====
         let currentSources = [];
-        let currentEmail = null;
         let currentLimit = 5;
         let currentAddType = 'rss';
         let currentSendTime = null;
@@ -771,7 +759,6 @@
             .then(data=>{
                 if(!data)return;
                 currentSources=data.sources||[];
-                currentEmail = (data.email && data.email.trim()) ? data.email.trim().toLowerCase() : null;
                 currentLimit=data.limit||5;
                 renderGroupedSources(currentSources);
                 document.getElementById('counter').textContent=currentSources.length;
@@ -1298,83 +1285,12 @@
         function toggleTariffs(){
             if (!ensureConsent()) return;
             hapticFeedback();
-            var tb = document.getElementById('tariffBlock');
-            var isOpening = !tb.classList.contains('visible');
-            tb.classList.toggle('visible');
-            var eb = document.getElementById('emailBlock');
-            if (eb) {
-                if (isOpening && !currentEmail) {
-                    eb.style.display = 'block';
-                } else {
-                    eb.style.display = 'none';
-                }
-            }
+            document.getElementById('tariffBlock').classList.toggle('visible');
         }
-        async function saveEmail() {
-            const inp = document.getElementById('emailInput');
-            const clean = (inp && inp.value || '').trim().toLowerCase();
-            if (!clean) { alert('Введите email'); return; }
-            if (!(clean.endsWith('.ru') || clean.endsWith('.рф'))) {
-                alert('Допустимы только адреса в домене .ru или .рф');
-                return;
-            }
-            const initData = localStorage.getItem('max_init_data');
-            if (!initData) { alert('Нет авторизации'); return; }
-            try {
-                const resp = await apiRequest('/api/webapp/max/set_email', {
-                    method: 'POST',
-                    headers: {'Content-Type': 'application/json', 'X-MAX-Init-Data': initData},
-                    body: JSON.stringify({ email: clean })
-                });
-                if (!resp || !resp.ok) {
-                    const err = resp ? await resp.json() : { detail: 'Ошибка' };
-                    alert((err.detail || 'Не удалось сохранить email'));
-                    return;
-                }
-                currentEmail = clean;
-                const block = document.getElementById('emailBlock');
-                if (block) block.style.display = 'none';
-                alert('✅ Email сохранён: ' + clean);
-            } catch (e) {
-                alert('Ошибка: ' + e.message);
-            }
-        }
-
-        async function handlePayment(tariffKey){
+        function handlePayment(tariffKey){
             if (!ensureConsent()) return;
             hapticFeedback();
-            if (!currentEmail) {
-                alert('Сначала укажите email для чека (.ru или .рф)');
-                var blk = document.getElementById('emailBlock');
-                if (blk) { blk.style.display = 'block'; blk.scrollIntoView({behavior:'smooth', block:'center'}); }
-                var ii = document.getElementById('emailInput');
-                if (ii) ii.focus();
-                return;
-            }
-            const initData = localStorage.getItem('max_init_data');
-            if (!initData) { alert('Нет авторизации'); return; }
-            try {
-                const resp = await apiRequest('/api/webapp/max/create-subscription', {
-                    method: 'POST',
-                    headers: {'Content-Type': 'application/json', 'X-MAX-Init-Data': initData},
-                    body: JSON.stringify({ tariff: tariffKey, email: currentEmail })
-                });
-                if (!resp) return;
-                if (!resp.ok) {
-                    const err = await resp.json();
-                    alert('❌ Ошибка: ' + (err.detail || 'не удалось создать платёж'));
-                    return;
-                }
-                const data = await resp.json();
-                if (!data.payment_url) { alert('❌ Не удалось получить ссылку на оплату'); return; }
-                if (window.WebApp && typeof window.WebApp.openLink === 'function') {
-                    window.WebApp.openLink(data.payment_url);
-                } else {
-                    window.location.href = data.payment_url;
-                }
-            } catch (err) {
-                alert('❌ Ошибка: ' + err.message);
-            }
+            startPayment(tariffKey);
         }
         function startPayment(tariffKey){
             if (!ensureConsent()) return;
@@ -1874,7 +1790,6 @@ let parts = body.split("- ").filter(p => p.trim() !== '');
         window.toggleTariffs=toggleTariffs;
         window.handlePayment=handlePayment;
         window.startPayment=startPayment;
-        window.saveEmail=saveEmail;
         window.updateStatus=updateStatus;
         window.toggleTimePicker=toggleTimePicker;
         window.closeTimePicker=closeTimePicker;
@@ -1903,8 +1818,6 @@ let parts = body.split("- ").filter(p => p.trim() !== '');
         window.shortenCategoryName=shortenCategoryName;
         window.toggleDigest = toggleDigest;
         window.logout = logout;
-        var _esb = document.getElementById('emailSaveBtn');
-        if (_esb) _esb.addEventListener('click', saveEmail);
         window.ensureConsent = ensureConsent;
     
     async function openCancelMail(e) {

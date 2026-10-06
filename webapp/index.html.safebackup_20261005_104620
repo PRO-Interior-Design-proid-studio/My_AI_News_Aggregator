@@ -711,17 +711,6 @@ html, body {
             <div class="section-header">Мои источники (<span id="counter">0</span>)</div>
             <div id="sourceListContainer"></div>
             <button class="payment-toggle-btn" id="paymentToggleBtn" onclick="toggleTariffs()">💰 Оплатить тариф</button>
-            <div class="status-block" id="emailBlock" style="display:none;">
-                <div class="status-title">📧 Email для чека</div>
-                <p style="color: var(--text-secondary); font-size: 13px; margin-bottom: 10px; line-height: 1.5;">
-                    Robokassa отправит чек на этот адрес. Допустимы только домены <strong>.ru</strong> и <strong>.рф</strong>.
-                </p>
-                <input type="email" id="emailInput" placeholder="user@example.ru"
-                       style="width:100%; padding:12px; margin-bottom:8px; background:rgba(0,0,0,0.3); color:var(--text); border:1px solid var(--border); border-radius:12px; font-size:15px; outline:none;">
-                <button id="emailSaveBtn" style="width:100%; padding:12px; border:none; border-radius:12px; font-size:16px; font-weight:600; cursor:pointer; background:linear-gradient(290deg,#d235ff 0%,#a062ff 30%,#3088ff 66%,#61d8ff 100%); color:#fff;">
-                    Сохранить email
-                </button>
-            </div>
             <div class="tariff-block" id="tariffBlock">
                 <div class="tariff-grid">
                     <div class="tariff-card">
@@ -821,7 +810,6 @@ function pollForToken(state, onSuccess) {
 }
 
     let authToken = localStorage.getItem('auth_token') || null;
-    let currentEmail = null;
     let currentSources = [];
     let currentLimit = 5;
     let currentAddType = 'rss';
@@ -1178,7 +1166,6 @@ async function startVkAuth(){
             const data = await resp.json();
             log('loadApp: received data', {consent_given: data.consent_given, telegram_consent_given: data.telegram_consent_given, telegram_id: data.telegram_id});
             currentSources = data.sources || [];
-            currentEmail = (data.email && data.email.trim()) ? data.email.trim().toLowerCase() : null;
             currentLimit = data.limit || 5;
             consentGiven = data.consent_given === true;
             telegramConsentGiven = data.telegram_consent_given === true;
@@ -1444,86 +1431,8 @@ async function startVkAuth(){
     function closeTimePicker(){ document.getElementById('timePicker').style.display='none'; }
     function renderTimePicker(){ const grid=document.getElementById('timePickerGrid'); grid.innerHTML=''; const cur=currentSendTime?parseInt(currentSendTime.split(':')[0]):-1; for(let h=0;h<24;h++){ const btn=document.createElement('button'); btn.textContent=h.toString().padStart(2,'0')+':00'; if(h===cur)btn.classList.add('selected'); btn.onclick=function(){setTime(h);}; grid.appendChild(btn); } }
     async function setTime(hour){ if(!ensureConsent())return; hapticFeedback(); try{ const resp=await apiRequest('/api/webapp/set_time',{method:'POST',headers:getHeaders(),body:JSON.stringify({hour:hour})}); if(!resp)return; if(!resp.ok){ const err=await resp.json(); alert('❌ Ошибка: '+err.detail); return; } const data=await resp.json(); currentSendTime=data.send_time; document.getElementById('currentTimeDisplay').textContent=currentSendTime+' MSK'; document.querySelectorAll('#timePickerGrid button').forEach((btn,idx)=>{ btn.classList.toggle('selected',idx===hour); }); alert('✅ Время установлено на '+currentSendTime); closeTimePicker(); await loadApp(); } catch(err){ alert('❌ Ошибка: '+err.message); } }
-    async function saveEmail(){
-        const inp = document.getElementById('emailInput');
-        const clean = (inp && inp.value || '').trim().toLowerCase();
-        if(!clean){ alert('Введите email'); return; }
-        if(!(clean.endsWith('.ru') || clean.endsWith('.рф'))){
-            alert('Допустимы только адреса в домене .ru или .рф');
-            return;
-        }
-        try{
-            const resp = await apiRequest('/api/webapp/set_email', {
-                method:'POST',
-                headers:getHeaders(),
-                body:JSON.stringify({ email: clean })
-            });
-            if(!resp || !resp.ok){
-                const err = resp ? await resp.json() : { detail: 'Ошибка' };
-                alert((err.detail || 'Не удалось сохранить email'));
-                return;
-            }
-            currentEmail = clean;
-            const block = document.getElementById('emailBlock');
-            if(block) block.style.display = 'none';
-            alert('✅ Email сохранён: ' + clean);
-        } catch(e){
-            alert('Ошибка: ' + e.message);
-        }
-    }
-    function toggleTariffs(){
-        if(!ensureConsent()) return;
-        hapticFeedback();
-        var tb = document.getElementById('tariffBlock');
-        var isOpening = !tb.classList.contains('visible');
-        tb.classList.toggle('visible');
-        var eb = document.getElementById('emailBlock');
-        if(eb){
-            if(isOpening && !currentEmail){
-                eb.style.display = 'block';
-            } else {
-                eb.style.display = 'none';
-            }
-        }
-    }
-    async function handlePayment(tariffKey){
-        if(!ensureConsent()) return;
-        hapticFeedback();
-        if(!authToken){ alert('❌ Вы не авторизованы. Пожалуйста, войдите.'); return; }
-        if(!currentEmail){
-            alert('Сначала укажите email для чека (.ru или .рф)');
-            var blk = document.getElementById('emailBlock');
-            if(blk){ blk.style.display='block'; blk.scrollIntoView({behavior:'smooth', block:'center'}); }
-            var ii = document.getElementById('emailInput');
-            if(ii) ii.focus();
-            return;
-        }
-        try{
-            const resp = await apiRequest('/api/webapp/create-subscription',{
-                method:'POST',
-                headers:getHeaders(),
-                body:JSON.stringify({tariff:tariffKey, email:currentEmail})
-            });
-            if(!resp) return;
-            if(!resp.ok){
-                const err = await resp.json();
-                alert('❌ Ошибка: '+err.detail);
-                return;
-            }
-            const data = await resp.json();
-            if(!data.payment_url){
-                alert('❌ Не удалось получить ссылку на оплату');
-                return;
-            }
-            if(window.Telegram && window.Telegram.WebApp && window.Telegram.WebApp.openLink){
-                window.Telegram.WebApp.openLink(data.payment_url);
-            } else {
-                window.location.href = data.payment_url;
-            }
-        } catch(err){
-            alert('❌ Ошибка: '+err.message);
-        }
-    }
+    function toggleTariffs(){ if(!ensureConsent())return; hapticFeedback(); document.getElementById('tariffBlock').classList.toggle('visible'); }
+    async function handlePayment(tariffKey){ if(!ensureConsent())return; hapticFeedback(); if(!authToken){ alert('❌ Вы не авторизованы. Пожалуйста, войдите.'); return; } try{ const resp=await apiRequest('/api/webapp/create-subscription',{method:'POST',headers:getHeaders(),body:JSON.stringify({tariff:tariffKey})}); if(!resp)return; if(!resp.ok){ const err=await resp.json(); alert('❌ Ошибка: '+err.detail); return; } const data=await resp.json(); if(data.payment_url){ window.open(data.payment_url,'_blank'); alert('🔗 Переход к оплате...'); } else { alert('❌ Не удалось получить ссылку на оплату'); } } catch(err){ alert('❌ Ошибка: '+err.message); } }
     async function toggleDigest(){ if(!ensureConsent())return; const container=document.getElementById('digestContainer'); const content=document.getElementById('digestContent'); if(digestVisible){ container.style.display='none'; digestVisible=false; return; } container.style.display='block'; digestVisible=true; content.innerHTML='<div style="text-align:center; padding:20px; color: var(--text-secondary);">⏳ Загрузка...</div>'; try{ const resp=await apiRequest('/api/webapp/digest',{headers:getHeaders()}); if(!resp)return; if(!resp.ok){ const err=await resp.json(); content.innerHTML='<div style="color: #ff6b6b; text-align:center; padding:20px;">❌ Ошибка: '+(err.detail||'Не удалось загрузить ленту')+'</div>'; return; } const data=await resp.json(); let digestHtml=data.digest; if(!digestHtml||digestHtml.trim()===''||digestHtml.includes('Лента ещё не формировалась')){ content.innerHTML='<div style="text-align:center; padding:20px; color: var(--text-secondary);">📭 Лента ещё не формировалась. Запустите сбор вручную или дождитесь автоматического.</div>'; return; } digestHtml=digestHtml.replace(/[\x00-\x1F\x7F-\x9F\u200B\u200C\u200D\uFEFF\u2028\u2029\r]/g,''); let blocks=digestHtml.split(/(?=\n- <b>)/).filter(b=>b.trim().length>0); if(blocks.length<=1){ blocks=digestHtml.split(/(?=\n-)/).filter(b=>b.trim().length>0); } if(blocks.length<=1){ blocks=digestHtml.split(/(?=- <b>)/).filter(b=>b.trim().length>0); if(blocks[0]&&blocks[0].trim()==='')blocks.shift(); } blocks=blocks.map(b=>b.startsWith('\n')?b.slice(1):b); let html=''; for(let block of blocks){ let lines=block.split('\n'); lines=lines.map(line=>line.replace(/^[\s\u00A0]+/,'')); while(lines.length>0&&lines[0].trim()==='')lines.shift(); while(lines.length>0&&lines[lines.length-1].trim()==='')lines.pop(); let cleanedBlock=lines.join('\n');
             // Обработка суммаризаций (эталон)
             let isSummary = cleanedBlock.indexOf('<b>Обсуждения в ') !== -1;
@@ -1981,7 +1890,6 @@ let parts = body.split("- ").filter(p => p.trim() !== '');
     // ===== ЭКСПОРТЫ =====
     window.toggleTariffs = toggleTariffs;
     window.handlePayment = handlePayment;
-    window.saveEmail = saveEmail;
     window.startPayment = handlePayment;
     window.toggleCategoryForm = toggleCategoryForm;
     window.openAddForm = openAddForm;
@@ -2020,8 +1928,6 @@ let parts = body.split("- ").filter(p => p.trim() !== '');
     window.suggestSource = suggestSource;
     window.loadApp = loadApp;
     window.logout = logout;
-    var _esb = document.getElementById('emailSaveBtn');
-    if(_esb) _esb.addEventListener('click', saveEmail);
     window.ensureConsent = ensureConsent;
     window.telegramConsentGiven = telegramConsentGiven;
     window.linkTelegram = linkTelegram;

@@ -556,17 +556,6 @@ body{font-family:-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, 
 <div class="section-header">Мои источники (<span id="counter">0</span>)</div>
 <div id="sourceListContainer"></div>
 <button class="payment-toggle-btn" id="paymentToggleBtn">💰 Оплатить тариф</button>
-<div class="status-block" id="emailBlock" style="display:none;">
-    <div class="status-title">📧 Email для чека</div>
-    <p style="color: var(--text-secondary); font-size: 13px; margin-bottom: 10px; line-height: 1.5;">
-        Robokassa отправит чек на этот адрес. Допустимы только домены <strong>.ru</strong> и <strong>.рф</strong>.
-    </p>
-    <input type="email" id="emailInput" placeholder="user@example.ru"
-           style="width:100%; padding:12px; margin-bottom:8px; background:rgba(0,0,0,0.3); color:var(--text); border:1px solid var(--border); border-radius:12px; font-size:15px; outline:none;">
-    <button id="emailSaveBtn" style="width:100%; padding:12px; border:none; border-radius:12px; font-size:16px; font-weight:600; cursor:pointer; background:linear-gradient(290deg,#d235ff 0%,#a062ff 30%,#3088ff 66%,#61d8ff 100%); color:#fff;">
-        Сохранить email
-    </button>
-</div>
 <div class="tariff-block" id="tariffBlock">
 <div class="tariff-grid">
 <div class="tariff-card"><div class="title">Базовый</div><button class="price-btn" onclick="handlePayment('basic_month')">190 ₽ <span class="label">/ мес</span></button><button class="price-btn" onclick="handlePayment('basic_year')">1 900 ₽ <span class="label">/ год</span></button></div>
@@ -765,7 +754,6 @@ let currentSendTime = null;
 let isPremium = false;
 let defaultSendHour = 18;
 let authToken = localStorage.getItem('auth_token') || null;
-let currentEmail = null;
 let isTestUser = false;
 let consentGiven = false;
 function hapticFeedback(){if(navigator.vibrate)navigator.vibrate(10);}
@@ -868,7 +856,6 @@ async function loadApp(){
         }
         const data = await resp.json();
         currentSources = data.sources || [];
-        currentEmail = (data.email && data.email.trim()) ? data.email.trim().toLowerCase() : null;
         currentLimit = data.limit || 5;
         window.lastSent = data.last_sent || null; // <-- СОХРАНЯЕМ ДАТУ ЛЕНТЫ
         renderGroupedSources(currentSources);
@@ -1604,85 +1591,28 @@ async function setTime(hour){ if(!ensureConsent())return; hapticFeedback();
         showError(err.message || 'Не удалось установить время');
     }
 }
-async function saveEmail(){
-    const inp = document.getElementById('emailInput');
-    const clean = (inp && inp.value || '').trim().toLowerCase();
-    if(!clean){ alert('Введите email'); return; }
-    if(!(clean.endsWith('.ru') || clean.endsWith('.рф'))){
-        alert('Допустимы только адреса в домене .ru или .рф');
-        return;
-    }
-    try{
-        const resp = await apiRequest('/api/webapp/set_email', {
+function toggleTariffs(){ if(!ensureConsent())return; hapticFeedback();document.getElementById('tariffBlock').classList.toggle('visible');}
+async function handlePayment(tariffKey){ if(!ensureConsent())return; hapticFeedback();
+    try {
+        if(!authToken){ throw new Error('Вы не авторизованы. Пожалуйста, войдите.'); }
+        const resp=await apiRequest('/api/webapp/create-subscription',{
             method:'POST',
             headers:getHeaders(),
-            body:JSON.stringify({ email: clean })
+            body:JSON.stringify({tariff:tariffKey})
         });
-        if(!resp || !resp.ok){
-            const err = resp ? await resp.json() : { detail: 'Ошибка' };
-            alert((err.detail || 'Не удалось сохранить email'));
-            return;
-        }
-        currentEmail = clean;
-        const block = document.getElementById('emailBlock');
-        if(block) block.style.display = 'none';
-        alert('✅ Email сохранён: ' + clean);
-    } catch(e){
-        alert('Ошибка: ' + e.message);
-    }
-}
-function toggleTariffs(){
-    if(!ensureConsent()) return;
-    hapticFeedback();
-    var tb = document.getElementById('tariffBlock');
-    var isOpening = !tb.classList.contains('visible');
-    tb.classList.toggle('visible');
-    var eb = document.getElementById('emailBlock');
-    if(eb){
-        if(isOpening && !currentEmail){
-            eb.style.display = 'block';
-        } else {
-            eb.style.display = 'none';
-        }
-    }
-}
-async function handlePayment(tariffKey){
-    if(!ensureConsent()) return;
-    hapticFeedback();
-    if(!authToken){ showError('Вы не авторизованы. Пожалуйста, войдите.'); return; }
-    if(!currentEmail){
-        alert('Сначала укажите email для чека (.ru или .рф)');
-        var blk = document.getElementById('emailBlock');
-        if(blk){ blk.style.display='block'; blk.scrollIntoView({behavior:'smooth', block:'center'}); }
-        var ii = document.getElementById('emailInput');
-        if(ii) ii.focus();
-        return;
-    }
-    var pendingWindow = window.open('', '_blank');
-    try{
-        const resp = await apiRequest('/api/webapp/create-subscription',{
-            method:'POST',
-            headers:getHeaders(),
-            body:JSON.stringify({tariff:tariffKey, email:currentEmail})
-        });
-        if(!resp){ if(pendingWindow) pendingWindow.close(); return; }
+        if(!resp) return;
         if(!resp.ok){
-            if(pendingWindow) pendingWindow.close();
-            const err = await resp.json();
+            const err=await resp.json();
             throw new Error(err.detail || 'Ошибка создания платежа');
         }
-        const data = await resp.json();
-        if(!data.payment_url){
-            if(pendingWindow) pendingWindow.close();
+        const data=await resp.json();
+        if(data.payment_url){
+            window.open(data.payment_url,'_blank');
+            showSuccess('🔗 Переход к оплате...');
+        } else {
             throw new Error('Не удалось получить ссылку на оплату');
         }
-        if(pendingWindow && !pendingWindow.closed){
-            pendingWindow.location.href = data.payment_url;
-        } else {
-            window.location.href = data.payment_url;
-        }
-    } catch(err){
-        if(pendingWindow) pendingWindow.close();
+    } catch(err) {
         showError(err.message);
     }
 }
@@ -2064,7 +1994,6 @@ window.startMaxAuth = startMaxAuth;
 window.startYandexAuth = startYandexAuth;
 window.toggleTariffs = toggleTariffs;
 window.handlePayment = handlePayment;
-window.saveEmail = saveEmail;
 window.startPayment = handlePayment;
 window.toggleCategoryForm = toggleCategoryForm;
 window.toggleAddForm = toggleAddForm;
@@ -2101,8 +2030,6 @@ window.generateGoogleNewsRSS = generateGoogleNewsRSS;
 window.addRSSSource = addRSSSource;
 window.toggleDigest = toggleDigest;
 window.suggestSource = window.suggestSource;
-var _esb = document.getElementById('emailSaveBtn');
-if(_esb) _esb.addEventListener('click', saveEmail);
 window.ensureConsent = ensureConsent;
 window.logout = logout;
 const WEATHER_API_URL = '/api/weather/forecast';

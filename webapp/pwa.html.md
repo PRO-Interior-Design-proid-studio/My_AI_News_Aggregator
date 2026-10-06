@@ -350,6 +350,17 @@ VC.ru --- выберите категорию
 
 💰 Оплатить тариф
 
+::: {#emailBlock .status-block style="display:none;"}
+::: {.status-title}
+📧 Email для чека
+:::
+
+Robokassa отправит чек на этот адрес. Допустимы только домены **.ru** и
+**.рф**.
+
+Сохранить email
+:::
+
 ::: {#tariffBlock .tariff-block}
 ::: {.tariff-grid}
 ::: {.tariff-card}

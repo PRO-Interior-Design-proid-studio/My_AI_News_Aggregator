@@ -540,7 +540,6 @@
                 <div class="section-header">Мои источники (<span id="counter">0</span>)</div>
                 <div id="sourceListContainer"></div>
 
-                                <button class="payment-toggle-btn" id="paymentToggleBtn" onclick="toggleTariffs()">💰 Оплатить тариф</button>
                 <div class="status-block" id="emailBlock" style="display:none;">
                     <div class="status-title">📧 Email для чека</div>
                     <p style="color: var(--text-secondary); font-size: 13px; margin-bottom: 10px; line-height: 1.5;">
@@ -552,6 +551,7 @@
                         Сохранить email
                     </button>
                 </div>
+                                <button class="payment-toggle-btn" id="paymentToggleBtn" onclick="toggleTariffs()">💰 Оплатить тариф</button>
 
                 <div class="tariff-block" id="tariffBlock">
                     <div class="tariff-grid">
@@ -772,6 +772,8 @@
                 if(!data)return;
                 currentSources=data.sources||[];
                 currentEmail = (data.email && data.email.trim()) ? data.email.trim().toLowerCase() : null;
+                var _eb = document.getElementById('emailBlock');
+                if (_eb) _eb.style.display = currentEmail ? 'none' : 'block';
                 currentLimit=data.limit||5;
                 renderGroupedSources(currentSources);
                 document.getElementById('counter').textContent=currentSources.length;
@@ -1298,17 +1300,7 @@
         function toggleTariffs(){
             if (!ensureConsent()) return;
             hapticFeedback();
-            var tb = document.getElementById('tariffBlock');
-            var isOpening = !tb.classList.contains('visible');
-            tb.classList.toggle('visible');
-            var eb = document.getElementById('emailBlock');
-            if (eb) {
-                if (isOpening && !currentEmail) {
-                    eb.style.display = 'block';
-                } else {
-                    eb.style.display = 'none';
-                }
-            }
+            document.getElementById('tariffBlock').classList.toggle('visible');
         }
         async function saveEmail() {
             const inp = document.getElementById('emailInput');
