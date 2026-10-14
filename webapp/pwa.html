@@ -561,9 +561,15 @@ body{font-family:-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, 
     <p style="color: var(--text-secondary); font-size: 13px; margin-bottom: 10px; line-height: 1.5;">
         Robokassa отправит чек на этот адрес. Допустимы только домены <strong>.ru</strong> и <strong>.рф</strong>.
     </p>
-    <input type="email" id="emailInput" placeholder="user@example.ru"
-           style="width:100%; padding:12px; margin-bottom:8px; background:rgba(0,0,0,0.3); color:var(--text); border:1px solid var(--border); border-radius:12px; font-size:15px; outline:none;">
-    <button id="emailSaveBtn" style="width:100%; padding:12px; border:none; border-radius:12px; font-size:16px; font-weight:600; cursor:pointer; background:linear-gradient(290deg,#d235ff 0%,#a062ff 30%,#3088ff 66%,#61d8ff 100%); color:#fff;">
+    <div style="display:flex;align-items:flex-start;gap:12px;margin:8px 0 12px 0;">
+        <input type="checkbox" id="autoRenewConsent" style="width:20px;height:20px;margin-top:2px;flex-shrink:0;accent-color:var(--accent2);cursor:pointer;">
+        <label for="autoRenewConsent" style="color:var(--text-secondary);font-size:13px;line-height:1.5;cursor:pointer;">
+            Я согласен на автоматическое продление подписки и списание денежных средств с моей банковской карты согласно условиям <a href="/offer" target="_blank" style="color:var(--accent2);">Публичной оферты</a>. Могу отменить автопродление в любой момент в личном кабинете.
+        </label>
+    </div>
+    <input type="email" id="emailInput" placeholder="user@example.ru" disabled
+           style="width:100%; padding:12px; margin-bottom:8px; background:rgba(0,0,0,0.3); color:var(--text); border:1px solid var(--border); border-radius:12px; font-size:15px; outline:none; opacity:0.5; cursor:not-allowed;">
+    <button id="emailSaveBtn" disabled style="width:100%; padding:12px; border:none; border-radius:12px; font-size:16px; font-weight:600; cursor:not-allowed; opacity:0.5; background:linear-gradient(290deg,#d235ff 0%,#a062ff 30%,#3088ff 66%,#61d8ff 100%); color:#fff;">
         Сохранить email
     </button>
 </div>
@@ -1605,6 +1611,12 @@ async function setTime(hour){ if(!ensureConsent())return; hapticFeedback();
     }
 }
 async function saveEmail(){
+    // ФЗ-376: отдельное явное согласие на автопродление
+    var _cb = document.getElementById('autoRenewConsent');
+    if (_cb && !_cb.checked) {
+        alert('Сначала подтвердите согласие на автопродление.');
+        return;
+    }
     const inp = document.getElementById('emailInput');
     const clean = (inp && inp.value || '').trim().toLowerCase();
     if(!clean){ alert('Введите email'); return; }
@@ -1649,6 +1661,14 @@ function toggleTariffs(){
 async function handlePayment(tariffKey){
     if(!ensureConsent()) return;
     hapticFeedback();
+    // ФЗ-376: если блок email видим — проверяем галочку автопродления
+    var _cb = document.getElementById('autoRenewConsent');
+    var _blk = document.getElementById('emailBlock');
+    if (_blk && _blk.style.display === 'block' && _cb && !_cb.checked) {
+        alert('Для оформления подписки необходимо согласие на автопродление.');
+        _blk.scrollIntoView({behavior:'smooth', block:'center'});
+        return;
+    }
     if(!authToken){ showError('Вы не авторизованы. Пожалуйста, войдите.'); return; }
     if(!currentEmail){
         alert('Сначала укажите email для чека (.ru или .рф)');
@@ -2489,5 +2509,24 @@ if (navigator.modelContext && navigator.modelContext.provideContext) {
         <span>Создано: <a href="https://proid.studio" target="_blank" class="studio-link">proid.studio</a></span>
     </div>
 </div>
+<script>
+// ФЗ-376: активация поля email и кнопки после согласия на автопродление
+document.addEventListener('DOMContentLoaded', function() {
+    var _autoCb = document.getElementById('autoRenewConsent');
+    var _emailInp = document.getElementById('emailInput');
+    var _emailBtn = document.getElementById('emailSaveBtn');
+    if (!_autoCb || !_emailInp || !_emailBtn) return;
+    _autoCb.addEventListener('change', function() {
+        var on = this.checked;
+        _emailInp.disabled = !on;
+        _emailInp.style.opacity = on ? '1' : '0.5';
+        _emailInp.style.cursor = on ? 'text' : 'not-allowed';
+        _emailBtn.disabled = !on;
+        _emailBtn.style.opacity = on ? '1' : '0.5';
+        _emailBtn.style.cursor = on ? 'pointer' : 'not-allowed';
+        if (on) _emailInp.focus();
+    });
+});
+</script>
 </body>
 </html>
