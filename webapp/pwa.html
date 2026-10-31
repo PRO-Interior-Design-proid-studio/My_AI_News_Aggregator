@@ -559,7 +559,7 @@ body{font-family:-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, 
 <div class="status-block" id="emailBlock" style="display:none;">
     <div class="status-title">📧 Email для чека</div>
     <p style="color: var(--text-secondary); font-size: 13px; margin-bottom: 10px; line-height: 1.5;">
-        Robokassa отправит чек на этот адрес. Допустимы только домены <strong>.ru</strong> и <strong>.рф</strong>.
+        Robokassa отправит чек на этот адрес. Любой домен — на него придёт чек.
     </p>
     <div style="display:flex;align-items:flex-start;gap:12px;margin:8px 0 12px 0;">
         <input type="checkbox" id="autoRenewConsent" style="width:20px;height:20px;margin-top:2px;flex-shrink:0;accent-color:var(--accent2);cursor:pointer;">
@@ -567,7 +567,7 @@ body{font-family:-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, 
             Я согласен на автоматическое продление подписки и списание денежных средств с моей банковской карты согласно условиям <a href="/offer" target="_blank" style="color:var(--accent2);">Публичной оферты</a>. Могу отменить автопродление в любой момент в личном кабинете.
         </label>
     </div>
-    <input type="email" id="emailInput" placeholder="user@example.ru" disabled
+    <input type="email" id="emailInput" placeholder="user@example.com" disabled
            style="width:100%; padding:12px; margin-bottom:8px; background:rgba(0,0,0,0.3); color:var(--text); border:1px solid var(--border); border-radius:12px; font-size:15px; outline:none; opacity:0.5; cursor:not-allowed;">
     <button id="emailSaveBtn" disabled style="width:100%; padding:12px; border:none; border-radius:12px; font-size:16px; font-weight:600; cursor:not-allowed; opacity:0.5; background:linear-gradient(290deg,#d235ff 0%,#a062ff 30%,#3088ff 66%,#61d8ff 100%); color:#fff;">
         Сохранить email
@@ -1620,10 +1620,10 @@ async function saveEmail(){
     const inp = document.getElementById('emailInput');
     const clean = (inp && inp.value || '').trim().toLowerCase();
     if(!clean){ alert('Введите email'); return; }
-    if(!(clean.endsWith('.ru') || clean.endsWith('.рф'))){
-        alert('Допустимы только адреса в домене .ru или .рф');
-        return;
-    }
+    if(!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(clean)){
+            alert('Некорректный email');
+            return;
+        }
     try{
         const resp = await apiRequest('/api/webapp/set_email', {
             method:'POST',
@@ -1671,7 +1671,7 @@ async function handlePayment(tariffKey){
     }
     if(!authToken){ showError('Вы не авторизованы. Пожалуйста, войдите.'); return; }
     if(!currentEmail){
-        alert('Сначала укажите email для чека (.ru или .рф)');
+        alert('Сначала укажите email для чека');
         var blk = document.getElementById('emailBlock');
         if(blk){ blk.style.display='block'; blk.scrollIntoView({behavior:'smooth', block:'center'}); }
         var ii = document.getElementById('emailInput');
